@@ -1,4 +1,4 @@
-# CellVoteR <img src="man/figures/logo.png" align="right" height="125" alt="" />
+# CellVoteR <img src="man/figures/logo.png" align="right" height="130" alt="" />
 
 
 An ensemble-based pipeline for robust cell type classification. 
