@@ -1,0 +1,35 @@
+Package: CellVoteR
+Title: Ensemble-based single-cell typing pipeline
+Version: 1.0.0
+Authors@R:
+    c(
+    person("Josh", "Winter-Luke", , "bs23jmw@leeds.ac.uk", 
+    role = c("cre"), comment = c(ORCID = "YOUR-ORCID-ID")),
+    person("Shoaib", "Ajaib", , "S.A.Ajaib@leeds.ac.uk", 
+    role = c("aut"),comment = c(ORCID = "YOUR-ORCID-ID"))
+    )
+Description: This package contains function for an ensemble-based cell typing pipeline. 
+            The method integrates multiple clustering and classification approaches 
+            to improve cell type annotation accuracy in single-cell RNA-seq data. Additionally,
+            The package also comprises functions to enable quality control and evaluation of 
+            single-cells before and after cell-typing.
+License: MIT + file LICENSE
+Encoding: UTF-8
+Roxygen: list(markdown = TRUE)
+RoxygenNote: 7.3.3
+Imports: 
+    ggplot2,
+    gtools,
+    Matrix,
+    methods,
+    Seurat,
+    SingleCellExperiment,
+    SummarizedExperiment
+Suggests: 
+    biomaRt,
+    openxlsx,
+    testthat (>= 3.0.0)
+Config/testthat/edition: 3
+Depends: 
+    R (>= 3.5)
+LazyData: true

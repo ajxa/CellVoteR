@@ -1,0 +1,12 @@
+utils::globalVariables(c(
+  "cellvoter_data",
+  "Cluster",
+  "Reference_Type",
+  "NegLog10P",
+  "marker_ref",
+  "gene",
+  "cluster",
+  "Broad_Cell_Type",
+  "Category",
+  "p_val_adj"
+))

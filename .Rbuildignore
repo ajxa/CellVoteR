@@ -1,0 +1,7 @@
+^renv$
+^renv\.lock$
+^CellVoteR\.Rproj$
+^\.Rproj\.user$
+^\.Rprofile$
+^LICENSE\.md$
+^data-raw$
