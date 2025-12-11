@@ -2,7 +2,7 @@
 
 <br clear="all" />
 
-**CellVoteR** is an ensemble-based pipeline for robust cell type classification using single-cell RNA-seq data. 
+An ensemble-based pipeline for robust cell type classification. 
 
 ## Overview
 
