@@ -1,4 +1,4 @@
-# CellVoteR \<img src="man/figures/main.png" align="right" height="138" /\>
+# CellVoteR \<img src=""https://github.com/ajxa/CellVoteR/raw/main/man/figures/main.png"" align="right" height="138" /\>
 
 [](https://www.google.com/search?q=https://github.com/ajxa/CellVoteR/actions)
 [](https://opensource.org/licenses/MIT)
