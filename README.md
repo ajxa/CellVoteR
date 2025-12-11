@@ -2,14 +2,15 @@
 
 <br clear="all" />
 
+**CellVoteR** is an ensemble-based pipeline for robust cell type classification using single-cell RNA-seq data. 
+
 ## Overview
 
-**CellVoteR** is an ensemble-based pipeline for robust cell type classification in single-cell RNA-seq data. 
-It integrates multiple classification strategies - including clustering-based, marker-thresholding, and hierarchical triage—to generate a consensus label for every cell. By combining diverse methodologies ("voting"), CellVoteR resolves ambiguities that single methods often miss, providing a confidence-aware annotation workflow.
-
+The underlying process integrates multiple classification strategies: 1.) clustering-based; 2.) marker-thresholding; and  3.) hierarchical triage. 
+These methods each vote and their combined scoring is used to generate a consensus label for every cell. 
+By combining diverse methodologies ("voting"), CellVoteR resolves ambiguities that single methods often miss, providing a confidence-aware annotation workflow.
 
 [ ](https://www.google.com/search?q=https://github.com/ajxa/CellVoteR/actions) [ ](https://opensource.org/licenses/MIT) **CellVoteR** is an ensemble-based pipeline for robust cell type classification in single-cell RNA-seq data.
-
 
 CellVoteR is designed to be flexible and generalizable, offering:
 
