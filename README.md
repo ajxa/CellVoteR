@@ -1,6 +1,6 @@
-# CellVoteR <a href="https://github.com/yourusername/CellVoteR"><img src="https://github.com/ajxa/CellVoteR/blob/main/man/figures/main.png?raw=true" align="right" height="138" /></a>
+# CellVoteR <img src="https://github.com/ajxa/CellVoteR/blob/main/man/figures/main.png?raw=true" align="right" height="138" />
 
-
+<br clear="all" />
 
 ## Overview
 
