@@ -1,4 +1,4 @@
-# CellVoteR <img src="man/figures/logo.png" align="right" height="120" alt="" />
+# CellVoteR <img src="man/figures/logo.png" align="right" height="150" alt="" />
 
 **CellVoteR** is an ensemble-based pipeline for robust cell type classification in single-cell RNA-seq data.
 
