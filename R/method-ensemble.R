@@ -17,7 +17,6 @@ run_ensemble <- function(object,
 
   object <- ensure_seurat(object)
 
-  # --- 1. Process Markers & Defaults ---
   valid_markers <- process_marker_input(markers, panel_name = panel_name)
 
   triage_markers <- process_triage_input(triage_markers)
@@ -31,11 +30,8 @@ run_ensemble <- function(object,
     if (verbose) message("Running General Purpose Labelling (5-6)...")
   }
 
-  # Seurat V5 now uses layers instead of slots
-  # In v5, we check if the 'data' layer exists in the default assay
-  # Layers are named like 'counts', 'data', 'scale.data'
   default_assay <- Seurat::DefaultAssay(object)
-  assay_layers <- Seurat::Layers(object, assay = default_assay)
+  assay_layers <- SeuratObject::Layers(object, assay = default_assay)
 
   if (!"data" %in% assay_layers) {
     if (verbose) message("Normalizing data (required for clash resolution)...")

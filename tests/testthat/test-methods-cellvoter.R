@@ -3,7 +3,6 @@ library(Seurat)
 library(Matrix)
 
 # HELPER: SYNTHETHIC DATA ------------------------------------------------------
-# We need enough cells (>10) to pass the sub-clustering minimums
 make_test_seurat <- function() {
   # 20 genes, 30 cells
   # Cells 1-15: Group A (High GeneA)
@@ -27,7 +26,6 @@ make_test_seurat <- function() {
 test_that("run_cellvoter runs Method 5 (Global) correctly", {
   obj <- make_test_seurat()
 
-  # Define markers that match our data
   markers <- list(TypeA = "GeneA", TypeB = "GeneB")
 
   # Run Method 5 (Global Clustering + All Genes)
@@ -52,7 +50,6 @@ test_that("run_cellvoter runs Method 5 (Global) correctly", {
 test_that("run_cellvoter Method 6 filters genes", {
   obj <- make_test_seurat() # Has 20 genes
 
-  # Marker list has only 2 genes
   markers <- list(TypeA = "GeneA", TypeB = "GeneB")
 
   # Run Method 6 (Global + Filtered Genes)
@@ -94,7 +91,6 @@ test_that("run_cellvoter Method 2 (Triage by Cell) assigns broad types", {
 test_that("run_cellvoter handles inputs with no valid markers gracefully", {
   obj <- make_test_seurat()
 
-  # Provide markers that don't exist in the data
   markers <- list(TypeX = "GeneZ")
 
   suppressWarnings({
