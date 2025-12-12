@@ -35,43 +35,45 @@ resolve the final identity.
 
 ```mermaid
 graph TD
-    %% --- Node Styling ---
-    %% "hidden" class makes spacer nodes invisible
-    classDef hidden fill:none,stroke:none,color:none,width:0px,height:0px
-
+    %% --- Styles ---
     classDef default fill:#ffffff,stroke:#333,stroke-width:1px,color:#000
     classDef start fill:#e1f5fe,stroke:#01579b,stroke-width:2px,color:#000
     
-    %% Track Styling: No fill, dashed border, adaptive text color
+    %% Track Box: Dashed border, no fill
     classDef track fill:none,stroke:#999,stroke-width:2px,stroke-dasharray: 5 5
+    
+    %% Titles: Invisible box, bold text
+    classDef title fill:none,stroke:none,font-weight:bold,font-size:16px,color:#000
     
     classDef decision fill:#fff9c4,stroke:#fbc02d,stroke-width:2px,color:#000
     classDef group fill:#e0f2f1,stroke:#00695c,stroke-width:1px,color:#000
     classDef logic fill:#fff3e0,stroke:#e65100,stroke-width:1px,color:#000
     classDef endnode fill:#dcedc8,stroke:#33691e,stroke-width:2px,color:#000
 
-    %% --- Input & QC ---
+    %% --- Input Phase ---
     Input([Input Data]):::start --> QC[Quality Control]
 
-    %% --- TRACK 1: Triage ---
-    subgraph T1 [**Broad Triage**]
+    %% --- TRACK 1: Broad Triage ---
+    subgraph T1 [ ]
         direction TB
-        %% Invisible spacer to push content down away from title
-        Spacer1[ ]:::hidden
+        %% Title Node (Acts as the entry point)
+        Title1[Broad Triage]:::title
         
         Split{Split?}:::decision
         
-        %% Group Nodes
+        %% Use invisible link between Title and Split to enforce order
+        Title1 ~~~ Split
+        
+        %% Groups
         GrpImm[Immune]:::group
         GrpEndo[Endothelial]:::group
         GrpOth[Other]:::group
         
-        Spacer1 --- Split
         Split --> GrpImm
         Split --> GrpEndo
         Split --> GrpOth
         
-        %% Processing
+        %% Processing Steps
         SubA[Sub-Cluster &<br/>Fisher Score]
         SubB[Sub-Cluster &<br/>Fisher Score]
         SubC[Sub-Cluster &<br/>Fisher Score]
@@ -81,23 +83,23 @@ graph TD
         GrpOth --> SubC
     end
 
-    %% --- TRACK 2: Global ---
-    subgraph T2 [**Global Consensus**]
+    %% --- TRACK 2: Global Consensus ---
+    subgraph T2 [ ]
         direction TB
-        %% Invisible spacer
-        Spacer2[ ]:::hidden
+        %% Title Node
+        Title2[Global Consensus]:::title
         
         Global[Global Clustering]
         ScoreG[Global Fisher Score]
         
-        Spacer2 --- Global
+        Title2 ~~~ Global
         Global --> ScoreG
     end
 
-    %% --- Main Flow Connections ---
-    %% Connect QC to the Spacers to enter the box cleanly at the top
-    QC --> Spacer1
-    QC --> Spacer2
+    %% --- Main Connections ---
+    %% Connect QC to the TITLES of the tracks
+    QC --> Title1
+    QC --> Title2
 
     %% --- Ensemble & Resolution ---
     SubA & SubB & SubC --> Vote[Ensemble Voting]
@@ -105,7 +107,7 @@ graph TD
 
     Vote --> Resolve{Clash?}:::decision
     
-    %% Outcome Nodes
+    %% Outcomes
     Yes[Yes]:::logic
     No[No]:::logic
     
@@ -116,11 +118,8 @@ graph TD
     No --> Final([Final Label]):::endnode
     TieBreak --> Final
 
-    %% Apply Track Styles
+    %% Apply Track Styles (Border only)
     class T1,T2 track
-    
-    %% Hide the lines connecting spacers to real nodes
-    linkStyle 4,12 stroke-width:0px
 ```
 
 ## Installation
