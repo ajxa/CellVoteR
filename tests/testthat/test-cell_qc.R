@@ -1,7 +1,7 @@
 library(testthat)
 library(Matrix)
 
-# --- Helper ---
+# HELPER: MAKE SYNTHETIC DATA --------------------------------------------------
 make_syn_data <- function() {
   counts <- Matrix::sparseMatrix(
     i = c(1, 2, 3, 4,   1, 3,   3,    2),
@@ -13,6 +13,8 @@ make_syn_data <- function() {
   rownames(counts) <- c("MT-1", "RPS-1", "GeneA", "GeneB")
   return(counts)
 }
+
+# TESTS FOR ASSESS_CELL_QUALITY ------------------------------------------------
 
 test_that("Core QC accepts explicit gene lists", {
   counts <- make_syn_data()
@@ -79,11 +81,10 @@ test_that("Helper function resolves regex correctly", {
   expect_equal(resolved$my_mito$max_pct, 15)
 })
 
-
+# TESTS FOR FILTER_CELLS -------------------------------------------------------
 test_that("Filter function removes failed cells correctly", {
   counts <- make_syn_data() # 4 cells
-  # Let's say Cell_2 and Cell_3 fail
-  # We manually construct a fake QC dataframe to control the test strictly
+
   qc_df <- data.frame(
     cell_id = colnames(counts),
     sample_id = c("S1", "S1", "S2", "S2"),
@@ -157,3 +158,5 @@ test_that("Filter function handles SingleCellExperiment objects", {
   expect_s4_class(clean_sce, "SingleCellExperiment")
   expect_equal(ncol(clean_sce), 2)
 })
+
+# END --------------------------------------------------------------------------

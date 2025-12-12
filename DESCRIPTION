@@ -22,7 +22,7 @@ Imports:
     gtools,
     Matrix,
     methods,
-    Seurat,
+    Seurat (>= 5.0.0),
     SingleCellExperiment,
     SummarizedExperiment
 Suggests: 

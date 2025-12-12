@@ -33,7 +33,16 @@ run_ensemble <- function(object,
     if (verbose) message("Running General Purpose Labelling (5-6)...")
   }
 
-  if (!"data" %in% names(object@assays$RNA)) object <- Seurat::NormalizeData(object, verbose = FALSE)
+  # Seurat V5 now uses layers instead of slots
+  # In v5, we check if the 'data' layer exists in the default assay
+  # Layers are named like 'counts', 'data', 'scale.data'
+  default_assay <- Seurat::DefaultAssay(object)
+  assay_layers <- Seurat::Layers(object, assay = default_assay)
+
+  if (!"data" %in% assay_layers) {
+    if (verbose) message("Normalizing data (required for clash resolution)...")
+    object <- Seurat::NormalizeData(object, verbose = FALSE)
+  }
 
   # --- Phase 1: Primary Methods ---
   vote_matrix <- matrix(NA, nrow = ncol(object), ncol = length(methods_to_use))
@@ -107,7 +116,8 @@ run_ensemble <- function(object,
 
 #' @noRd
 resolve_clashes_internal <- function(object, cells, current_labels, ref) {
-  expr_mat <- Seurat::GetAssayData(object, slot = "data")[, cells, drop = FALSE]
+  # Seurat V5 now uses layers instead of slots
+  expr_mat <- Seurat::GetAssayData(object, layer = "data")[, cells, drop = FALSE]
   resolved <- character(length(cells))
   names(resolved) <- cells
 

@@ -13,17 +13,8 @@ extract_counts <- function(object) {
 
   # 1. Handle Seurat Objects
   if (inherits(object, "Seurat")) {
-    # Try different Seurat versions (v3/v4/v5)
-    # GetAssayData is generally safe for v3/v4
-    counts <- tryCatch({
-      Seurat::GetAssayData(object, slot = "counts")
-    }, error = function(e) {
-      # Fallback for v5 or weird structures
-      if ("counts" %in% methods::slotNames(object@assays[[Seurat::DefaultAssay(object)]])) {
-        return(object@assays[[Seurat::DefaultAssay(object)]]@counts)
-      }
-      stop("Could not extract counts from Seurat object.")
-    })
+    counts <- Seurat::GetAssayData(object, layer = "counts")
+
   }
 
   # 2. Handle SingleCellExperiment

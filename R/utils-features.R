@@ -42,27 +42,27 @@ find_qc_features <- function(object,
 
 #' Expand gene symbols with synonyms from biomaRt
 #'
-#' Connects to Ensembl to find synonyms for a list of genes or a regex pattern,
-#' filtering for those actually present in your dataset.
+#' Connects to Ensembl to find synonyms for a list of genes. If `valid_genes` is provided,
+#' it filters the results to match genes present in your dataset and supports regex patterns.
 #'
 #' @param input_features A character vector of gene symbols OR a single regex pattern string.
-#' @param valid_genes A character vector of all gene names in your dataset (to filter results).
+#' @param valid_genes (Optional) A character vector of all gene names in your dataset.
+#'   If provided, used to filter results and allow regex matching. Default NULL.
 #' @param organism Character. "hsapiens", "mmusculus", etc.
 #'
 #' @return A character vector of unique gene symbols found in `valid_genes`.
 #' @export
-feature_synonyms <- function(input_features, valid_genes, organism = "hsapiens") {
+feature_synonyms <- function(input_features, valid_genes = NULL, organism = "hsapiens") {
 
   if (!requireNamespace("biomaRt", quietly = TRUE)) {
     stop("Package 'biomaRt' is required for synonym lookup. Please install it.")
   }
 
   # 1. Determine if input is a regex or a list of genes
-  search_genes <- if (length(input_features) == 1 && grepl("[^a-zA-Z0-9]", input_features)) {
-    # If it looks like regex, find matches in valid_genes first
-    grep(input_features, valid_genes, value = TRUE, ignore.case = TRUE)
+  if (!is.null(valid_genes) && length(input_features) == 1 && grepl("[^a-zA-Z0-9]", input_features)) {
+    search_genes <- grep(input_features, valid_genes, value = TRUE, ignore.case = TRUE)
   } else {
-    input_features
+    search_genes <- input_features
   }
 
   if (length(search_genes) == 0) return(character(0))
@@ -92,9 +92,12 @@ feature_synonyms <- function(input_features, valid_genes, organism = "hsapiens")
     mart = mart
   )
 
-  # 4. Filter synonyms against what is actually in the data
   all_variants <- unique(c(results$external_gene_name, results$external_synonym))
-  found_genes <- intersect(all_variants, valid_genes)
 
-  return(found_genes)
+  # 4. Filter synonyms against what is actually in the data
+  if (!is.null(valid_genes)) {
+    return(intersect(all_variants, valid_genes))
+  }
+
+  return(all_variants)
 }

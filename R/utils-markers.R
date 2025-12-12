@@ -24,7 +24,7 @@ process_marker_input <- function(input = NULL,
                                  type_col = NULL,
                                  category_col = NULL) {
 
-  # --- 1. Handle NULL (Default Internal Data) ---
+  # 1. Handle NULL (Default Internal Data) -------------------------------------
   if (is.null(input)) {
     if (!exists("cellvoter_data")) {
       stop("Internal data 'cellvoter_data' is missing. Please reinstall the package.")
@@ -41,7 +41,7 @@ process_marker_input <- function(input = NULL,
     return(cellvoter_data$marker_panels[[panel_name]])
   }
 
-  # --- 2. Handle File Paths (CSV / Excel) ---
+  # 2. Handle File Paths (CSV / Excel) -----------------------------------------
   if (is.character(input) && length(input) == 1) {
     if (!file.exists(input)) stop("File not found: ", input)
 
@@ -58,7 +58,7 @@ process_marker_input <- function(input = NULL,
     }
   }
 
-  # --- 3. Handle Named List ---
+  # 3. Handle Named List -------------------------------------------------------
   # Convert list(T_cell = "CD3D") -> DF(gene="CD3D", cell_type="T_cell")
   if (is.list(input) && !is.data.frame(input)) {
     if (is.null(names(input))) stop("Marker list must be named (e.g. list(TypeA = 'Gene1')).")
@@ -75,7 +75,7 @@ process_marker_input <- function(input = NULL,
     return(do.call(rbind, df_list))
   }
 
-  # --- 4. Handle Dataframe Standardization ---
+  # 4. Handle Dataframe Standardization ----------------------------------------
   if (is.data.frame(input)) {
     cols <- colnames(input)
 
