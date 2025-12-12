@@ -14,7 +14,7 @@ broad_label_by_cell(
 \arguments{
 \item{object}{Seurat object or matrix.}
 
-\item{marker_list}{Named list of markers.}
+\item{marker_list}{Named list of markers. If NULL, uses internal defaults.}
 
 \item{expr_threshold}{Threshold for expression (0.1).}
 

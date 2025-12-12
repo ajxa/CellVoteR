@@ -8,7 +8,7 @@ test_that("process_marker_input handles NULL (Defaults)", {
 
   markers <- process_marker_input(NULL)
   expect_s3_class(markers, "data.frame")
-  expect_true(all(c("gene", "cell_type", "category") %in% colnames(markers)))
+  expect_true(all(c("gene", "cell_type", "cell_category") %in% colnames(markers)))
 })
 
 test_that("process_marker_input handles Named Lists", {

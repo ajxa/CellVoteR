@@ -23,6 +23,7 @@ Imports:
     Matrix (>= 1.7.4),
     methods,
     Seurat (>= 5.0.0),
+    SeuratObject,
     SingleCellExperiment,
     SummarizedExperiment
 Suggests: 

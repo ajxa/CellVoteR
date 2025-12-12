@@ -4,15 +4,12 @@
 \alias{run_broad_labelling}
 \title{Perform initial broad cell type classification via Clustering}
 \usage{
-run_broad_labelling(
-  object,
-  broad_markers = list(Immune = "PTPRC", Endothelial = c("CDH5", "VWF"))
-)
+run_broad_labelling(object, broad_markers = NULL)
 }
 \arguments{
 \item{object}{Seurat object.}
 
-\item{broad_markers}{Named list of markers.}
+\item{broad_markers}{Named list of markers. If NULL, uses internal defaults.}
 }
 \value{
 Seurat object with 'Broad_Type' metadata.

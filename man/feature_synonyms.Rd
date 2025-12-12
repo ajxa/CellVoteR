@@ -4,12 +4,13 @@
 \alias{feature_synonyms}
 \title{Expand gene symbols with synonyms from biomaRt}
 \usage{
-feature_synonyms(input_features, valid_genes, organism = "hsapiens")
+feature_synonyms(input_features, valid_genes = NULL, organism = "hsapiens")
 }
 \arguments{
 \item{input_features}{A character vector of gene symbols OR a single regex pattern string.}
 
-\item{valid_genes}{A character vector of all gene names in your dataset (to filter results).}
+\item{valid_genes}{(Optional) A character vector of all gene names in your dataset.
+If provided, used to filter results and allow regex matching. Default NULL.}
 
 \item{organism}{Character. "hsapiens", "mmusculus", etc.}
 }
@@ -17,6 +18,6 @@ feature_synonyms(input_features, valid_genes, organism = "hsapiens")
 A character vector of unique gene symbols found in \code{valid_genes}.
 }
 \description{
-Connects to Ensembl to find synonyms for a list of genes or a regex pattern,
-filtering for those actually present in your dataset.
+Connects to Ensembl to find synonyms for a list of genes. If \code{valid_genes} is provided,
+it filters the results to match genes present in your dataset and supports regex patterns.
 }

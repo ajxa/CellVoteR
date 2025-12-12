@@ -9,7 +9,7 @@ calculate_fisher_scores(cluster_markers, reference_markers, background_genes)
 \arguments{
 \item{cluster_markers}{Dataframe with columns 'gene' and 'cluster' (from FindAllMarkers).}
 
-\item{reference_markers}{Dataframe with 'Gene' and 'Broad_Cell_Type' columns.}
+\item{reference_markers}{Dataframe with 'gene' and 'cell_type' columns.}
 
 \item{background_genes}{Character vector of all genes in the dataset.}
 }

@@ -1,13 +1,6 @@
 #' Calculate Fisher's Exact Test Scores
 #'
 #' @param cluster_markers Dataframe with columns 'gene' and 'cluster' (from FindAllMarkers).
-#' @param reference_markers Dataframe with 'Gene' and 'Broad_Cell_Type' columns.
-#' @param background_genes Character vector of all genes in the dataset.
-#'
-#' @export
-#' Calculate Fisher's Exact Test Scores
-#'
-#' @param cluster_markers Dataframe with columns 'gene' and 'cluster' (from FindAllMarkers).
 #' @param reference_markers Dataframe with 'gene' and 'cell_type' columns.
 #' @param background_genes Character vector of all genes in the dataset.
 #'
