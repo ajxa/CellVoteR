@@ -1,12 +1,20 @@
 #' Perform initial broad cell type classification via Clustering
 #'
 #' @param object Seurat object.
-#' @param broad_markers Named list of markers.
+#' @param broad_markers Named list of markers. If NULL, uses internal defaults.
 #'
 #' @return Seurat object with 'Broad_Type' metadata.
 #' @export
-run_broad_labelling <- function(object,
-                                broad_markers = list(Immune = "PTPRC", Endothelial = c("CDH5", "VWF"))) {
+run_broad_labelling <- function(object, broad_markers = NULL) {
+
+  if (is.null(broad_markers)) {
+    if (exists("cellvoter_data")) {
+      broad_markers <- cellvoter_data$cell_groups
+    } else {
+      warning("Internal data missing. Using fallback markers.")
+      broad_markers <- list(Immune = "PTPRC", Endothelial = c("CDH5", "VWF"))
+    }
+  }
 
   if (!"pca" %in% names(object@reductions)) {
     object <- Seurat::NormalizeData(object, verbose=FALSE)

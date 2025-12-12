@@ -1,7 +1,7 @@
 #' Broad Labelling by Cell (Marker Thresholding)
 #'
 #' @param object Seurat object or matrix.
-#' @param marker_list Named list of markers.
+#' @param marker_list Named list of markers. If NULL, uses internal defaults.
 #' @param expr_threshold Threshold for expression (0.1).
 #' @param min_markers Min positive markers required (1).
 #'
@@ -16,7 +16,12 @@ broad_label_by_cell <- function(object,
   counts <- extract_counts(object)
 
   if (is.null(marker_list)) {
-    marker_list <- list(Immune = c("PTPRC"), Endothelial = c("CDH5", "VWF"))
+    if (exists("cellvoter_data")) {
+      marker_list <- cellvoter_data$cell_groups
+    } else {
+      warning("Internal data 'cellvoter_data' missing. Using fallback markers.")
+      marker_list <- list(Immune = c("PTPRC"), Endothelial = c("CDH5", "VWF"))
+    }
   }
 
   cell_names <- colnames(counts)
@@ -24,6 +29,7 @@ broad_label_by_cell <- function(object,
   colnames(results) <- names(marker_list)
   rownames(results) <- cell_names
 
+  # 1. Calculate Detection
   for (type in names(marker_list)) {
     markers <- intersect(marker_list[[type]], rownames(counts))
     if (length(markers) > 0) {
@@ -33,9 +39,20 @@ broad_label_by_cell <- function(object,
     }
   }
 
+  # 2. Assign Labels (Dynamic)
   labels <- rep("Other", length(cell_names))
-  if ("Endothelial" %in% colnames(results)) labels[results[, "Endothelial"]] <- "Endothelial"
-  if ("Immune" %in% colnames(results)) labels[results[, "Immune"]] <- "Immune"
+
+  for (type in names(marker_list)) {
+    if (type %in% colnames(results)) {
+      hits <- results[, type]
+      if (any(hits)) {
+        labels[hits] <- type
+      }
+    }
+  }
 
   return(labels)
 }
+
+
+

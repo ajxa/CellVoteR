@@ -2,7 +2,7 @@ library(testthat)
 
 # TESTS FOR CALCULATE_FISHER_SCORES --------------------------------------------
 test_that("Fisher test correctly identifies perfect overlaps", {
-  # Setup: Cluster 1 matches TypeX perfectly (3 genes overlap)
+  # Cluster 1 matches TypeX perfectly (3 genes overlap)
   cluster_markers <- data.frame(gene = c("A", "B", "C"), cluster = "1")
   ref_markers <- data.frame(Gene = c("A", "B", "C"), Broad_Cell_Type = "TypeX")
   background <- c("A", "B", "C", paste0("Noise", 1:97))

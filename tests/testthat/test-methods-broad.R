@@ -13,7 +13,6 @@ make_small_seurat <- function() {
 }
 
 # TESTS FOR BROAD_LABEL_BY_CELL ------------------------------------------------
-
 test_that("broad_label_by_cell works correctly", {
   obj <- make_small_seurat()
 

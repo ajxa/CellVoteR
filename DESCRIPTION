@@ -20,7 +20,7 @@ RoxygenNote: 7.3.3
 Imports: 
     ggplot2,
     gtools,
-    Matrix,
+    Matrix (>= 1.7.4),
     methods,
     Seurat (>= 5.0.0),
     SingleCellExperiment,
