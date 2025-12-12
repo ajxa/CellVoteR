@@ -1,23 +1,69 @@
 # CellVoteR <img src="man/figures/logo.png" align="right" height="130" alt="" />
 
+An ensemble-based pipeline for robust cell type classification in single-cell RNAseq data. 
 
-An ensemble-based pipeline for robust cell type classification. 
+It moves beyond simple "best-match" scoring by integrating multiple classification 
+strategies: 
+lineage triage, targeted sub-clustering, and global consensus, to generate a 
+high-confidence label for every cell.
 
-## Overview
+## How It Works
 
-The underlying process integrates multiple classification strategies: 1.) clustering-based; 2.) marker-thresholding; and  3.) hierarchical triage. 
-These methods each vote and their combined scoring is used to generate a consensus label for every cell. 
-By combining diverse methodologies ("voting"), CellVoteR resolves ambiguities that single methods often miss, providing a confidence-aware annotation workflow.
+CellVoteR determines cell identity through a three-stage voting process:
 
-[ ](https://www.google.com/search?q=https://github.com/ajxa/CellVoteR/actions) [ ](https://opensource.org/licenses/MIT) **CellVoteR** is an ensemble-based pipeline for robust cell type classification in single-cell RNA-seq data.
+### 1. Broad Triage (divide & conquer)
+The dataset is first split into broad biological categories (e.g., *Immune* vs. *Vascular* vs. *Tumour*) 
+using defined marker thresholds or coarse clustering. 
+This "Triage" step isolates distinct lineages, 
+preventing dominant signals from obscuring rare cell types.
 
-CellVoteR is designed to be flexible and generalizable, offering:
+### 2. Targeted Sub-clustering
+Each broad category is processed independently. Cells are sub-clustered to 
+identify fine-grained states, and their identity is determined by 
+performing Fisher's Exact Tests against a reference marker panel. 
+This ensures that an immune cell is only compared against immune markers, 
+reducing false positives.
 
--   **Ensemble Voting:** Runs up to 6 distinct classification methods and calculates a consensus vote.
--   **Clash Resolution:** Automatically resolves ties using raw marker intensity scores.
--   **Hierarchical Triage:** Optional logic to split cells into broad categories (e.g., Immune vs. Endothelial) before fine-grained sub-clustering.
--   **Quality Control:** Built-in functions to assess and filter cells based on feature counts and mitochondrial/ribosomal content.
--   **Extensible References:** Includes a curated IDHwt GBM marker panel but supports custom user-supplied marker lists for any tissue.
+### 3. Global Consensus (tie-breaker)
+Simultaneously, the full dataset is clustered globally (without triage). 
+These global labels serve as a "baseline vote." 
+In the final ensemble step, if the triage methods disagree, 
+the global result and raw marker intensities are used to break the tie and 
+resolve the final identity.
+
+## Workflow Diagram
+
+```mermaid
+graph TD
+    Input[Single Cell Data] --> QC(Quality Control)
+    QC --> Triage{1. Broad Triage}
+    
+    %% Triage Paths
+    Triage -- Immune Markers --> PathA[Immune Subset]
+    Triage -- Endo Markers --> PathB[Vascular Subset]
+    Triage -- No Match --> PathC[Remaining Cells]
+    
+    %% Targeted Logic
+    PathA --> SubA[Sub-Cluster & Fisher Score]
+    PathB --> SubB[Sub-Cluster & Fisher Score]
+    PathC --> SubC[Sub-Cluster & Fisher Score]
+    
+    %% Global Logic
+    QC --> Global[2. Global Clustering]
+    Global --> ScoreG[Global Fisher Score]
+    
+    %% Consensus
+    SubA & SubB & SubC & ScoreG --> Vote[3. Ensemble Voting]
+    Vote --> Resolve{Clash?}
+    
+    Resolve -- Yes --> TieBreak[Apply Global Breaker\n& Marker Intensity]
+    Resolve -- No --> Final[Final Cell Label]
+    TieBreak --> Final
+    
+    style Input fill:#f9f9f9,stroke:#333,stroke-width:2px
+    style Vote fill:#e1f5fe,stroke:#01579b,stroke-width:2px
+    style Final fill:#dcedc8,stroke:#33691e,stroke-width:2px
+```
 
 ## Installation
 
@@ -32,7 +78,7 @@ devtools::install_github("ajxa/CellVoteR")
 
 ### 1. Quality Control
 
-Before labelling, ensure your data is clean using the built-in QC engine.
+Before labelling, ensure your data is clean using the built-in QC functions.
 
 ``` r
 library(CellVoteR)
@@ -82,18 +128,3 @@ my_markers <- data.frame(
 # Run with custom panel
 results <- run_ensemble(clean_obj, markers = my_markers)
 ```
-
-## Methods
-
-CellVoteR employs a "Mix and Match" architecture to generate votes:
-
-| Method | Strategy                           | Scope                      |
-|:-------|:-----------------------------------|:---------------------------|
-| **1**  | Clustering + Fisher Test           | Triage (Immune/Endo split) |
-| **2**  | Marker Thresholds                  | Triage (Immune/Endo split) |
-| **3**  | Clustering (Ref Genes Only)        | Triage (Immune/Endo split) |
-| **4**  | Marker Thresholds (Ref Genes Only) | Triage (Immune/Endo split) |
-| **5**  | Clustering + Fisher Test           | Global (All cells)         |
-| **6**  | Clustering (Ref Genes Only)        | Global (All cells)         |
-
-*By default, `run_ensemble()` uses Methods 5 & 6. Setting `use_ensemble = TRUE` activates all 6 methods.*
