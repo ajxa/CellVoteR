@@ -42,8 +42,8 @@ graph TD
     %% Track Box: Dashed border, no fill
     classDef track fill:none,stroke:#999,stroke-width:2px,stroke-dasharray: 5 5
     
-    %% Titles: Invisible box, bold text
-    classDef title fill:none,stroke:none,font-weight:bold,font-size:16px,color:#000
+    %% Titles: Visible Header Boxes
+    classDef title fill:#eceff1,stroke:#455a64,stroke-width:2px,font-weight:bold,color:#000
     
     classDef decision fill:#fff9c4,stroke:#fbc02d,stroke-width:2px,color:#000
     classDef group fill:#e0f2f1,stroke:#00695c,stroke-width:1px,color:#000
@@ -56,12 +56,12 @@ graph TD
     %% --- TRACK 1: Broad Triage ---
     subgraph T1 [ ]
         direction TB
-        %% Title Node (Acts as the entry point)
+        %% Title Node
         Title1[Broad Triage]:::title
         
         Split{Split?}:::decision
         
-        %% Use invisible link between Title and Split to enforce order
+        %% Invisible link to force vertical stacking
         Title1 ~~~ Split
         
         %% Groups
@@ -97,7 +97,7 @@ graph TD
     end
 
     %% --- Main Connections ---
-    %% Connect QC to the TITLES of the tracks
+    %% Connect QC to the TITLES
     QC --> Title1
     QC --> Title2
 
@@ -118,7 +118,7 @@ graph TD
     No --> Final([Final Label]):::endnode
     TieBreak --> Final
 
-    %% Apply Track Styles (Border only)
+    %% Apply Track Styles
     class T1,T2 track
 ```
 
