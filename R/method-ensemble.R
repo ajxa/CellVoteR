@@ -99,7 +99,7 @@ run_ensemble <- function(object,
       object,
       colnames(object)[remaining_clashes],
       resolved_labels[remaining_clashes],
-      valid_markers # Use valid_markers, NOT hardcoded marker_ref
+      valid_markers
     )
     resolved_labels[remaining_clashes] <- intens_resolved
   }

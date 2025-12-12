@@ -35,34 +35,70 @@ resolve the final identity.
 
 ```mermaid
 graph TD
-    Input[Single Cell Data] --> QC(Quality Control)
-    QC --> Triage{1. Broad Triage}
+    %% --- Node Definitions ---
+    Input([Input Data]):::start
+    QC[Quality Control]:::proc
     
-    %% Triage Paths
-    Triage -- Immune Markers --> PathA[Immune Subset]
-    Triage -- Endo Markers --> PathB[Vascular Subset]
-    Triage -- No Match --> PathC[Remaining Cells]
+    %% Track 1: Triage
+    subgraph T1 [Track 1: Broad Triage]
+        direction TB
+        Triage{Broad Triage}:::decision
+        
+        %% Paths
+        subgraph P1 [ ]
+            direction TB
+            PathA[Immune Subset]:::proc
+            SubA[Sub-Cluster &<br/>Fisher Score]:::proc
+        end
+        
+        subgraph P2 [ ]
+            direction TB
+            PathB[Vascular Subset]:::proc
+            SubB[Sub-Cluster &<br/>Fisher Score]:::proc
+        end
+        
+        subgraph P3 [ ]
+            direction TB
+            PathC[Remaining Cells]:::proc
+            SubC[Sub-Cluster &<br/>Fisher Score]:::proc
+        end
+    end
+
+    %% Track 2: Global
+    subgraph T2 [Track 2: Global Consensus]
+        direction TB
+        Global[Global Clustering]:::proc
+        ScoreG[Global Fisher Score]:::proc
+    end
+
+    %% --- Logic Flow ---
+    Input --> QC
+    QC --> Triage
+    QC --> Global
     
-    %% Targeted Logic
-    PathA --> SubA[Sub-Cluster & Fisher Score]
-    PathB --> SubB[Sub-Cluster & Fisher Score]
-    PathC --> SubC[Sub-Cluster & Fisher Score]
+    Triage -- Immune --> PathA --> SubA
+    Triage -- Endo --> PathB --> SubB
+    Triage -- Other --> PathC --> SubC
     
-    %% Global Logic
-    QC --> Global[2. Global Clustering]
-    Global --> ScoreG[Global Fisher Score]
+    Global --> ScoreG
     
-    %% Consensus
-    SubA & SubB & SubC & ScoreG --> Vote[3. Ensemble Voting]
-    Vote --> Resolve{Clash?}
+    %% --- Voting & Resolution ---
+    SubA & SubB & SubC --> Vote[Ensemble Voting]:::proc
+    ScoreG --> Vote
     
-    Resolve -- Yes --> TieBreak[Apply Global Breaker\n& Marker Intensity]
-    Resolve -- No --> Final[Final Cell Label]
+    Vote --> Resolve{Clash?}:::decision
+    Resolve -- Yes --> TieBreak[Apply Global Breaker<br/>& Marker Intensity]:::proc
+    Resolve -- No --> Final([Final Cell Label]):::endnode
     TieBreak --> Final
+
+    %% --- Styling ---
+    %% Theme-Neutral Colors: Light fills with black text ensure readability in Dark Mode
+    classDef start fill:#e1f5fe,stroke:#01579b,stroke-width:2px,color:#000
+    classDef proc fill:#f5f5f5,stroke:#333,stroke-width:1px,color:#000
+    classDef decision fill:#fff9c4,stroke:#fbc02d,stroke-width:1px,stroke-dasharray: 5 5,color:#000
+    classDef endnode fill:#dcedc8,stroke:#33691e,stroke-width:2px,color:#000
     
-    style Input fill:#f9f9f9,stroke:#333,stroke-width:2px
-    style Vote fill:#e1f5fe,stroke:#01579b,stroke-width:2px
-    style Final fill:#dcedc8,stroke:#33691e,stroke-width:2px
+    linkStyle default stroke:#b0bec5,stroke-width:2px
 ```
 
 ## Installation
