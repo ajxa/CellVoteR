@@ -36,9 +36,15 @@ resolve the final identity.
 ```mermaid
 graph TD
     %% --- Node Styling ---
+    %% "hidden" class makes spacer nodes invisible
+    classDef hidden fill:none,stroke:none,color:none,width:0px,height:0px
+
     classDef default fill:#ffffff,stroke:#333,stroke-width:1px,color:#000
     classDef start fill:#e1f5fe,stroke:#01579b,stroke-width:2px,color:#000
-    classDef track fill:#f9f9f9,stroke:#999,stroke-width:2px,stroke-dasharray: 5 5,color:#000
+    
+    %% Track Styling: No fill, dashed border, adaptive text color
+    classDef track fill:none,stroke:#999,stroke-width:2px,stroke-dasharray: 5 5
+    
     classDef decision fill:#fff9c4,stroke:#fbc02d,stroke-width:2px,color:#000
     classDef group fill:#e0f2f1,stroke:#00695c,stroke-width:1px,color:#000
     classDef logic fill:#fff3e0,stroke:#e65100,stroke-width:1px,color:#000
@@ -50,13 +56,17 @@ graph TD
     %% --- TRACK 1: Triage ---
     subgraph T1 [**Broad Triage**]
         direction TB
+        %% Invisible spacer to push content down away from title
+        Spacer1[ ]:::hidden
+        
         Split{Split?}:::decision
         
-        %% Group Nodes (The "Boxes" you requested)
+        %% Group Nodes
         GrpImm[Immune]:::group
         GrpEndo[Endothelial]:::group
         GrpOth[Other]:::group
         
+        Spacer1 --- Split
         Split --> GrpImm
         Split --> GrpEndo
         Split --> GrpOth
@@ -74,14 +84,20 @@ graph TD
     %% --- TRACK 2: Global ---
     subgraph T2 [**Global Consensus**]
         direction TB
+        %% Invisible spacer
+        Spacer2[ ]:::hidden
+        
         Global[Global Clustering]
         ScoreG[Global Fisher Score]
+        
+        Spacer2 --- Global
         Global --> ScoreG
     end
 
     %% --- Main Flow Connections ---
-    QC --> Split
-    QC --> Global
+    %% Connect QC to the Spacers to enter the box cleanly at the top
+    QC --> Spacer1
+    QC --> Spacer2
 
     %% --- Ensemble & Resolution ---
     SubA & SubB & SubC --> Vote[Ensemble Voting]
@@ -89,7 +105,7 @@ graph TD
 
     Vote --> Resolve{Clash?}:::decision
     
-    %% Outcome Nodes (The "Yes/No" Boxes)
+    %% Outcome Nodes
     Yes[Yes]:::logic
     No[No]:::logic
     
@@ -102,6 +118,9 @@ graph TD
 
     %% Apply Track Styles
     class T1,T2 track
+    
+    %% Hide the lines connecting spacers to real nodes
+    linkStyle 4,12 stroke-width:0px
 ```
 
 ## Installation
