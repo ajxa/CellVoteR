@@ -15,7 +15,7 @@ broad_label_by_cell <- function(object,
 
   counts <- extract_counts(object)
 
-  triage_markers <- process_triage_input(triage_markers)
+  marker_list <- process_triage_input(triage_markers)
 
   cell_names <- colnames(counts)
   results <- matrix(FALSE, nrow = length(cell_names), ncol = length(marker_list))

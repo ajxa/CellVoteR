@@ -7,7 +7,7 @@
 #' @export
 run_broad_labelling <- function(object, broad_markers = NULL) {
 
-  triage_markers <- process_triage_input(triage_markers)
+  broad_markers <- process_triage_input(triage_markers)
 
   if (!"pca" %in% names(object@reductions)) {
     object <- Seurat::NormalizeData(object, verbose=FALSE)
