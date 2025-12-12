@@ -35,70 +35,73 @@ resolve the final identity.
 
 ```mermaid
 graph TD
-    %% --- Node Definitions ---
-    Input([Input Data]):::start
-    QC[Quality Control]:::proc
-    
-    %% Track 1: Triage
-    subgraph T1 [Track 1: Broad Triage]
+    %% --- Node Styling ---
+    classDef default fill:#ffffff,stroke:#333,stroke-width:1px,color:#000
+    classDef start fill:#e1f5fe,stroke:#01579b,stroke-width:2px,color:#000
+    classDef track fill:#f9f9f9,stroke:#999,stroke-width:2px,stroke-dasharray: 5 5,color:#000
+    classDef decision fill:#fff9c4,stroke:#fbc02d,stroke-width:2px,color:#000
+    classDef group fill:#e0f2f1,stroke:#00695c,stroke-width:1px,color:#000
+    classDef logic fill:#fff3e0,stroke:#e65100,stroke-width:1px,color:#000
+    classDef endnode fill:#dcedc8,stroke:#33691e,stroke-width:2px,color:#000
+
+    %% --- Input & QC ---
+    Input([Input Data]):::start --> QC[Quality Control]
+
+    %% --- TRACK 1: Triage ---
+    subgraph T1 [**Broad Triage**]
         direction TB
-        Triage{Broad Triage}:::decision
+        Split{Split?}:::decision
         
-        %% Paths
-        subgraph P1 [ ]
-            direction TB
-            PathA[Immune Subset]:::proc
-            SubA[Sub-Cluster &<br/>Fisher Score]:::proc
-        end
+        %% Group Nodes (The "Boxes" you requested)
+        GrpImm[Immune]:::group
+        GrpEndo[Endothelial]:::group
+        GrpOth[Other]:::group
         
-        subgraph P2 [ ]
-            direction TB
-            PathB[Vascular Subset]:::proc
-            SubB[Sub-Cluster &<br/>Fisher Score]:::proc
-        end
+        Split --> GrpImm
+        Split --> GrpEndo
+        Split --> GrpOth
         
-        subgraph P3 [ ]
-            direction TB
-            PathC[Remaining Cells]:::proc
-            SubC[Sub-Cluster &<br/>Fisher Score]:::proc
-        end
+        %% Processing
+        SubA[Sub-Cluster &<br/>Fisher Score]
+        SubB[Sub-Cluster &<br/>Fisher Score]
+        SubC[Sub-Cluster &<br/>Fisher Score]
+        
+        GrpImm --> SubA
+        GrpEndo --> SubB
+        GrpOth --> SubC
     end
 
-    %% Track 2: Global
-    subgraph T2 [Track 2: Global Consensus]
+    %% --- TRACK 2: Global ---
+    subgraph T2 [**Global Consensus**]
         direction TB
-        Global[Global Clustering]:::proc
-        ScoreG[Global Fisher Score]:::proc
+        Global[Global Clustering]
+        ScoreG[Global Fisher Score]
+        Global --> ScoreG
     end
 
-    %% --- Logic Flow ---
-    Input --> QC
-    QC --> Triage
+    %% --- Main Flow Connections ---
+    QC --> Split
     QC --> Global
-    
-    Triage -- Immune --> PathA --> SubA
-    Triage -- Endo --> PathB --> SubB
-    Triage -- Other --> PathC --> SubC
-    
-    Global --> ScoreG
-    
-    %% --- Voting & Resolution ---
-    SubA & SubB & SubC --> Vote[Ensemble Voting]:::proc
+
+    %% --- Ensemble & Resolution ---
+    SubA & SubB & SubC --> Vote[Ensemble Voting]
     ScoreG --> Vote
-    
+
     Vote --> Resolve{Clash?}:::decision
-    Resolve -- Yes --> TieBreak[Apply Global Breaker<br/>& Marker Intensity]:::proc
-    Resolve -- No --> Final([Final Cell Label]):::endnode
+    
+    %% Outcome Nodes (The "Yes/No" Boxes)
+    Yes[Yes]:::logic
+    No[No]:::logic
+    
+    Resolve --> Yes
+    Resolve --> No
+    
+    Yes --> TieBreak[Apply Breaker]
+    No --> Final([Final Label]):::endnode
     TieBreak --> Final
 
-    %% --- Styling ---
-    %% Theme-Neutral Colors: Light fills with black text ensure readability in Dark Mode
-    classDef start fill:#e1f5fe,stroke:#01579b,stroke-width:2px,color:#000
-    classDef proc fill:#f5f5f5,stroke:#333,stroke-width:1px,color:#000
-    classDef decision fill:#fff9c4,stroke:#fbc02d,stroke-width:1px,stroke-dasharray: 5 5,color:#000
-    classDef endnode fill:#dcedc8,stroke:#33691e,stroke-width:2px,color:#000
-    
-    linkStyle default stroke:#b0bec5,stroke-width:2px
+    %% Apply Track Styles
+    class T1,T2 track
 ```
 
 ## Installation
