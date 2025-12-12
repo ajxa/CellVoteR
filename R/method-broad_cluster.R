@@ -7,14 +7,7 @@
 #' @export
 run_broad_labelling <- function(object, broad_markers = NULL) {
 
-  if (is.null(broad_markers)) {
-    if (exists("cellvoter_data")) {
-      broad_markers <- cellvoter_data$cell_groups
-    } else {
-      warning("Internal data missing. Using fallback markers.")
-      broad_markers <- list(Immune = "PTPRC", Endothelial = c("CDH5", "VWF"))
-    }
-  }
+  triage_markers <- process_triage_input(triage_markers)
 
   if (!"pca" %in% names(object@reductions)) {
     object <- Seurat::NormalizeData(object, verbose=FALSE)

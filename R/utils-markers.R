@@ -120,3 +120,29 @@ process_marker_input <- function(input = NULL,
 
   stop("Invalid input format. Must be Dataframe, Named List, or File Path.")
 }
+
+
+#' Process Triage Markers
+#'
+#' Helper to resolve triage markers from user input, internal defaults, or fallback.
+#'
+#' @param triage_markers Named list or NULL.
+#' @return A named list of markers.
+#' @export
+process_triage_input <- function(triage_markers = NULL) {
+
+  # 1. User supplied
+  if (!is.null(triage_markers)) {
+    if (!is.list(triage_markers)) stop("triage_markers must be a named list.")
+    return(triage_markers)
+  }
+
+  # 2. Try Internal Data
+  if (exists("cellvoter_data")) {
+    return(cellvoter_data$cell_groups)
+  }
+
+  # 3. Fallback (Safety net)
+  warning("Internal 'cellvoter_data' missing. Using hardcoded fallback for triage.")
+  return(list(Immune = "PTPRC", Endothelial = c("CDH5", "VWF")))
+}

@@ -17,26 +17,15 @@ run_cellvoter <- function(object, method = 5,
 
   if (!method %in% 1:6) stop("Method must be integer 1-6.")
 
-  # --- 1. Process Markers ---
   marker_ref <- process_marker_input(markers, panel_name = panel_name)
 
-  # --- 2. Handle Triage Defaults ---
-  if (is.null(triage_markers)) {
-    if (exists("cellvoter_data")) {
-      triage_markers <- cellvoter_data$cell_groups
-    } else {
-      warning("Internal data missing. Using hardcoded fallback.")
-      triage_markers <- list(Immune = "PTPRC", Endothelial = c("CDH5", "VWF"))
-    }
-  }
+  triage_markers <- process_triage_input(triage_markers)
 
-  # --- Step A: Data Prep ---
   if (method %in% c(3, 4, 6)) {
     if (verbose) message("Step 1: Filtering data to reference genes...")
     object <- restrict_to_reference(object, unique(marker_ref$gene))
   }
 
-  # --- Step B: Broad Labelling ---
   if (method %in% 1:4) {
     if (method %in% c(1, 3)) {
       if (verbose) message("Step 2: Broad labelling via CLUSTERING (Triage)...")
@@ -50,7 +39,7 @@ run_cellvoter <- function(object, method = 5,
     object$Broad_Type <- "Global"
   }
 
-  # --- Step C: Sub-clustering & Scoring ---
+  # Sub-clustering & scoring
   final_labels <- rep("Unassigned", ncol(object))
   names(final_labels) <- colnames(object)
   heatmap_list <- list(); score_list <- list()
@@ -69,21 +58,38 @@ run_cellvoter <- function(object, method = 5,
       next
     }
 
-    # Filter Reference based on Broad Type
+    # --- FILTERING LOGIC (Dynamic) ---
     if (method %in% 5:6) {
+      # Global methods use everything
       relevant_ref <- marker_ref
     } else {
-      valid_categories <- get_category_map(b_type)
-      # Check if 'category' column exists (it should from process_marker_input)
-      if ("category" %in% colnames(marker_ref)) {
-        relevant_ref <- marker_ref[marker_ref$category %in% valid_categories, ]
+      # Triage methods (1-4)
+      if (b_type == "Other") {
+        # "Other" means it did NOT match any of the Triage keys.
+        # So we include all reference categories EXCEPT the triage keys.
+        exclude_cats <- names(triage_markers)
+
+        # Alias Fix: If we exclude "Endothelial", also exclude "Vasculature"
+        # (Handles the mismatch in the default GBM panel names)
+        if ("Endothelial" %in% exclude_cats) exclude_cats <- c(exclude_cats, "Vasculature")
+
+        relevant_ref <- marker_ref[!marker_ref$category %in% exclude_cats, ]
       } else {
-        relevant_ref <- marker_ref
+        # Specific Match: Filter for the category matching the Broad Type
+        relevant_ref <- marker_ref[marker_ref$category == b_type, ]
+
+        # Alias Fix: If Broad Type is "Endothelial" but ref uses "Vasculature"
+        if (nrow(relevant_ref) == 0 && b_type == "Endothelial") {
+          relevant_ref <- marker_ref[marker_ref$category == "Vasculature", ]
+        }
       }
     }
 
     if (nrow(relevant_ref) == 0) {
-      final_labels[cells_in_group] <- b_type; next
+      # If no matching markers found (e.g. user provided "GroupA" but ref has no "GroupA"),
+      # default to Broad Label (better than crashing or empty)
+      final_labels[cells_in_group] <- b_type
+      next
     }
 
     scores <- calculate_fisher_scores(res$markers, relevant_ref, background_genes)
@@ -100,10 +106,3 @@ run_cellvoter <- function(object, method = 5,
   return(list(object = object, heatmaps = heatmap_list, scores = score_list))
 }
 
-#' @noRd
-get_category_map <- function(broad_type) {
-  if (broad_type == "Immune") return("Immune")
-  if (broad_type %in% c("Endothelial", "Vasculature")) return(c("Vasculature", "Endothelial"))
-  # Everything else matches to Malignant/Normal/etc
-  return(c("Cancer", "Normal", "Immune", "Vasculature", "Endothelial", "Malignant"))
-}

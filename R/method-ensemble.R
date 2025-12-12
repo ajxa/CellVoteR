@@ -20,9 +20,7 @@ run_ensemble <- function(object,
   # --- 1. Process Markers & Defaults ---
   valid_markers <- process_marker_input(markers, panel_name = panel_name)
 
-  if (is.null(triage_markers)) {
-    triage_markers <- if (exists("cellvoter_data")) cellvoter_data$cell_groups else list(Immune="PTPRC", Endothelial=c("CDH5","VWF"))
-  }
+  triage_markers <- process_triage_input(triage_markers)
 
   # --- 2. Define Strategy ---
   if (use_ensemble) {
@@ -116,7 +114,6 @@ run_ensemble <- function(object,
 
 #' @noRd
 resolve_clashes_internal <- function(object, cells, current_labels, ref) {
-  # Seurat V5 now uses layers instead of slots
   expr_mat <- Seurat::GetAssayData(object, layer = "data")[, cells, drop = FALSE]
   resolved <- character(length(cells))
   names(resolved) <- cells

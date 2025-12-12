@@ -15,14 +15,7 @@ broad_label_by_cell <- function(object,
 
   counts <- extract_counts(object)
 
-  if (is.null(marker_list)) {
-    if (exists("cellvoter_data")) {
-      marker_list <- cellvoter_data$cell_groups
-    } else {
-      warning("Internal data 'cellvoter_data' missing. Using fallback markers.")
-      marker_list <- list(Immune = c("PTPRC"), Endothelial = c("CDH5", "VWF"))
-    }
-  }
+  triage_markers <- process_triage_input(triage_markers)
 
   cell_names <- colnames(counts)
   results <- matrix(FALSE, nrow = length(cell_names), ncol = length(marker_list))

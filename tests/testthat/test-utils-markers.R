@@ -1,5 +1,7 @@
 library(testthat)
 
+# TESTS FOR PROCESS_MARKER_INPUT -----------------------------------------------
+
 test_that("process_marker_input handles NULL (Defaults)", {
   # This relies on cellvoter_data being available (LazyData)
   skip_if_not(exists("cellvoter_data"))
@@ -44,3 +46,30 @@ test_that("process_marker_input throws errors for bad input", {
   bad_df <- data.frame(A = 1, B = 2)
   expect_error(process_marker_input(bad_df), "Could not find a gene")
 })
+
+# TESTS FOR PROCESS_TRIAGE_MARKERS ---------------------------------------------
+test_that("process_triage_input handles NULL (Defaults)", {
+  # Should find internal data if available
+  skip_if_not(exists("cellvoter_data"))
+
+  res <- process_triage_input(NULL)
+  expect_type(res, "list")
+  # Verify it pulled the correct default keys
+  expect_true("Immune" %in% names(res))
+  expect_true("Endothelial" %in% names(res))
+})
+
+test_that("process_triage_input accepts user overrides", {
+  # User supplies their own list
+  my_triage <- list(GroupA = "Gene1")
+  res <- process_triage_input(my_triage)
+
+  expect_equal(res, my_triage)
+  expect_equal(names(res), "GroupA")
+})
+
+test_that("process_triage_input validates input type", {
+  expect_error(process_triage_input("Not a list"), "must be a named list")
+})
+
+# END --------------------------------------------------------------------------
