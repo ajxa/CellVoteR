@@ -1,3 +1,45 @@
+#' Prepare QC feature groups from regex patterns
+#'
+#' Scans the dataset for genes matching the provided patterns and constructs
+#' the list format required by `assess_cell_quality`.
+#'
+#' @param object Input object (Seurat, SingleCellExperiment, or Matrix).
+#' @param group_configs Named list of definitions. Each entry should contain:
+#'   \itemize{
+#'     \item \code{pattern}: Regex string to find genes (e.g. "^MT-").
+#'     \item \code{max_pct}: The threshold to preserve in the output.
+#'   }
+#'   Default includes Mito \code{("^MT-")} and Ribo \code{("^RP[SL]")}.
+#'
+#' @return A named list suitable for the `check_feature_groups` argument.
+#' @export
+find_qc_features <- function(object,
+                             group_configs = list(
+                               mito = list(pattern = "^MT-", max_pct = 20),
+                               ribo = list(pattern = "^RP[SL]", max_pct = 50)
+                             )) {
+
+  counts <- extract_counts(object)
+  all_genes <- rownames(counts)
+
+  final_list <- list()
+
+  for (name in names(group_configs)) {
+    config <- group_configs[[name]]
+
+    # Find the genes
+    found_genes <- grep(config$pattern, all_genes, value = TRUE, ignore.case = TRUE)
+
+    # Construct the explicit list element
+    final_list[[name]] <- list(
+      features = found_genes,
+      max_pct = config$max_pct
+    )
+  }
+
+  return(final_list)
+}
+
 #' Assess Cell Quality Metrics (Core)
 #'
 #' Calculates QC metrics for each cell within a single-cell matrix. It also

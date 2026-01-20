@@ -8,5 +8,9 @@ utils::globalVariables(c(
   "cluster",
   "Broad_Cell_Type",
   "Category",
-  "p_val_adj"
+  "p_val_adj",
+  "values",
+  "ind",
+  ":=",
+  "%>%"
 ))
