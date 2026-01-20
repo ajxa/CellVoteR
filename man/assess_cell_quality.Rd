@@ -2,37 +2,77 @@
 % Please edit documentation in R/qc-assess_quality.R
 \name{assess_cell_quality}
 \alias{assess_cell_quality}
-\title{Assess Cell Quality Metrics (Core)}
+\title{Assess cell quality metrics for single-cell data}
 \usage{
 assess_cell_quality(
   object,
-  check_feature_groups = list(),
+  check_feature_groups = NULL,
   min_cells_per_sample = 100,
-  min_features = 200,
-  sample_ids = NULL
+  min_features = 100,
+  nmads = 3,
+  sample_col = NULL,
+  layer = "counts",
+  remove_failed_cells = FALSE
 )
 }
 \arguments{
-\item{object}{Input object (Seurat, SingleCellExperiment, or Matrix).}
+\item{object}{A Seurat object containing single-cell data.}
 
-\item{check_feature_groups}{Named list of gene sets. Each entry must contain:
-\itemize{
-\item \code{features}: Character vector of gene symbols present in the matrix.
-\item \code{max_pct}: Maximum allowed percentage (0-100).
-}
-Default is empty (no groups checked).}
+\item{check_feature_groups}{A named list defining gene groups to check. Each element
+should be a list with \code{features} (vector of gene names) and \code{max_pct}
+(numeric threshold for maximum percentage). If \code{NULL} (default), attempts to
+auto-detect mitochondrial (\verb{^MT-}) and ribosomal (\verb{^RP[SL]}) genes using
+\code{\link{find_qc_features}}.}
 
-\item{min_cells_per_sample}{Min cells per sample ID.}
+\item{min_cells_per_sample}{Integer. Minimum number of cells required per sample
+for that sample's cells to be retained (default: 100). Requires \code{sample_col} to operate.}
 
-\item{min_features}{Min detected genes per cell.}
+\item{min_features}{Integer. Minimum number of detected features (genes) required
+for a cell to pass QC (default: 100).}
 
-\item{sample_ids}{Vector of sample IDs.}
+\item{nmads}{Numeric. Number of median absolute deviations (MADs) below the median
+log-transformed library size to set the adaptive low-count threshold (default: 3).
+Used to generate the \code{pass_adaptive_counts} metric but does not strictly filter
+unless manually enforced downstream.}
+
+\item{sample_col}{Character vector or factor of the same length as the number of cells,
+indicating the sample ID for each cell. If \code{NULL}, all cells are treated as a single sample.}
+
+\item{layer}{Character. The assay layer to use for calculating counts (default: "counts").}
+
+\item{remove_failed_cells}{Logical. If \code{TRUE}, subsets the returned object to keep only
+cells that passed all QC checks (\code{QC_PASS == TRUE}). Default is \code{FALSE}.}
 }
 \value{
-A data.frame with QC metrics and pass/fail flags.
+A Seurat object with updated metadata columns:
+\itemize{
+\item \code{sc_n_features}: Number of features detected per cell.
+\item \code{sc_n_counts}: Total UMI counts per cell.
+\item \code{pass_min_features}: Logical, TRUE if cell exceeds \code{min_features}.
+\item \code{sc_adaptive_threshold}: The calculated low-count threshold for that cell.
+\item \code{pass_adaptive_counts}: Logical, TRUE if cell counts exceed adaptive threshold.
+\item \code{pct_[group]}: Percentage of counts belonging to specific feature groups (e.g., \code{pct_mito}).
+\item \code{pass_max_[group]}: Logical, TRUE if percentage is below \code{max_pct} for that group.
+\item \code{QC_PASS}: Logical, TRUE if the cell passed ALL active checks (features, groups, sample size).
+}
 }
 \description{
-Calculates QC metrics for each cell within a single-cell matrix. It also
-provides QC metrics for explicitly provided gene groups, e.g., mitochondrial
-and ribosomal genes.
+Calculates comprehensive quality control (QC) metrics for a Seurat object,
+including feature counts, library size, and specific gene group percentages
+(e.g., mitochondrial or ribosomal genes). Supports filtering based on minimum
+features, adaptive thresholds for library size, and user-defined feature groups.
+}
+\examples{
+\dontrun{
+# Basic usage with auto-detection
+seu <- assess_cell_quality(seu, remove_failed_cells = TRUE)
+
+# Custom usage with specific groups
+groups <- list(
+  mito = list(features = c("MT-ND1", "MT-CO1"), max_pct = 15),
+  stress = list(features = c("JUN", "FOS"), max_pct = 5)
+)
+seu <- assess_cell_quality(seu, check_feature_groups = groups, min_features = 200)
+}
+
 }

@@ -2,7 +2,7 @@
 % Please edit documentation in R/qc-assess_quality.R
 \name{find_qc_features}
 \alias{find_qc_features}
-\title{Prepare QC feature groups from regex patterns}
+\title{Auto-Detect QC Feature Groups}
 \usage{
 find_qc_features(
   object,
@@ -11,19 +11,37 @@ find_qc_features(
 )
 }
 \arguments{
-\item{object}{Input object (Seurat, SingleCellExperiment, or Matrix).}
+\item{object}{A Seurat object.}
 
-\item{group_configs}{Named list of definitions. Each entry should contain:
+\item{group_configs}{A named list of configurations. Each element must be a list containing:
 \itemize{
-\item \code{pattern}: Regex string to find genes (e.g. "^MT-").
-\item \code{max_pct}: The threshold to preserve in the output.
+\item \code{pattern}: A regex string to match gene names (e.g., "^MT-").
+\item \code{max_pct}: The maximum allowed percentage for this group (used later in QC).
 }
-Default includes Mito \code{("^MT-")} and Ribo \code{("^RP[SL]")}.}
+Defaults to mitochondrial (\verb{^MT-}, 20\%) and ribosomal (\verb{^RP[SL]}, 50\%) genes.}
 }
 \value{
-A named list suitable for the \code{check_feature_groups} argument.
+A named list where each element contains:
+\itemize{
+\item \code{features}: A character vector of matching gene names found in the object.
+\item \code{max_pct}: The threshold percentage carried over from the config.
+}
+Returns an empty list structure for groups where no genes were found (with a CLI info message).
 }
 \description{
-Scans the dataset for genes matching the provided patterns and constructs
-the list format required by \code{assess_cell_quality}.
+Scans the rownames of a Seurat object to identify genes matching specific patterns
+(e.g., mitochondrial or ribosomal) and formats them for use in quality control checks.
+}
+\examples{
+\dontrun{
+# Default usage
+qc_feats <- find_qc_features(seu)
+
+# Custom patterns (e.g., hemoglobin)
+custom_config <- list(
+  hb = list(pattern = "^HB[A|B]", max_pct = 5)
+)
+qc_feats <- find_qc_features(seu, group_configs = custom_config)
+}
+
 }
