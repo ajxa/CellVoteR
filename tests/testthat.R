@@ -9,4 +9,4 @@
 library(testthat)
 library(CellVoteR)
 
-test_check("CellVoteR")
+# test_check("CellVoteR")

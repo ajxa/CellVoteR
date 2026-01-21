@@ -1,151 +1,138 @@
-#' Process and Standardize User Marker Input
+#' Extract distinct markers per cluster
 #'
-#' Converts various input formats (Dataframe, List, CSV, Excel) into the
-#' standardized 3-column format required by CellVoteR.
+#' Converts a data frame of differential expression (DE) results into a named list,
+#' where each element represents a cluster and contains a vector of unique gene symbols.
 #'
-#' @param input Input data. Can be:
-#'   \itemize{
-#'     \item \code{NULL}: Returns the internal default reference (idhwt_gbm_markers).
-#'     \item \code{data.frame}: Must contain gene and cell type info.
-#'     \item \code{list}: Named list (e.g. \code{list(T_cell = "CD3D")}).
-#'     \item \code{character}: File path to .csv or .xlsx file.
-#'   }
-#' @param panel_name String. If \code{input} is NULL, selects this named panel from internal data.
-#'                   Default: "idhwt_gbm_markers".
-#' @param gene_col Name of the column containing gene symbols (default guesses: "gene", "symbol", "feature").
-#' @param type_col Name of the column containing cell types (default guesses: "cell_type", "type", "cluster").
-#' @param category_col Name of the column containing broad categories (default guesses: "category", "class", "broad_type").
+#' @param de_results A data frame containing DE results (e.g., from Seurat's \code{FindAllMarkers}).
+#' @param cluster_col Character. The name of the column containing cluster identities.
+#'   Default is "cluster".
+#' @param gene_col Character. The name of the column containing gene symbols.
+#'   Default is "gene".
 #'
-#' @return A data.frame with columns: \code{gene}, \code{cell_type}, \code{category}.
-#' @export
-process_marker_input <- function(input = NULL,
-                                 panel_name = "idhwt_gbm_markers",
-                                 gene_col = NULL,
-                                 type_col = NULL,
-                                 category_col = NULL) {
+#' @return A named list of character vectors. Names correspond to cluster IDs.
+#' @keywords internal
+distinct_cluster_markers <- function(
+    de_results,
+    cluster_col = "cluster",
+    gene_col = "gene"
+) {
 
-  # 1. Handle NULL (Default Internal Data) -------------------------------------
-  if (is.null(input)) {
-    if (!exists("cellvoter_data")) {
-      stop("Internal data 'cellvoter_data' is missing. Please reinstall the package.")
-    }
+  return(
+    lapply(split(de_results[[gene_col]], de_results[[cluster_col]]), unique)
+  )
 
-    # Check if the requested panel exists
-    available_panels <- names(cellvoter_data$marker_panels)
-    if (!panel_name %in% available_panels) {
-      stop("Internal panel '", panel_name, "' not found. Available panels: ",
-           paste(available_panels, collapse = ", "))
-    }
+}
 
-    # Return the selected panel
-    return(cellvoter_data$marker_panels[[panel_name]])
+
+
+
+#' Expand a marker reference with gene aliases
+#'
+#' Augments a reference marker data frame by adding rows for gene aliases.
+#' It effectively duplicates the metadata of an original marker and assigns it
+#' to its alias, allowing the downstream scoring system to recognize both names.
+#'
+#' @param ref_df A data frame containing the reference markers and associated metadata.
+#' @param alias_list A named list where names are the original markers (matching \code{ref_df})
+#'   and values are vectors of alias names.
+#' @param ref_marker_col Character. The column name in \code{ref_df} that holds the
+#'   primary gene symbols. Default is "marker".
+#'
+#' @examples
+#' \dontrun{
+#'   # Define aliases: CD8A can also be detected as CD8
+#'   aliases <- list(CD8A = "CD8")
+#'
+#'   # Expand the reference table
+#'   new_ref <- expand_markers_with_aliases(reference_data, aliases)
+#' }
+#' @return A data frame with additional rows for the aliases. Duplicates are removed.
+#' @importFrom dplyr .data
+#' @keywords internal
+expand_markers_with_aliases <- function(
+    ref_df,
+    alias_list,
+    ref_marker_col = "marker"
+) {
+
+
+  alias_map <- stack(alias_list) %>%
+    dplyr::rename(alias = .data$values, original_marker = .data$ind) %>%
+    dplyr::mutate(original_marker = as.character(.data$original_marker),
+                  alias = as.character(.data$alias))
+
+  rem_cols <- c("original_marker", "alias")
+
+  alias_rows <- alias_map %>%
+    dplyr::inner_join(ref_df, by = c("original_marker" = ref_marker_col)) %>%
+    dplyr::mutate(marker = .data$alias) %>%
+    dplyr::select(-dplyr::all_of(rem_cols))
+
+  updated_df <- dplyr::bind_rows(ref_df, alias_rows) %>%
+    dplyr::distinct()
+
+  n_added <- nrow(updated_df) - nrow(ref_df)
+  cli::cli_alert_success("Added {n_added} alias-based markers to the reference set.")
+
+  return(updated_df)
+}
+
+
+
+
+#' Build broad marker configuration
+#'
+#' specific list structure required for annotation or scoring functions.
+#' It assigns priorities, default expression thresholds, and co-expression requirements
+#' to each cell type category.
+#'
+#' @param marker_list A named list where names are cell types (e.g., "T_cells", "B_cells")
+#'   and values are character vectors of gene markers.
+#' @param priority_order A character vector defining the hierarchy of cell types.
+#'   Categories appearing earlier in this vector are assigned a lower numeric priority score
+#'   (1 = highest priority).
+#' @param default_threshold Numeric. The default expression detection threshold. Default is 0.1.
+#' @param default_coexp Numeric/Integer. The minimum number of markers required to be
+#'   co-expressed. Default is 1.
+#'
+#' @return A named list of configuration lists. Each element contains:
+#' \itemize{
+#'   \item \code{markers}: Vector of genes.
+#'   \item \code{expr_threshold}: The threshold set.
+#'   \item \code{coexp_min}: The co-expression minimum.
+#'   \item \code{priority}: Integer rank based on \code{priority_order}.
+#' }
+#' @keywords internal
+build_broad_marker_config <- function(
+    marker_list,
+    priority_order,
+    default_threshold = 0.1,
+    default_coexp = 1
+) {
+
+  if (!all(priority_order %in% names(marker_list))) {
+    missing <- setdiff(priority_order, names(marker_list))
+    cli::cli_abort("Priority categories {.val {missing}} not found in the input marker list.")
   }
 
-  # 2. Handle File Paths (CSV / Excel) -----------------------------------------
-  if (is.character(input) && length(input) == 1) {
-    if (!file.exists(input)) stop("File not found: ", input)
+  config_list <- lapply(names(marker_list), function(cat_name) {
 
-    ext <- tolower(tools::file_ext(input))
-    if (ext == "csv") {
-      input <- utils::read.csv(input, stringsAsFactors = FALSE)
-    } else if (ext %in% c("xls", "xlsx")) {
-      if (!requireNamespace("openxlsx", quietly = TRUE)) {
-        stop("Package 'openxslx' is required to read Excel files. Please install it")
-      }
-      input <- as.data.frame(openxlsx::read.xlsx(input))
-    } else {
-      stop("Unsupported file extension: .", ext)
-    }
-  }
+    prio_rank <- match(cat_name, priority_order, nomatch = length(priority_order) + 1)
 
-  # 3. Handle Named List -------------------------------------------------------
-  # Convert list(T_cell = "CD3D") -> DF(gene="CD3D", cell_type="T_cell")
-  if (is.list(input) && !is.data.frame(input)) {
-    if (is.null(names(input))) stop("Marker list must be named (e.g. list(TypeA = 'Gene1')).")
-
-    df_list <- lapply(names(input), function(n) {
-      data.frame(
-        gene = input[[n]],
-        cell_type = n,
-        category = n, # Default category to the cell type itself if not specified
-        stringsAsFactors = FALSE
-      )
-    })
-    # Return immediately as we know the structure is correct
-    return(do.call(rbind, df_list))
-  }
-
-  # 4. Handle Dataframe Standardization ----------------------------------------
-  if (is.data.frame(input)) {
-    cols <- colnames(input)
-
-    # Helper to find column name if not provided
-    find_col <- function(user_choice, candidates, mandatory = TRUE) {
-      # If user specified a name, check it exists
-      if (!is.null(user_choice)) {
-        if (!user_choice %in% cols) stop("Column '", user_choice, "' not found in input.")
-        return(user_choice)
-      }
-      # Otherwise search for candidates
-      match <- grep(paste0("^", candidates, "$", collapse="|"), cols, ignore.case=TRUE, value=TRUE)
-      if (length(match) > 0) return(match[1])
-
-      if (mandatory) stop("Could not find a gene/type column. Please specify 'gene_col' or 'type_col'.")
-      return(NULL)
-    }
-
-    # Identify Columns
-    final_gene <- find_col(gene_col, c("gene", "genes", "symbol", "feature", "marker"))
-    final_type <- find_col(type_col, c("cell_type", "type", "cluster", "annotation", "label", "broad_cell_type"))
-    final_cat  <- find_col(category_col, c("category", "class", "broad_type", "group"), mandatory = FALSE)
-
-    # Construct Standardized DF
-    clean_df <- data.frame(
-      gene = input[[final_gene]],
-      cell_type = input[[final_type]],
-      stringsAsFactors = FALSE
+    list(
+      markers        = as.vector(marker_list[[cat_name]], mode = "character"),
+      expr_threshold = default_threshold,
+      coexp_min      = default_coexp,
+      priority       = prio_rank
     )
+  })
 
-    # Handle Category
-    if (!is.null(final_cat)) {
-      clean_df$category <- input[[final_cat]]
-    } else {
-      # Default: If no category provided, use the cell_type
-      # This ensures downstream functions always have a 'category' column to filter on
-      clean_df$category <- clean_df$cell_type
-    }
-
-    return(clean_df)
-  }
-
-  stop("Invalid input format. Must be Dataframe, Named List, or File Path.")
+  names(config_list) <- names(marker_list)
+  return(config_list)
 }
 
 
-#' Process Triage Markers
-#'
-#' Helper to resolve triage markers from user input, internal defaults, or fallback.
-#'
-#' @param triage_markers Named list or NULL.
-#' @return A named list of markers.
-#' @export
-process_triage_input <- function(triage_markers = NULL) {
 
-  # 1. User supplied
-  if (!is.null(triage_markers)) {
-    if (!is.list(triage_markers)) stop("triage_markers must be a named list.")
-    return(triage_markers)
-  }
-
-  # 2. Try Internal Data
-  if (exists("cellvoter_data")) {
-    return(cellvoter_data$cell_groups)
-  }
-
-  # 3. Fallback (Safety net)
-  warning("Internal 'cellvoter_data' missing. Using hardcoded fallback for triage.")
-  return(list(Immune = "PTPRC", Endothelial = c("CDH5", "VWF")))
-}
 
 #' Validate broad marker structure
 #'
@@ -169,7 +156,10 @@ process_triage_input <- function(triage_markers = NULL) {
   return(all(sapply(broad_marker_list, \(x) all(struct_fields %in% names(x)))))
 }
 
-#' Check for missing features in a Set
+
+
+
+#' Check for missing features in a set
 #'
 #' Verifies that all features in `set1` are present in `set2`.
 #'
@@ -191,6 +181,9 @@ process_triage_input <- function(triage_markers = NULL) {
   }
 }
 
+
+
+
 #' Unpack marker list to Tibble
 #'
 #' Converts a named list of markers (either simple or nested) into a long-format tibble.
@@ -201,6 +194,9 @@ process_triage_input <- function(triage_markers = NULL) {
 #'
 #' @return A tibble with columns defined by `val_col` and `ind_col`.
 #' @importFrom utils stack
+#' @importFrom magrittr `%>%`
+#' @importFrom rlang `:=`
+#' @importFrom dplyr .data
 #' @keywords internal
 .unpack_markers <- function(marker_list, val_col = "gene", ind_col = "type") {
 
@@ -217,11 +213,14 @@ process_triage_input <- function(triage_markers = NULL) {
   } else out <- stack(marker_list)
 
   out <- out %>%
-    dplyr::rename(!!val_col := values, !!ind_col := ind) %>%
+    dplyr::rename(!!val_col := .data$values, !!ind_col := .data$ind) %>%
     tibble::as_tibble()
 
   return(out)
 }
+
+
+
 
 #' Define a complete feature-space
 #'
@@ -247,6 +246,9 @@ process_triage_input <- function(triage_markers = NULL) {
 
   return(all_features)
 }
+
+
+
 
 #' Expand gene symbols with synonyms from biomaRt
 #'

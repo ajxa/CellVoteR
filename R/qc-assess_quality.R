@@ -51,7 +51,11 @@ find_qc_features <- function(
     found_genes <- grep(config$pattern, all_genes, value = TRUE, ignore.case = TRUE)
 
     if (length(found_genes) == 0) {
-      cli::cli_alert_info("No genes found matching pattern {.val {config$pattern}} for group {.val {name}}.")
+
+      print_alert(
+        text = glue::glue("No genes matching pattern '{config$pattern}' for group '{name}'"),
+        type = "w"
+          )
     }
 
     final_list[[name]] <- list(
@@ -135,11 +139,14 @@ assess_cell_quality <- function(
 
   .valid_sObj_input(object)
 
-  cli::cli_h1("Assessing Cell Quality")
+  print_h2("Assessing Cell Quality")
 
   if (is.null(check_feature_groups)) {
-    cli::cli_alert_info("No feature groups provided. Auto-detecting Mito/Ribo patterns...")
-    check_feature_groups <- .hush({find_qc_features(object)})
+
+    print_alert(
+      text = "Auto-detecting Mito/Ribo patterns..."
+        )
+    check_feature_groups <- find_qc_features(object)
   }
 
   counts <- Seurat::GetAssayData(object, layer = layer)
@@ -204,7 +211,11 @@ assess_cell_quality <- function(
   } else {
 
     if (!is.null(sample_col)) {
-      cli::cli_alert_warning("Invalid {.arg sample_col} length. Treating all cells as one sample.")
+
+      print_alert(
+        text = glue::glue("Invalid {sample_col} length. Treating all cells as one sample"),
+        type = "w"
+      )
     }
 
     sample_ids <- rep("All_Cells", n_cells)
@@ -229,14 +240,26 @@ assess_cell_quality <- function(
   )
 
   n_pass <- sum(pass_mask)
-  cli::cli_alert_success("QC Complete: {n_pass}/{n_cells} cells passed ({round(n_pass/n_cells*100, 1)}%)")
+  n_fail <- n_cells - n_pass
 
   if(remove_failed_cells & n_pass < n_cells) {
 
     object <- object[, pass_mask]
-    cli::cli_alert_warning("Removed failed cells from the Seurat object.")
+
+    print_alert(
+      text = glue::glue("Removed {n_fail} cells"),
+      type = "w"
+    )
 
   }
+
+  print_status_bar(
+    n_pass = round((n_pass/n_cells)*100, 1),
+    n_fail = round((n_fail/n_cells)*100, 1),
+    label_text = "passed",
+    unknown_text = "failed",
+    use_props = TRUE
+    )
 
   return(object)
 }

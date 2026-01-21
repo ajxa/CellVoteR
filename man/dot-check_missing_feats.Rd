@@ -2,7 +2,7 @@
 % Please edit documentation in R/utils-markers.R
 \name{.check_missing_feats}
 \alias{.check_missing_feats}
-\title{Check for missing features in a Set}
+\title{Check for missing features in a set}
 \usage{
 .check_missing_feats(set1, set2)
 }
