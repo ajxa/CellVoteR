@@ -1,4 +1,4 @@
-#' Auto-Detect QC Feature Groups
+#' Auto-detect QC feature groups
 #'
 #' Scans the rownames of a Seurat object to identify genes matching specific patterns
 #' (e.g., mitochondrial or ribosomal) and formats them for use in quality control checks.
@@ -139,12 +139,12 @@ assess_cell_quality <- function(
 
   .valid_sObj_input(object)
 
-  print_h2("Assessing Cell Quality")
+  print_h2("Assessing cell quality")
 
   if (is.null(check_feature_groups)) {
 
     print_alert(
-      text = "Auto-detecting Mito/Ribo patterns..."
+      text = "Auto-detecting mito/ribo patterns..."
         )
     check_feature_groups <- find_qc_features(object)
   }
@@ -213,7 +213,7 @@ assess_cell_quality <- function(
     if (!is.null(sample_col)) {
 
       print_alert(
-        text = glue::glue("Invalid {sample_col} length. Treating all cells as one sample"),
+        text = glue::glue("length(sample_col)[{length(sample_col)}] != nCells[{n_cells}]. Taking all cells as one sample"),
         type = "w"
       )
     }

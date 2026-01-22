@@ -1,3 +1,87 @@
+#' Clean and split broad and fine markers
+#'
+#' This function validates that all broad categories exist within the fine marker dataframe.
+#' It reassigns unmatched fine categories to a generic label, splits both datasets into
+#' hierarchical lists, and compiles a comprehensive vector of all unique markers found
+#' across both datasets.
+#'
+#' @param fine_marker_df A dataframe containing specific cell markers and their labels.
+#' @param broad_marker_df A dataframe containing higher-level categories to validate against.
+#' @param fine_marker_col String. The column name for markers in `fine_marker_df`. Defaults to "marker".
+#' @param fine_label_col String. The column name for the specific cell type label (e.g., "B cell") in `fine_marker_df`. Defaults to "fine_label".
+#' @param fine_category_col String. The column name for the broader category (e.g., "immune") in `fine_marker_df`. Defaults to "fine_category".
+#' @param broad_category_col String. The column name for categories in `broad_marker_df`. Defaults to "broad_category".
+#' @param broad_marker_col String. The column name for markers in `broad_marker_df`. Defaults to "marker".
+#' @param unnamed_broad_cat_label String. The label to assign to fine categories that do not match any broad category. Defaults to "other".
+#'
+#' @return A named list containing three elements:
+#' \itemize{
+#'   \item \strong{fine}: A nested list where top-level keys are `fine_category` and sub-keys are `fine_label`. Values are character vectors of markers.
+#'   \item \strong{broad}: A named list where keys are `broad_category` and values are character vectors of markers.
+#'   \item \strong{all}: A single character vector containing every unique marker found in both the fine and broad datasets.
+#' }
+
+#' @examples
+#' # res <- clean_markers(fine_df, broad_df)
+#' # head(res$all) # View all unique markers
+#'
+#' @export
+#'
+clean_markers <- function(
+    fine_marker_df,
+    broad_marker_df,
+    fine_marker_col = "marker",
+    fine_label_col = "fine_label",
+    fine_category_col = "fine_category",
+    broad_category_col = "broad_category",
+    broad_marker_col = "marker",
+    unnamed_broad_cat_label = "other"
+){
+
+  broad_cats <- unique(broad_marker_df[[broad_category_col]])
+  fine_cats <- unique(fine_marker_df[[fine_category_col]])
+  broad_cats_present <- broad_cats %in% unique(fine_marker_df[[fine_category_col]])
+
+  if(any(!broad_cats_present)){
+    missing_cats <- broad_cats[!broad_cats_present]
+    cli::cli_abort(c(
+      "Some broad categories are missing from the fine marker dataframe:",
+      "x" = "{missing_cats}",
+      "i" = "please ensure ALL broad categories are represented in the fine_marker_df"
+    ))
+  }
+
+  fine_cats_to_other <- fine_cats[!fine_cats %in% broad_cats]
+
+  if(length(fine_cats_to_other) > 0){
+    print_alert(
+      text = glue::glue(
+        "{length(fine_cats_to_other)} categories re-assigned to '{unnamed_broad_cat_label}':\t",
+        "{paste(fine_cats_to_other, collapse = ', ')}"
+      )
+    )
+
+    fine_marker_df[[fine_category_col]][fine_marker_df[[fine_category_col]] %in% fine_cats_to_other] <- unnamed_broad_cat_label
+
+  }
+
+  out <- list()
+
+  fine_split <- split(fine_marker_df, fine_marker_df[[fine_category_col]])
+
+  out$fine <-  lapply(fine_split, \(x) split(x[[fine_marker_col]], x[[fine_label_col]]))
+
+  out$broad <- split(broad_marker_df[[broad_marker_col]], broad_marker_df[[broad_category_col]])
+
+  out$all <- unique(unlist(out, use.names = F))
+
+  return(out)
+}
+
+
+
+
+
 #' Extract distinct markers per cluster
 #'
 #' Converts a data frame of differential expression (DE) results into a named list,
@@ -22,62 +106,6 @@ distinct_cluster_markers <- function(
   )
 
 }
-
-
-
-
-#' Expand a marker reference with gene aliases
-#'
-#' Augments a reference marker data frame by adding rows for gene aliases.
-#' It effectively duplicates the metadata of an original marker and assigns it
-#' to its alias, allowing the downstream scoring system to recognize both names.
-#'
-#' @param ref_df A data frame containing the reference markers and associated metadata.
-#' @param alias_list A named list where names are the original markers (matching \code{ref_df})
-#'   and values are vectors of alias names.
-#' @param ref_marker_col Character. The column name in \code{ref_df} that holds the
-#'   primary gene symbols. Default is "marker".
-#'
-#' @examples
-#' \dontrun{
-#'   # Define aliases: CD8A can also be detected as CD8
-#'   aliases <- list(CD8A = "CD8")
-#'
-#'   # Expand the reference table
-#'   new_ref <- expand_markers_with_aliases(reference_data, aliases)
-#' }
-#' @return A data frame with additional rows for the aliases. Duplicates are removed.
-#' @importFrom dplyr .data
-#' @keywords internal
-expand_markers_with_aliases <- function(
-    ref_df,
-    alias_list,
-    ref_marker_col = "marker"
-) {
-
-
-  alias_map <- stack(alias_list) %>%
-    dplyr::rename(alias = .data$values, original_marker = .data$ind) %>%
-    dplyr::mutate(original_marker = as.character(.data$original_marker),
-                  alias = as.character(.data$alias))
-
-  rem_cols <- c("original_marker", "alias")
-
-  alias_rows <- alias_map %>%
-    dplyr::inner_join(ref_df, by = c("original_marker" = ref_marker_col)) %>%
-    dplyr::mutate(marker = .data$alias) %>%
-    dplyr::select(-dplyr::all_of(rem_cols))
-
-  updated_df <- dplyr::bind_rows(ref_df, alias_rows) %>%
-    dplyr::distinct()
-
-  n_added <- nrow(updated_df) - nrow(ref_df)
-  cli::cli_alert_success("Added {n_added} alias-based markers to the reference set.")
-
-  return(updated_df)
-}
-
-
 
 
 #' Build broad marker configuration
@@ -250,64 +278,105 @@ build_broad_marker_config <- function(
 
 
 
-#' Expand gene symbols with synonyms from biomaRt
+#' Retrieve gene synonyms from Ensembl
 #'
-#' Connects to Ensembl to find synonyms for a list of genes. If `valid_genes` is provided,
-#' it filters the results to match genes present in your dataset and supports regex patterns.
+#' Connects to the Ensembl BioMart database to retrieve gene synonyms for a
+#' provided list of gene names. It queries both the 'external_gene_name' and
+#' 'external_synonym' filters to maximize match rates.
 #'
-#' @param input_features A character vector of gene symbols OR a single regex pattern string.
-#' @param valid_genes (Optional) A character vector of all gene names in your dataset.
-#'   If provided, used to filter results and allow regex matching. Default NULL.
-#' @param organism Character. "hsapiens", "mmusculus", etc.
+#' @param lookup_genes Character vector. A list of gene names (or synonyms)
+#'   to search for.
 #'
-#' @return A character vector of unique gene symbols found in `valid_genes`.
+#' @return A named list where:
+#'   \itemize{
+#'     \item \strong{Names} are the standard Ensembl external gene names.
+#'     \item \strong{Values} are character vectors of unique synonyms for that gene.
+#'   }
+#'   Returns \code{NULL} if the connection to Ensembl fails or if no genes are found.
+#'
+#' @details
+#' The function performs the following steps:
+#' \enumerate{
+#'   \item Checks if \code{biomaRt} is installed.
+#'   \item safely connects to the \code{hsapiens_gene_ensembl} dataset.
+#'   \item Queries Ensembl twice: once matching against gene names and once
+#'     matching against existing synonyms.
+#'   \item Cleans the results by converting empty strings \code{""} to \code{NA}
+#'     and removing incomplete records.
+#' }
+#'
+#' @examples
+#' \dontrun{
+#'   # Basic usage
+#'   syns <- gene_synonyms(c("TP53", "BRCA1"))
+#'
+#'   # Access synonyms for TP53
+#'   print(syns$TP53)
+#' }
 #' @export
-feature_synonyms <- function(input_features, valid_genes = NULL, organism = "hsapiens") {
+#'
+gene_synonyms <- function(lookup_genes) {
 
   if (!requireNamespace("biomaRt", quietly = TRUE)) {
-    stop("Package 'biomaRt' is required for synonym lookup. Please install it.")
+    cli::cli_abort(c(
+      "x" = "Package 'biomaRt' is not installed.",
+      "i" = "Please install it and try again."
+    ))
   }
 
-  # 1. Determine if input is a regex or a list of genes
-  if (!is.null(valid_genes) && length(input_features) == 1 && grepl("[^a-zA-Z0-9]", input_features)) {
-    search_genes <- grep(input_features, valid_genes, value = TRUE, ignore.case = TRUE)
-  } else {
-    search_genes <- input_features
+  if (missing(lookup_genes)) {
+    cli::cli_abort(c(
+      "x" = "No lookup genes provided.",
+      "i" = "Please provide a vector of gene names."
+    ))
   }
-
-  if (length(search_genes) == 0) return(character(0))
-
-  # 2. Setup BiomaRt
-  dataset_name <- switch(tolower(organism),
-                         "human" = "hsapiens_gene_ensembl",
-                         "hsapiens" = "hsapiens_gene_ensembl",
-                         "mouse" = "mmusculus_gene_ensembl",
-                         "mmusculus" = "mmusculus_gene_ensembl",
-                         stop("Organism not supported automatically."))
 
   mart <- tryCatch({
-    biomaRt::useMart("ensembl", dataset = dataset_name)
+    biomaRt::useMart("ensembl", dataset = "hsapiens_gene_ensembl")
+
   }, error = function(e) {
-    warning("Could not connect to biomaRt: ", e$message)
+    print_alert(glue::glue("Error connecting to biomaRt: {e$message}"), type = "w", face = "i")
     return(NULL)
   })
 
-  if (is.null(mart)) return(search_genes)
+  if (is.null(mart)) return(NULL)
 
-  # 3. Query
-  results <- biomaRt::getBM(
-    attributes = c("external_gene_name", "external_synonym"),
-    filters = "external_gene_name",
-    values = search_genes,
-    mart = mart
-  )
+  hsap_version <- biomaRt::searchDatasets(mart, pattern = "hsapiens")$version[[1]]
 
-  all_variants <- unique(c(results$external_gene_name, results$external_synonym))
+  print_alert(
+    glue::glue("Using Ensembl version: {hsap_version }"),
+    type = "i", face = "i", color = "grey90"
+    )
 
-  # 4. Filter synonyms against what is actually in the data
-  if (!is.null(valid_genes)) {
-    return(intersect(all_variants, valid_genes))
+  res <- list()
+
+  res$by_name <- biomaRt::getBM(
+      attributes = c("external_gene_name", "external_synonym"),
+      filters = c("external_gene_name"),
+      values = lookup_genes,
+      mart = mart
+    )
+
+    res$by_synonym <- biomaRt::getBM(
+      attributes = c("external_gene_name", "external_synonym"),
+      filters = c("external_synonym"),
+      values = lookup_genes,
+      mart = mart
+    )
+
+  res <- dplyr::bind_rows(res)
+
+  if (nrow(res) == 0) {
+    print_alert("Did not find any lookup genes in Ensembl", type = "w")
+    return(NULL)
   }
 
-  return(all_variants)
+  res <- res %>%
+    dplyr::mutate(dplyr::across(dplyr::where(is.character), ~dplyr::na_if(., ""))) %>%
+    tidyr::drop_na()
+
+  out <- split(res, as.factor(res$external_gene_name)) |>
+    lapply(\(x) unique(x[["external_synonym"]]))
+
+  return(out)
 }

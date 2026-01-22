@@ -2,7 +2,7 @@
 % Please edit documentation in R/qc-assess_quality.R
 \name{find_qc_features}
 \alias{find_qc_features}
-\title{Auto-Detect QC Feature Groups}
+\title{Auto-detect QC feature groups}
 \usage{
 find_qc_features(
   object,
