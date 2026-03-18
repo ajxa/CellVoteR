@@ -10,25 +10,34 @@ markers$broad <- build_broad_marker_config(
 
 # 2.) Load the single-cell expression data -------------------------------------
 # data_path <- "~/Desktop/OneDrive - University of Leeds/adhoc/Ensemble_Cell_Typing/data"
-#
+
 # sc_data_path <- list(
-#   cosmx = list.files(data_path, pattern = "sObj\\.rds", full.names = TRUE),
-#   wang = list.files(file.path(data_path, "Wang_patient_seurats"), full.names = TRUE),
-#   nomura =  list.files(file.path(data_path, "Nomura_patient_seurats"), full.names = TRUE)
+#   cosmx = list.files(data_path, pattern = "sObj\\.rds", full.names = TRUE)
+  # wang = list.files(file.path(data_path, "Wang_patient_seurats"), full.names = TRUE),
+  # nomura =  list.files(file.path(data_path, "Nomura_patient_seurats"), full.names = TRUE)
 # )
-#
-# seu_data <- readRDS(sc_data_path$cosmx)[[1]]
+
+# raw data is in the count data slot typically
+# This is stored as a sparse matrix, so can easily be saved to an rds file
+# similarly, the metadata is stored as a data frame, and can also be saved as
+# an rds file by extracting the metadata slot of the Seurat object and
+# saving that separately.
+
+# seu_data <- readRDS(sc_data_path$cosmx)
 # rm(data_path, sc_data_path, seu_data)
+#
 
+# cell_meta <- readRDS("~/Desktop/example_data/cell_metadata.rds")
+# data <- readRDS("~/Desktop/example_data/test_input_sc_matrix.rds")
+#
+# cell_meta[1:5,1:7]
+# data[1:5,1:7]
 
-cell_meta <- readRDS("inst/cell_metadata.rds")
-
-# Loading a sparse matrix saved as an .rds object
+# Loading a sparse matrix and cell_metadata saved as .rds objects
 sce <- create_sce(
-  counts = "inst/test_input_sc_matrix.rds", cell_metadata = cell_meta
+  counts = "~/Desktop/example_data/test_input_sc_matrix.rds",
+  cell_metadata = "~/Desktop/example_data/cell_metadata.rds"
 )
-
-rm(cell_meta)
 
 # Loading a sparse matrix saved as a .mtx file, with separate files for genes and cells
 # mtx_data <- create_sce(

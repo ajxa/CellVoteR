@@ -23,6 +23,10 @@
 #'     genes files are text files with one identifier per line (or
 #'     tab-separated, in which case the second column is used preferentially).
 #'     All three must be provided together.}
+#'  \item{\strong{cell_metadata (RDS or CSV/TSV file)}}{A character path to
+#'     an \code{.rds} file containing a \code{data.frame}, or a path to a
+#'     \code{.csv} or \code{.tsv}/\code{.txt} file. The file must contain one
+#'     row per cell, in the same order as the columns of the counts matrix.}
 #' }
 #'
 #' @section Disk-backed extension:
@@ -52,9 +56,15 @@
 #' @param genes_file Character scalar. Path to a text file containing one gene
 #'   identifier per line (no header). Required when \code{mtx_file} is
 #'   provided.
-#' @param cell_metadata Optional \code{data.frame} of per-cell annotations
-#'   (e.g. sample ID, batch). Must have one row per column in the counts
-#'   matrix. Stored in \code{colData()}.
+#' @param cell_metadata Optional per-cell annotations. Either:
+#'   \itemize{
+#'     \item A \code{data.frame} with one row per cell.
+#'     \item A character scalar path to an \code{.rds} file containing a
+#'       \code{data.frame}.
+#'     \item A character scalar path to a \code{.csv}, \code{.tsv}, or
+#'       \code{.txt} file (tab-separated).
+#'   }
+#'   Must have one row per column in the counts matrix. This will be stored in \code{colData()}.
 #' @param gene_metadata Optional \code{data.frame} of per-gene annotations.
 #'   Must have one row per row in the counts matrix. Stored in
 #'   \code{rowData()}.
@@ -67,18 +77,19 @@
 #' # From an in-memory sparse matrix
 #' sce <- create_sce(counts = my_sparse_counts)
 #'
-#' # From an RDS file
-#' sce <- create_sce(counts = "raw_counts.rds")
-#'
-#' # From MTX triplet files
+#' # From an RDS file with metadata from a CSV
 #' sce <- create_sce(
-#'   mtx_file   = "data/matrix.mtx.gz",
-#'   cells_file = "data/barcodes.tsv",
-#'   genes_file = "data/features.tsv"
+#'   counts        = "raw_counts.rds",
+#'   cell_metadata = "cell_metadata.csv"
 #' )
 #'
-#' # Optionally convert to disk-backed for large datasets
-#' HDF5Array::saveHDF5SummarizedExperiment(sce, dir = "my_hdf5_sce")
+#' # From MTX triplet files with metadata from an RDS
+#' sce <- create_sce(
+#'   mtx_file      = "data/matrix.mtx.gz",
+#'   cells_file    = "data/barcodes.tsv",
+#'   genes_file    = "data/features.tsv",
+#'   cell_metadata = "data/cell_metadata.rds"
+#' )
 #' }
 #'
 #' @seealso
@@ -97,6 +108,8 @@ create_sce <- function(counts = NULL,
                        cell_metadata = NULL,
                        gene_metadata = NULL) {
 
+  # --- 1.) Resolve the counts ----
+
   mtx_args <- c(!is.null(mtx_file), !is.null(cells_file), !is.null(genes_file))
 
   if (!is.null(counts)) {
@@ -114,7 +127,6 @@ create_sce <- function(counts = NULL,
     if (!all(mtx_args)) {
 
       provided <- c("mtx_file", "cells_file", "genes_file")[mtx_args]
-
       missing  <- c("mtx_file", "cells_file", "genes_file")[!mtx_args]
 
       cli::cli_abort(c(
@@ -132,14 +144,18 @@ create_sce <- function(counts = NULL,
 
   validate_counts_matrix(counts)
 
+  # --- 2.) Resolve the cell metadata ----
+
   if (!is.null(cell_metadata)) {
+    cell_metadata <- resolve_cell_metadata(cell_metadata)
 
     validate_metadata(cell_metadata,
                       expected_n = ncol(counts),
-                      dim_label = "cells",
-                      arg_name = "cell_metadata"
-                      )
+                      dim_label  = "cells",
+                      arg_name   = "cell_metadata")
   }
+
+  # --- 3.) Resolve gene metadata ----
 
   if (!is.null(gene_metadata)) {
 
@@ -150,10 +166,11 @@ create_sce <- function(counts = NULL,
                       )
   }
 
+  # --- 4.) Construct the SCE object ----
+
   sce_args <- list(assays = list(counts = counts))
 
   if (!is.null(cell_metadata)) sce_args$colData <- S4Vectors::DataFrame(cell_metadata)
-
   if (!is.null(gene_metadata)) sce_args$rowData <- S4Vectors::DataFrame(gene_metadata)
 
   sce <- do.call(SingleCellExperiment::SingleCellExperiment, sce_args)
@@ -163,6 +180,52 @@ create_sce <- function(counts = NULL,
   )
 
   return(sce)
+}
+
+#' Resolve cell metadata from a data.frame or file path
+#'
+#' Accepts a \code{data.frame} directly, or a path to an \code{.rds},
+#' \code{.csv}, \code{.tsv}, or \code{.txt} file.
+#'
+#' @param cell_metadata A \code{data.frame} or character scalar file path.
+#' @return A \code{data.frame}.
+#' @keywords internal
+#' @noRd
+resolve_cell_metadata <- function(cell_metadata) {
+
+  if (is.data.frame(cell_metadata)) return(cell_metadata)
+
+  if (!is.character(cell_metadata) || length(cell_metadata) != 1L) {
+    cli::cli_abort(
+      "{.arg cell_metadata} must be a {.cls data.frame} or a single file path."
+    )
+  }
+
+  if (!file.exists(cell_metadata)) cli::cli_abort("File not found: {.path {cell_metadata}}.")
+
+  ext <- tolower(tools::file_ext(cell_metadata))
+
+  out <- switch(ext,
+                rds = {
+                  obj <- readRDS(cell_metadata)
+                  if (!is.data.frame(obj)) {
+                    cli::cli_abort(
+                      "The RDS file {.path {cell_metadata}} must contain a {.cls data.frame}, \\
+           not a {.cls {class(obj)}}."
+                    )
+                  }
+                  obj
+                },
+                csv = utils::read.csv(cell_metadata,  stringsAsFactors = FALSE),
+                tsv = ,
+                txt = utils::read.delim(cell_metadata, stringsAsFactors = FALSE),
+                cli::cli_abort(
+                  "Unsupported file extension {.val {ext}} for {.arg cell_metadata}. \\
+       Supported formats: {.val rds}, {.val csv}, {.val tsv}, {.val txt}."
+                )
+  )
+
+  return(out)
 }
 
 

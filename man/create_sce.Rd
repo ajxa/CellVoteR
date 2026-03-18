@@ -35,9 +35,15 @@ provided.}
 identifier per line (no header). Required when \code{mtx_file} is
 provided.}
 
-\item{cell_metadata}{Optional \code{data.frame} of per-cell annotations
-(e.g. sample ID, batch). Must have one row per column in the counts
-matrix. Stored in \code{colData()}.}
+\item{cell_metadata}{Optional per-cell annotations. Either:
+\itemize{
+\item A \code{data.frame} with one row per cell.
+\item A character scalar path to an \code{.rds} file containing a
+\code{data.frame}.
+\item A character scalar path to a \code{.csv}, \code{.tsv}, or
+\code{.txt} file (tab-separated).
+}
+Must have one row per column in the counts matrix. This will be stored in \code{colData()}.}
 
 \item{gene_metadata}{Optional \code{data.frame} of per-gene annotations.
 Must have one row per row in the counts matrix. Stored in
@@ -74,6 +80,10 @@ file contains the sparse matrix in Matrix Market format. The cells and
 genes files are text files with one identifier per line (or
 tab-separated, in which case the second column is used preferentially).
 All three must be provided together.}
+\item{\strong{cell_metadata (RDS or CSV/TSV file)}}{A character path to
+an \code{.rds} file containing a \code{data.frame}, or a path to a
+\code{.csv} or \code{.tsv}/\code{.txt} file. The file must contain one
+row per cell, in the same order as the columns of the counts matrix.}
 }
 }
 
@@ -94,18 +104,19 @@ sce <- HDF5Array::loadHDF5SummarizedExperiment("my_hdf5_sce")
 # From an in-memory sparse matrix
 sce <- create_sce(counts = my_sparse_counts)
 
-# From an RDS file
-sce <- create_sce(counts = "raw_counts.rds")
-
-# From MTX triplet files
+# From an RDS file with metadata from a CSV
 sce <- create_sce(
-  mtx_file   = "data/matrix.mtx.gz",
-  cells_file = "data/barcodes.tsv",
-  genes_file = "data/features.tsv"
+  counts        = "raw_counts.rds",
+  cell_metadata = "cell_metadata.csv"
 )
 
-# Optionally convert to disk-backed for large datasets
-HDF5Array::saveHDF5SummarizedExperiment(sce, dir = "my_hdf5_sce")
+# From MTX triplet files with metadata from an RDS
+sce <- create_sce(
+  mtx_file      = "data/matrix.mtx.gz",
+  cells_file    = "data/barcodes.tsv",
+  genes_file    = "data/features.tsv",
+  cell_metadata = "data/cell_metadata.rds"
+)
 }
 
 }
