@@ -1,83 +1,453 @@
-#' Clean and split broad and fine markers
+#' Load and structure CellVoteR marker definitions
 #'
-#' This function validates that all broad categories exist within the fine marker dataframe.
-#' It reassigns unmatched fine categories to a generic label, splits both datasets into
-#' hierarchical lists, and compiles a comprehensive vector of all unique markers found
-#' across both datasets.
+#' Reads a marker definition file (csv, tab-separated txt, or xlsx) and
+#' organises it into a hierarchical list suitable for two-tier (broad -> fine)
+#' cell-type annotation pipelines. The returned broad markers are a simple
+#' named list of character vectors intended to be passed to
+#' \code{\link{build_broad_marker_config}()} as a subsequent step to attach
+#' priority, threshold, and co-expression settings.
 #'
-#' @param fine_marker_df A dataframe containing specific cell markers and their labels.
-#' @param broad_marker_df A dataframe containing higher-level categories to validate against.
-#' @param fine_marker_col String. The column name for markers in `fine_marker_df`. Defaults to "marker".
-#' @param fine_label_col String. The column name for the specific cell type label (e.g., "B cell") in `fine_marker_df`. Defaults to "fine_label".
-#' @param fine_category_col String. The column name for the broader category (e.g., "immune") in `fine_marker_df`. Defaults to "fine_category".
-#' @param broad_category_col String. The column name for categories in `broad_marker_df`. Defaults to "broad_category".
-#' @param broad_marker_col String. The column name for markers in `broad_marker_df`. Defaults to "marker".
-#' @param unnamed_broad_cat_label String. The label to assign to fine categories that do not match any broad category. Defaults to "other".
-#'
-#' @return A named list containing three elements:
-#' \itemize{
-#'   \item \strong{fine}: A nested list where top-level keys are `fine_category` and sub-keys are `fine_label`. Values are character vectors of markers.
-#'   \item \strong{broad}: A named list where keys are `broad_category` and values are character vectors of markers.
-#'   \item \strong{all}: A single character vector containing every unique marker found in both the fine and broad datasets.
+#' @section Expected file layout:
+#' The input file must contain at least four columns (names configurable):
+#' \describe{
+#'   \item{type}{Either \code{"broad"} or \code{"fine"}.}
+#'   \item{category}{Broad cell-type category (e.g. \code{"immune"},
+#'     \code{"vasculature"}). Every broad category must also appear as a
+#'     category in the fine rows.}
+#'   \item{label}{Fine-grained cell-type label (e.g. \code{"CD8_T"},
+#'     \code{"endothelial"}).}
+#'   \item{marker}{Gene symbol.}
 #' }
-
+#'
+#' @section Supported file formats:
+#' \describe{
+#'   \item{\code{.csv}}{Comma-separated values, read via
+#'     \code{\link[utils]{read.csv}}.}
+#'   \item{\code{.txt}}{Tab-separated values, read via
+#'     \code{\link[utils]{read.delim}}.}
+#'   \item{\code{.xlsx}}{Excel workbook, read via
+#'     \code{\link[openxlsx]{read.xlsx}}.}
+#' }
+#'
+#' @section Category reconciliation:
+#' Fine-type rows whose \code{category} does not match any broad category are
+#' reassigned to \code{unnamed_broad_cat_label} (default \code{"other"}) with
+#' an informational message. Broad categories that have \strong{no}
+#' corresponding fine rows cause an error.
+#'
+#' @section Typical workflow:
+#' \preformatted{
+#' markers <- load_markers("markers.csv")
+#'
+#' markers$broad <- build_broad_marker_config(
+#'   marker_list    = markers$broad,
+#'   priority_order = c("vasculature", "immune"),
+#'   per_category_overrides = list(
+#'     immune = list(coexp_min = 2)
+#'   )
+#' )
+#' }
+#'
+#' @param file_path Character scalar. Path to a \code{.csv}, \code{.txt}
+#'   (tab-separated), or \code{.xlsx} file containing marker definitions.
+#' @param unnamed_broad_cat_label Character scalar. Label assigned to fine-type
+#'   categories that do not map to any broad category. Defaults to
+#'   \code{"other"}.
+#' @param type_col,cat_col,label_col,marker_col Character scalars giving the
+#'   column names in the input file for type, category, label, and marker
+#'   respectively.
+#' @param unique_types Character vector of permitted values in \code{type_col}.
+#'
+#' @return A named list with components:
+#' \describe{
+#'   \item{broad}{Named list of character vectors - one element per broad
+#'     category, values are marker gene symbols. Pass this to
+#'     \code{\link{build_broad_marker_config}()} to generate the full
+#'     configuration.}
+#'   \item{fine}{Named list of lists: top level keyed by category, second
+#'     level keyed by label, values are character vectors of markers. The
+#'     \code{unnamed_broad_cat_label} group (if any) is placed last.}
+#' }
+#'
 #' @examples
-#' # res <- clean_markers(fine_df, broad_df)
-#' # head(res$all) # View all unique markers
+#' \dontrun{
+#' markers <- load_markers("markers.csv")
+#'
+#' # Inspect raw broad markers before configuring
+#' names(markers$broad)
+#' markers$broad[["immune"]]
+#'
+#' # Then configure broad markers for annotation
+#' markers$broad <- build_broad_marker_config(
+#'   marker_list    = markers$broad,
+#'   priority_order = c("vasculature", "immune")
+#' )
+#' }
+#'
+#' @seealso \code{\link{build_broad_marker_config}} for configuring the broad
+#'   markers returned by this function.
 #'
 #' @export
-#'
-clean_markers <- function(
-    fine_marker_df,
-    broad_marker_df,
-    fine_marker_col = "marker",
-    fine_label_col = "fine_label",
-    fine_category_col = "fine_category",
-    broad_category_col = "broad_category",
-    broad_marker_col = "marker",
-    unnamed_broad_cat_label = "other"
-){
+#' @export
+load_markers <- function(file_path,
+                         unnamed_broad_cat_label = "other",
+                         type_col = "type",
+                         unique_types = c("broad", "fine"),
+                         cat_col = "category",
+                         label_col = "label",
+                         marker_col = "marker") {
 
-  broad_cats <- unique(broad_marker_df[[broad_category_col]])
-  fine_cats <- unique(fine_marker_df[[fine_category_col]])
-  broad_cats_present <- broad_cats %in% unique(fine_marker_df[[fine_category_col]])
+  checkmate::assert_string(file_path)
+  checkmate::assert_file_exists(file_path, access = "r")
+  checkmate::assert_string(unnamed_broad_cat_label)
+  checkmate::assert_character(unique_types, min.len = 1L, any.missing = FALSE)
 
-  if(any(!broad_cats_present)){
-    missing_cats <- broad_cats[!broad_cats_present]
+  # 1.) Read file ----
+
+  ext <- tolower(tools::file_ext(file_path))
+
+  marker_list <- switch(
+    EXPR = ext,
+    csv  = utils::read.csv(file_path, stringsAsFactors = FALSE),
+    txt  = utils::read.delim(file_path, stringsAsFactors = FALSE),
+    xlsx = openxlsx::read.xlsx(file_path),
+    stop("Unsupported file extension '", ext, "'. Expected csv, txt, or xlsx.", call. = FALSE)
+  )
+
+  if (nrow(marker_list) == 0L) stop("Marker file is empty: ", file_path, call. = FALSE)
+
+  # 2.) Column validation ----
+
+  required_cols <- c(type_col, cat_col, label_col, marker_col)
+  missing_cols  <- setdiff(required_cols, colnames(marker_list))
+
+  if (length(missing_cols) > 0L) {
+    stop("Missing required columns: ", paste(missing_cols, collapse = ", "),
+         "\n  Found: ", paste(colnames(marker_list), collapse = ", "),
+         call. = FALSE)
+  }
+
+  # 3.) Trim white-space & drop empty rows ----
+
+  for (col in required_cols) {
+    marker_list[[col]] <- trimws(marker_list[[col]])
+  }
+
+  marker_list <- marker_list[!is.na(marker_list[[marker_col]]) &
+                               nchar(marker_list[[marker_col]]) > 0L, ]
+
+  # 4.) Type validation ----
+
+  observed_types <- unique(marker_list[[type_col]])
+  unexpected_types <- setdiff(observed_types, unique_types)
+
+  if (length(unexpected_types) > 0L) {
+    stop("Unexpected values in '", type_col, "': ",
+         paste(unexpected_types, collapse = ", "),
+         "\n  Allowed: ", paste(unique_types, collapse = ", "),
+         call. = FALSE)
+  }
+
+  for (req_type in unique_types) {
+    if (!req_type %in% observed_types) {
+      stop("No '", req_type, "' rows found in '", type_col, "' column.",
+           call. = FALSE)
+    }
+  }
+
+  # 5.) Check for duplicate marker entries ----
+
+  dup_rows <- duplicated(marker_list[, required_cols])
+
+  if (any(dup_rows)) {
+    n_dup <- sum(dup_rows)
+    print_alert("Removed {n_dup} duplicate row{?s} from marker file.", type = "w")
+    marker_list <- marker_list[!dup_rows, ]
+  }
+
+  # 6.) Split by type ----
+
+  cat_split  <- split(marker_list, marker_list[[type_col]])
+  broad_cats <- unique(cat_split[["broad"]][[cat_col]])
+  fine_cats  <- unique(cat_split[["fine"]][[cat_col]])
+
+  missing_broad_cats <- broad_cats[!broad_cats %in% fine_cats]
+
+  if (length(missing_broad_cats) > 0L) {
     cli::cli_abort(c(
-      "Some broad categories are missing from the fine marker dataframe:",
-      "x" = "{missing_cats}",
-      "i" = "please ensure ALL broad categories are represented in the fine_marker_df"
+      "Broad categories with no matching fine entries:",
+      "x" = "{.val {missing_broad_cats}}",
+      "i" = "Every broad category must also appear as a category in the fine rows."
     ))
   }
 
-  fine_cats_to_other <- fine_cats[!fine_cats %in% broad_cats]
+  other_fine_cats <- setdiff(fine_cats, broad_cats)
 
-  if(length(fine_cats_to_other) > 0){
-    print_alert(
-      text = glue::glue(
-        "{length(fine_cats_to_other)} categories re-assigned to '{unnamed_broad_cat_label}':\t",
-        "{paste(fine_cats_to_other, collapse = ', ')}"
-      )
-    )
+  if (length(other_fine_cats) > 0L) {
+    reassign_idx <- cat_split[["fine"]][[cat_col]] %in% other_fine_cats
+    cat_split[["fine"]][[cat_col]][reassign_idx] <- unnamed_broad_cat_label
 
-    fine_marker_df[[fine_category_col]][fine_marker_df[[fine_category_col]] %in% fine_cats_to_other] <- unnamed_broad_cat_label
-
+    print_alert("{length(other_fine_cats)} fine categor{?y/ies} re-assigned to {.val {unnamed_broad_cat_label}}: {other_fine_cats}")
   }
+
+  # 7.) Build marker list structure ----
 
   out <- list()
 
-  fine_split <- split(fine_marker_df, fine_marker_df[[fine_category_col]])
+  out$broad <- split(cat_split[["broad"]][[marker_col]],
+                     cat_split[["broad"]][[cat_col]])
 
-  out$fine <-  lapply(fine_split, \(x) split(x[[fine_marker_col]], x[[fine_label_col]]))
+  fine_split <- split(cat_split[["fine"]], cat_split[["fine"]][[cat_col]])
 
-  out$broad <- split(broad_marker_df[[broad_marker_col]], broad_marker_df[[broad_category_col]])
+  fine_split <- lapply(fine_split, \(x) split(x[[marker_col]], x[[label_col]]))
 
-  out$all <- unique(unlist(out, use.names = F))
+  if (unnamed_broad_cat_label %in% names(fine_split)) {
+    other_group <- fine_split[[unnamed_broad_cat_label]]
+    fine_split[[unnamed_broad_cat_label]] <- NULL
+    fine_split[[unnamed_broad_cat_label]] <- other_group
+  }
+
+  out$fine <- fine_split
 
   return(out)
+
 }
 
+
+
+#' Build broad marker configuration
+#'
+#' Converts a named list of broad-category marker vectors into a structured
+#' configuration list suitable for priority-based cell-type assignment. Each
+#' category is annotated with an expression threshold, minimum co-expression
+#' count, and a numeric priority rank derived from \code{priority_order}.
+#'
+#' @section Priority order:
+#' The \code{priority_order} vector determines how ties are resolved when a
+#' cell or cluster matches multiple broad categories. Categories listed
+#' earlier receive higher priority (lower rank number). At most one category
+#' may be omitted from \code{priority_order}, in which case it is
+#' automatically assigned the lowest priority. If two or more categories are
+#' omitted they would share the same rank, making tie-breaking ambiguous -
+#' this is treated as an error.
+#'
+#'
+#' @param marker_list Named list of character vectors. Names are broad category
+#'   labels (e.g. \code{"immune"}, \code{"vasculature"}), values are marker
+#'   gene symbols.
+#' @param priority_order Character vector defining the assignment priority.
+#'   Categories listed first receive lower (higher-priority) rank values.
+#'   All entries must correspond to names in \code{marker_list}. At most one
+#'   category in \code{marker_list} may be absent from this vector (see
+#'   Priority order section).
+#' @param default_threshold Numeric scalar (>= 0). Default expression threshold
+#'   applied to every category. Defaults to \code{0.1}.
+#' @param default_coexp Positive integer scalar. Minimum number of co-expressed
+#'   markers required for a category call. Defaults to \code{1}.
+#' @param per_category_overrides Optional named list of named lists, keyed by
+#'   category name. Each inner list may contain \code{expr_threshold} and/or
+#'   \code{coexp_min} to override the defaults for that category. Categories
+#'   not listed use the defaults. Defaults to \code{NULL} (no overrides).
+#'
+#' @return A named list (one element per category, ordered by priority rank
+#'   ascending) where each element is a list with components:
+#'   \describe{
+#'     \item{markers}{Character vector of marker gene symbols.}
+#'     \item{expr_threshold}{Numeric expression threshold for the category.}
+#'     \item{coexp_min}{Integer minimum co-expression count.}
+#'     \item{priority}{Integer priority rank (1 = highest priority).}
+#'   }
+#'
+#' @examples
+#' \dontrun{
+#'   markers <- list(
+#'     immune      = c("CD45", "CD3", "CD8"),
+#'     vasculature = c("PECAM1", "VWF"),
+#'     stromal     = c("COL1A1", "VIM")
+#'   )
+#'
+#'   # All categories ranked explicitly
+#'   cfg <- build_broad_marker_config(
+#'     marker_list    = markers,
+#'     priority_order = c("vasculature", "immune", "stromal")
+#'   )
+#'
+#'   # One category omitted - automatically gets lowest priority
+#'   cfg <- build_broad_marker_config(
+#'     marker_list    = markers,
+#'     priority_order = c("vasculature", "immune")
+#'   )
+#'   # vasculature=1, immune=2, stromal=3
+#'
+#'   # Per-category overrides
+#'   cfg <- build_broad_marker_config(
+#'     marker_list    = markers,
+#'     priority_order = c("vasculature", "immune", "stromal"),
+#'     per_category_overrides = list(
+#'       immune = list(coexp_min = 2, expr_threshold = 0.2)
+#'     )
+#'   )
+#' }
+#'
+#' @export
+build_broad_marker_config <- function(
+    marker_list,
+    priority_order,
+    default_threshold = 0.1,
+    default_coexp = 1,
+    per_category_overrides = NULL
+) {
+
+  # -- Input validation ---
+
+  if (!is.list(marker_list) || is.null(names(marker_list))){
+    cli::cli_abort("{.arg marker_list} must be a named list.")
+  }
+
+  if (any(nchar(names(marker_list)) == 0L)) {
+    cli::cli_abort("All elements of {.arg marker_list} must be named.")
+  }
+
+  if (anyDuplicated(names(marker_list))) {
+    dups <- unique(names(marker_list)[duplicated(names(marker_list))])
+    cli::cli_abort("Duplicate category names in {.arg marker_list}: {.val {dups}}")
+  }
+
+  checkmate::assert_character(priority_order, min.len = 1L, any.missing = FALSE)
+  checkmate::assert_number(default_threshold, lower = 0)
+  checkmate::assert_count(default_coexp, positive = TRUE)
+
+  # -- Validate priority_order entries exist ---
+
+  missing_prio <- setdiff(priority_order, names(marker_list))
+
+  if (length(missing_prio) > 0L) {
+    cli::cli_abort(
+      "Priority categories not found in {.arg marker_list}: {.val {missing_prio}}"
+    )
+  }
+
+  # -- Validate priority coverage ---
+
+  unranked <- setdiff(names(marker_list), priority_order)
+
+  if (length(unranked) > 0L) {
+
+    n_ranked   <- length(priority_order)
+    n_unranked <- length(unranked)
+
+    if (n_ranked == 0L) {
+
+      cli::cli_abort(c(
+        "No categories have an assigned priority.",
+        "x" = "All {.val {n_unranked}} categor{?y/ies} would receive the same default rank.",
+        "i" = "Please supply a {.arg priority_order} covering at least the categories
+               that should take precedence when a cell matches multiple groups.",
+        "i" = "Unranked categories: {.val {unranked}}"
+      ))
+
+    }
+
+    if (n_unranked > 1L) {
+
+      cli::cli_abort(c(
+        "Multiple categories missing from {.arg priority_order}.",
+        "x" = "{.val {n_unranked}} categories would share the same lowest rank: {.val {unranked}}",
+        "i" = "When multiple categories are unranked, ties cannot be resolved during
+               broad assignment. Please include all categories in {.arg priority_order},
+               or leave at most one category unranked."
+      ))
+
+    }
+
+    print_alert(
+      "Category {.val {unranked}} not in {.arg priority_order} - assigned lowest priority (rank {.val {n_ranked + 1L}})",
+      type = "w"
+    )
+  }
+
+
+  # -- Validate per-category overrides ---
+
+  if (!is.null(per_category_overrides)) {
+
+    if (!is.list(per_category_overrides) || is.null(names(per_category_overrides))) {
+      cli::cli_abort("{.arg per_category_overrides} must be a named list.")
+    }
+
+    unknown_cats <- setdiff(names(per_category_overrides), names(marker_list))
+
+    if (length(unknown_cats) > 0L) {
+      print_alert(
+        "Overrides for unknown categories will be ignored: {.val {unknown_cats}}", type = "w"
+      )
+    }
+
+    allowed_fields <- c("expr_threshold", "coexp_min")
+
+    for (cat in intersect(names(per_category_overrides), names(marker_list))) {
+
+      bad_fields <- setdiff(names(per_category_overrides[[cat]]), allowed_fields)
+
+      if (length(bad_fields) > 0L) {
+        print_alert(
+          "Unknown override fields for {.val {cat}} will be ignored: {.val {bad_fields}}",
+          type = "w"
+        )
+      }
+
+    }
+
+  }
+
+  # -- Validate marker vectors ---
+
+  empty_cats <- names(marker_list)[vapply(marker_list, length, integer(1)) == 0L]
+
+  if (length(empty_cats) > 0L) {
+    print_alert("Categories with no markers: {.val {empty_cats}}", type = "w")
+  }
+
+  # -- Build config ---
+
+  config_list <- lapply(names(marker_list), function(cat_name) {
+
+    markers <- as.character(marker_list[[cat_name]])
+
+    prio_rank <- match(cat_name, priority_order,
+                       nomatch = length(priority_order) + 1L)
+
+    cat_threshold <- default_threshold
+
+    cat_coexp     <- default_coexp
+
+    if (!is.null(per_category_overrides[[cat_name]])) {
+
+      ovr <- per_category_overrides[[cat_name]]
+
+      if (!is.null(ovr$expr_threshold)) cat_threshold <- ovr$expr_threshold
+
+      if (!is.null(ovr$coexp_min))      cat_coexp     <- ovr$coexp_min
+
+    }
+
+    return(
+      list(
+            markers        =   markers,
+            expr_threshold =   cat_threshold,
+            coexp_min      =   cat_coexp,
+            priority       =   prio_rank
+            )
+      )
+  })
+
+  names(config_list) <- names(marker_list)
+
+  config_list <- config_list[order(vapply(config_list, `[[`, integer(1), "priority"))]
+
+  return(config_list)
+
+}
 
 
 
@@ -107,57 +477,6 @@ distinct_cluster_markers <- function(
 
 }
 
-
-#' Build broad marker configuration
-#'
-#' specific list structure required for annotation or scoring functions.
-#' It assigns priorities, default expression thresholds, and co-expression requirements
-#' to each cell type category.
-#'
-#' @param marker_list A named list where names are cell types (e.g., "T_cells", "B_cells")
-#'   and values are character vectors of gene markers.
-#' @param priority_order A character vector defining the hierarchy of cell types.
-#'   Categories appearing earlier in this vector are assigned a lower numeric priority score
-#'   (1 = highest priority).
-#' @param default_threshold Numeric. The default expression detection threshold. Default is 0.1.
-#' @param default_coexp Numeric/Integer. The minimum number of markers required to be
-#'   co-expressed. Default is 1.
-#'
-#' @return A named list of configuration lists. Each element contains:
-#' \itemize{
-#'   \item \code{markers}: Vector of genes.
-#'   \item \code{expr_threshold}: The threshold set.
-#'   \item \code{coexp_min}: The co-expression minimum.
-#'   \item \code{priority}: Integer rank based on \code{priority_order}.
-#' }
-#' @keywords internal
-build_broad_marker_config <- function(
-    marker_list,
-    priority_order,
-    default_threshold = 0.1,
-    default_coexp = 1
-) {
-
-  if (!all(priority_order %in% names(marker_list))) {
-    missing <- setdiff(priority_order, names(marker_list))
-    cli::cli_abort("Priority categories {.val {missing}} not found in the input marker list.")
-  }
-
-  config_list <- lapply(names(marker_list), function(cat_name) {
-
-    prio_rank <- match(cat_name, priority_order, nomatch = length(priority_order) + 1)
-
-    list(
-      markers        = as.vector(marker_list[[cat_name]], mode = "character"),
-      expr_threshold = default_threshold,
-      coexp_min      = default_coexp,
-      priority       = prio_rank
-    )
-  })
-
-  names(config_list) <- names(marker_list)
-  return(config_list)
-}
 
 
 

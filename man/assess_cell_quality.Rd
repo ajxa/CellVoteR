@@ -2,77 +2,112 @@
 % Please edit documentation in R/qc-assess_quality.R
 \name{assess_cell_quality}
 \alias{assess_cell_quality}
-\title{Assess cell quality metrics for single-cell data}
+\title{Assess Cell Quality Metrics}
 \usage{
 assess_cell_quality(
-  object,
+  sce,
   check_feature_groups = NULL,
   min_cells_per_sample = 100,
   min_features = 100,
   nmads = 3,
   sample_col = NULL,
-  layer = "counts",
+  assay_name = "counts",
   remove_failed_cells = FALSE
 )
 }
 \arguments{
-\item{object}{A Seurat object containing single-cell data.}
+\item{sce}{A \code{\link[SingleCellExperiment]{SingleCellExperiment}} object
+with a \code{counts} assay.}
 
-\item{check_feature_groups}{A named list defining gene groups to check. Each element
-should be a list with \code{features} (vector of gene names) and \code{max_pct}
-(numeric threshold for maximum percentage). If \code{NULL} (default), attempts to
-auto-detect mitochondrial (\verb{^MT-}) and ribosomal (\verb{^RP[SL]}) genes using
+\item{check_feature_groups}{A named list defining gene groups to check.
+Each element must be a list with \code{features} (character vector of
+gene names) and \code{max_pct} (numeric threshold for maximum
+percentage). If \code{NULL} (default), auto-detects mitochondrial
+(\code{^MT-}) and ribosomal (\code{^RP[SL]}) genes via
 \code{\link{find_qc_features}}.}
 
-\item{min_cells_per_sample}{Integer. Minimum number of cells required per sample
-for that sample's cells to be retained (default: 100). Requires \code{sample_col} to operate.}
+\item{min_cells_per_sample}{Integer scalar. Minimum number of cells
+required per sample for that sample's cells to be retained. Requires
+\code{sample_col} to operate. Defaults to \code{100}.}
 
-\item{min_features}{Integer. Minimum number of detected features (genes) required
-for a cell to pass QC (default: 100).}
+\item{min_features}{Integer scalar. Minimum number of detected genes
+required for a cell to pass QC. Defaults to \code{100}.}
 
-\item{nmads}{Numeric. Number of median absolute deviations (MADs) below the median
-log-transformed library size to set the adaptive low-count threshold (default: 3).
-Used to generate the \code{pass_adaptive_counts} metric but does not strictly filter
-unless manually enforced downstream.}
+\item{nmads}{Numeric scalar. Number of median absolute deviations below
+the median log-transformed library size to set the adaptive low-count
+threshold. Stored for reference but not included in the pass/fail vote.
+Defaults to \code{3}.}
 
-\item{sample_col}{Character vector or factor of the same length as the number of cells,
-indicating the sample ID for each cell. If \code{NULL}, all cells are treated as a single sample.}
+\item{sample_col}{Character scalar naming a column in \code{colData(sce)}
+containing sample identifiers, or a character/factor vector of the same
+length as the number of cells. If \code{NULL}, all cells are treated as
+a single sample.}
 
-\item{layer}{Character. The assay layer to use for calculating counts (default: "counts").}
+\item{assay_name}{Character scalar. Name of the assay to use. Defaults to
+\code{"counts"}.}
 
-\item{remove_failed_cells}{Logical. If \code{TRUE}, subsets the returned object to keep only
-cells that passed all QC checks (\code{QC_PASS == TRUE}). Default is \code{FALSE}.}
+\item{remove_failed_cells}{Logical. If \code{TRUE}, subsets the returned
+object to retain only cells with \code{QC_PASS == TRUE}. Defaults to
+\code{FALSE}.}
 }
 \value{
-A Seurat object with updated metadata columns:
-\itemize{
-\item \code{sc_n_features}: Number of features detected per cell.
-\item \code{sc_n_counts}: Total UMI counts per cell.
-\item \code{pass_min_features}: Logical, TRUE if cell exceeds \code{min_features}.
-\item \code{sc_adaptive_threshold}: The calculated low-count threshold for that cell.
-\item \code{pass_adaptive_counts}: Logical, TRUE if cell counts exceed adaptive threshold.
-\item \code{pct_[group]}: Percentage of counts belonging to specific feature groups (e.g., \code{pct_mito}).
-\item \code{pass_max_[group]}: Logical, TRUE if percentage is below \code{max_pct} for that group.
-\item \code{QC_PASS}: Logical, TRUE if the cell passed ALL active checks (features, groups, sample size).
+The input SCE with additional columns in \code{colData()}:
+\describe{
+\item{\code{sc_n_features}}{Number of detected genes per cell.}
+\item{\code{sc_n_counts}}{Total UMI counts per cell.}
+\item{\code{pass_min_features}}{Logical. \code{TRUE} if cell exceeds
+\code{min_features}.}
+\item{\code{sc_adaptive_threshold}}{The computed low-count threshold.}
+\item{\code{pass_adaptive_counts}}{Logical. \code{TRUE} if cell counts
+exceed the adaptive threshold.}
+\item{\code{pct_[group]}}{Percentage of counts from each feature group.}
+\item{\code{pass_max_[group]}}{Logical. \code{TRUE} if percentage is
+below \code{max_pct} for that group.}
+\item{\code{sc_sample_id}}{Sample identity for each cell.}
+\item{\code{pass_min_cells_sample}}{Logical. \code{TRUE} if cell
+belongs to a sample meeting \code{min_cells_per_sample}.}
+\item{\code{QC_PASS}}{Logical. \code{TRUE} if the cell passed all
+active checks.}
 }
 }
 \description{
-Calculates comprehensive quality control (QC) metrics for a Seurat object,
-including feature counts, library size, and specific gene group percentages
-(e.g., mitochondrial or ribosomal genes). Supports filtering based on minimum
-features, adaptive thresholds for library size, and user-defined feature groups.
+Calculates comprehensive quality control (QC) metrics for a
+\code{\link[SingleCellExperiment]{SingleCellExperiment}} object, including
+feature counts, library size, and specific gene group percentages (e.g.
+mitochondrial or ribosomal genes). Supports filtering based on minimum
+features, adaptive thresholds for library size, and user-defined feature
+groups.
 }
+\section{QC strategy}{
+
+Each cell is assessed against multiple independent criteria. A cell must
+pass \strong{all} active checks to receive \code{QC_PASS = TRUE}:
+\enumerate{
+\item Minimum detected features (\code{min_features}).
+\item Feature group percentage thresholds (e.g. mitochondrial < 20\\%).
+\item Minimum cells per sample (\code{min_cells_per_sample}).
+}
+An adaptive library-size threshold is also computed and stored for
+reference but is \strong{not} included in the pass/fail vote by default.
+}
+
 \examples{
 \dontrun{
 # Basic usage with auto-detection
-seu <- assess_cell_quality(seu, remove_failed_cells = TRUE)
+sce <- assess_cell_quality(sce, remove_failed_cells = TRUE)
 
-# Custom usage with specific groups
+# Custom feature groups
 groups <- list(
-  mito = list(features = c("MT-ND1", "MT-CO1"), max_pct = 15),
+  mito   = list(features = c("MT-ND1", "MT-CO1"), max_pct = 15),
   stress = list(features = c("JUN", "FOS"), max_pct = 5)
 )
-seu <- assess_cell_quality(seu, check_feature_groups = groups, min_features = 200)
+sce <- assess_cell_quality(sce,
+  check_feature_groups = groups,
+  min_features = 200
+)
+
+# With per-sample filtering using a colData column
+sce <- assess_cell_quality(sce, sample_col = "patient_id")
 }
 
 }

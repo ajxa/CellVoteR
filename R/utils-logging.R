@@ -159,7 +159,12 @@ print_h2 <- function(text,
     )
   )
 
-  cli::cli_rule(left = left_label, right = right_label)
+  escape_cli_braces <- function(x) gsub("\\{", "{{", gsub("\\}", "}}", x))
+
+  cli::cli_rule(
+    left = escape_cli_braces(left_label),
+    right = escape_cli_braces(right_label)
+    )
 
   cli::cli_end(div_id)
 }
@@ -251,75 +256,124 @@ print_inline_vec <- function(counts,
 
 #' Print a styled alert message
 #'
-#' A flexible wrapper for \code{cli} alert functions. It allows you to dispatch
-#' different alert types (success, danger, warning, info) using shorthand codes,
-#' while simultaneously controlling text color and font face (bold/italic).
+#' A flexible wrapper for \code{cli} alert functions that uses \code{cli}'s
+#' theming system for consistent styling. Supports glue-style interpolation
+#' including \code{cli} in-line text formatting for the following:
+#' \code{{.val ...}}; \code{{.arg ...}}; \code{{.field ...}} and \code{{.path ...}}.
+#' Moreover, each of these in-line values is rendered in a
+#' distinct highlight color (defaulting to \code{"grey98"}),
+#' making it easy to draw attention to specific variables or values within the message.
+#' The alert type controls the leading icon, while the base text color and font face
+#' can be customized for further emphasis.
 #'
-#' @param text Character string. The message to display.
-#' @param type Character string. The type of alert icon to display. Options:
-#'   \itemize{
-#'     \item \code{"s"}: Success (Green Tick)
-#'     \item \code{"d"}: Danger (Red Cross)
-#'     \item \code{"w"}: Warning (Orange Exclamation)
-#'     \item \code{"i"}: Info (Blue/Cyan 'i') - \emph{Default}
-#'     \item Any other value defaults to a generic alert (Arrow).
+#'
+#' @param text Character string. The message to display. Supports \code{cli}
+#'   glue-style interpolation and inline markup (e.g. \code{{.val x}},
+#'   \code{{.emph x}}, \code{{?singular/plural}}).
+#' @param type Character string. Alert type controlling the leading icon:
+#'   \describe{
+#'     \item{\code{"s"}}{Success (green tick)}
+#'     \item{\code{"d"}}{Danger (red cross)}
+#'     \item{\code{"w"}}{Warning (orange exclamation)}
+#'     \item{\code{"i"}}{Info (blue/cyan 'i')}
+#'     \item{\code{"n"}}{Plain text, no icon (default)}
 #'   }
-#' @param face Character string. The font face styling code. Options:
-#'   \itemize{
-#'     \item \code{"n"}: Normal (Plain) - \emph{Default}
-#'     \item \code{"b"}: Bold
-#'     \item \code{"i"}: Italic
-#'     \item \code{"bi"}: Bold Italic
-#'  }
-#' @param color Character string. The color of the text. Supports standard names
-#'   (e.g., "red") or hex codes. Defaults to \code{"grey80"}.
+#'   Any other value falls back to a generic alert (arrow).
+#' @param face Character string. Font face applied to the base text:
+#'   \describe{
+#'     \item{\code{"n"}}{Normal / plain (default)}
+#'     \item{\code{"b"}}{Bold}
+#'     \item{\code{"i"}}{Italic}
+#'     \item{\code{"bi"}}{Bold italic}
+#'   }
+#' @param color Character string. Base text color applied to the message body.
+#'   Accepts standard color names (e.g. \code{"red"}) or hex codes (e.g.
+#'   \code{"#FF5733"}). Defaults to \code{"grey80"}.
+#' @param highlight_color Character string. Color applied to \code{{.val ...}};
+#' \code{{.arg ...}}; \code{{.field ...}} and \code{{.path ...}} spans.
+#' Each of the aforementioned spans are rendered using their default themes:
+#' only the colour is changed according to this argument which accepts the same
+#'   values as \code{color} and defaults to \code{"grey98"}.
+#' @param .envir Environment used for glue interpolation. Defaults to the
+#'   caller's environment so that variables referenced in \code{text} are
+#'   resolved from the calling scope.
 #'
+#' @details
+#' Styling is applied via \code{\link[cli]{start_app}} themes rather than
+#' pre-wrapping the text in ANSI codes. This ensures that \code{cli}'s own
+#' inline markup (\code{{.val}}, \code{{.emph}}, etc.) composes correctly
+#' with the user-specified base color and face.
 #'
-#' @return No return value; prints a formatted message to the console.
-#' @importFrom cli make_ansi_style cli_alert_success cli_alert_danger cli_alert_warning cli_alert_info cli_alert style_bold style_italic
+#' The \code{"n"} (plain) alert type uses \code{\link[cli]{cli_text}} under
+#' the \code{body} theme class, producing output with no icon and no leading
+#' whitespace — visually identical to the other alert types minus the bullet
+#' character.
+#'
+#' @return Invisible \code{NULL}; called for its side effect of printing a
+#'   formatted message to the console.
 #'
 #' @examples
 #' \dontrun{
-#'   # Standard Info (Grey)
+#'   # Plain message — no icon, default grey
 #'   print_alert("Starting process...")
 #'
-#'   # Success with Bold Green Text
-#'   print_alert("Compilation Complete", type = "s", color = "green", face = "b")
+#'   # Highlight interpolated values
+#'   n <- 5
+#'   print_alert("Loaded {.val {n}} sample{?s}", type = "s", color = "green")
 #'
-#'   # Warning with Italic Orange Text
-#'   print_alert("Disk space low", type = "w", color = "orange", face = "i")
+#'   # Warning with italic text and custom highlight
+#'   print_alert("Column {.val {col}} has missing values",
+#'               type = "w", color = "orange", face = "i",
+#'               highlight_color = "yellow")
 #'
-#'   # Critical Error (Bold Italic Red)
-#'   print_alert("Fatal Exception", type = "d", color = "red", face = "bi")
+#'   # Bold italic danger alert
+#'   print_alert("Fatal: {.val {msg}}", type = "d", color = "red", face = "bi")
 #' }
+#'
+#' @importFrom cli start_app stop_app cli_text cli_alert cli_alert_success
+#'   cli_alert_danger cli_alert_warning cli_alert_info
 #' @export
 print_alert <- function(text,
-                        type = "i",
+                        type = "n",
                         face = "n",
-                        color = "grey80"
-                        ) {
+                        color = "grey80",
+                        highlight_color = "grey98",
+                        .envir = parent.frame()) {
 
-  txt_style <- cli::make_ansi_style(color)
+  base_style <- list(
+    color         = color,
+    `font-style`  = if (face %in% c("i", "bi")) "italic",
+    `font-weight` = if (face %in% c("b", "bi")) "bold"
+  )
 
-  styled_msg <- txt_style(text)
+  theme <- list(
+    .alert             = base_style,
+    `.alert-success`   = base_style,
+    `.alert-danger`    = base_style,
+    `.alert-warning`   = base_style,
+    `.alert-info`      = base_style,
+    body               = base_style,
+    span.val           = list(color = highlight_color, fmt = function(x) x),
+    span.arg           = list(color = highlight_color, fmt = function(x) x),
+    span.field         = list(color = highlight_color, fmt = function(x) x),
+    span.path          = list(color = highlight_color, fmt = function(x) x)
+  )
 
-  out_message <- switch(face,
-                        "b"  = cli::style_bold(styled_msg),
-                        "i"  = cli::style_italic(styled_msg),
-                        "bi" = cli::style_bold(cli::style_italic(styled_msg)),
-                        "n"  = styled_msg,
-                        styled_msg
-                        )
+  app <- cli::start_app(theme = theme, .auto_close = FALSE)
+  on.exit(cli::stop_app(app), add = TRUE)
 
-  switch(type,
-         "s" = cli::cli_alert_success(out_message),
-         "d" = cli::cli_alert_danger(out_message),
-         "w" = cli::cli_alert_warning(out_message),
-         "i" = cli::cli_alert_info(out_message),
-         cli::cli_alert(out_message)
-         )
+  dispatch <- switch(type,
+                     "s" = cli::cli_alert_success,
+                     "d" = cli::cli_alert_danger,
+                     "w" = cli::cli_alert_warning,
+                     "i" = cli::cli_alert_info,
+                     "n" = cli::cli_text,
+                     cli::cli_alert
+  )
+
+  dispatch(text, .envir = .envir)
+  invisible(NULL)
 }
-
 
 
 
@@ -369,4 +423,52 @@ step_fmt <- function(text, color = "grey60", face = "n") {
          "n"  = styled_msg,
          styled_msg # Fallback
   )
+}
+
+
+
+#' Silently evaluate an R expression
+#'
+#' Evaluates an expression while suppressing all messages, warnings, and console output.
+#' Useful for running noisy functions without cluttering the console.
+#'
+#' @param expr An R expression to evaluate.
+#'
+#' @return The result of the evaluated expression.
+#' @keywords internal
+.hush <- function(expr) {
+  trash <- utils::capture.output({
+    res <- suppressWarnings(
+      suppressMessages(expr)
+    )
+  })
+  return(res)
+}
+
+
+#' Check for missing arguments in parent call
+#'
+#' Checks if any specific arguments are missing in the function calling this helper.
+#' This looks into the `parent.frame()` to inspect the arguments of the caller.
+#'
+#' @param required_args A character vector of argument names to check for presence.
+#'
+#' @return NULL. Throws an error if any required arguments are missing.
+#' @keywords internal
+.check_missing_args <- function(required_args) {
+  env <- parent.frame()
+
+  is_missing <- vapply(required_args, function(arg) {
+    eval(call("missing", as.name(arg)), envir = env)
+  }, logical(1))
+
+  if (any(is_missing)) {
+    missing_names <- required_args[is_missing]
+
+    cli::cli_abort(c(
+      "x" = "The following required arguments are missing:",
+      "*" = "{.val {missing_names}}",
+      "i" = "Please provide these values in the function call."
+    ))
+  }
 }

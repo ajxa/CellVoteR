@@ -5,43 +5,46 @@
 \title{Auto-detect QC feature groups}
 \usage{
 find_qc_features(
-  object,
+  sce,
   group_configs = list(mito = list(pattern = "^MT-", max_pct = 20), ribo = list(pattern =
     "^RP[SL]", max_pct = 50))
 )
 }
 \arguments{
-\item{object}{A Seurat object.}
+\item{sce}{A \code{\link[SingleCellExperiment]{SingleCellExperiment}} object.}
 
-\item{group_configs}{A named list of configurations. Each element must be a list containing:
-\itemize{
-\item \code{pattern}: A regex string to match gene names (e.g., "^MT-").
-\item \code{max_pct}: The maximum allowed percentage for this group (used later in QC).
+\item{group_configs}{A named list of configurations. Each element must be a
+list containing:
+\describe{
+\item{pattern}{A regex string to match gene names (e.g. \code{"^MT-"}).}
+\item{max_pct}{Numeric scalar. The maximum allowed percentage for this
+group, carried forward for use in QC filtering.}
 }
 Defaults to mitochondrial (\verb{^MT-}, 20\%) and ribosomal (\verb{^RP[SL]}, 50\%) genes.}
 }
 \value{
 A named list where each element contains:
-\itemize{
-\item \code{features}: A character vector of matching gene names found in the object.
-\item \code{max_pct}: The threshold percentage carried over from the config.
+\describe{
+\item{features}{Character vector of matching gene names found in the
+object. Empty character vector if no genes matched.}
+\item{max_pct}{Numeric threshold carried over from the config.}
 }
-Returns an empty list structure for groups where no genes were found (with a CLI info message).
 }
 \description{
-Scans the rownames of a Seurat object to identify genes matching specific patterns
-(e.g., mitochondrial or ribosomal) and formats them for use in quality control checks.
+Scans the row names of a
+\code{\link[SingleCellExperiment]{SingleCellExperiment}} object to identify
+genes matching specific patterns (e.g. mitochondrial or ribosomal) and
+formats them for use in downstream quality control filtering.
 }
 \examples{
 \dontrun{
 # Default usage
-qc_feats <- find_qc_features(seu)
+qc_feats <- find_qc_features(sce)
 
-# Custom patterns (e.g., hemoglobin)
-custom_config <- list(
-  hb = list(pattern = "^HB[A|B]", max_pct = 5)
-)
-qc_feats <- find_qc_features(seu, group_configs = custom_config)
+# Custom patterns (e.g. hemoglobin genes)
+qc_feats <- find_qc_features(sce, group_configs = list(
+  hb = list(pattern = "^HB[AB]", max_pct = 5)
+))
 }
 
 }

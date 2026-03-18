@@ -1,0 +1,988 @@
+type	category	label	marker
+broad	immune		PTPRC
+broad	vasculature		CDH5
+broad	vasculature		VWF
+fine	immune	B cell	CD79A
+fine	immune	B cell	CD79B
+fine	immune	B cell	CD37
+fine	immune	B cell	MS4A1
+fine	immune	B cell	BANK1
+fine	immune	B cell	BLK
+fine	immune	B cell	VPREB3
+fine	immune	B cell	RP5-887A10.1
+fine	immune	DC	FCER1A
+fine	immune	DC	PLD4
+fine	immune	DC	JAML
+fine	immune	DC	PKIB
+fine	immune	DC	CTSH
+fine	immune	Mast cell	TPSAB1
+fine	immune	Mast cell	TPSB2
+fine	immune	Mast cell	CPA3
+fine	immune	Mast cell	HPGD
+fine	immune	Mast cell	HPGDS
+fine	immune	Mast cell	HDC
+fine	immune	Mast cell	RGS13
+fine	immune	Mast cell	MAOB
+fine	immune	Mast cell	KRT1
+fine	immune	Mast cell	AC004791.2
+fine	immune	Mast cell	SLC45A3
+fine	immune	Mast cell	SVOPL
+fine	immune	Mast cell	CTSG
+fine	immune	Mast cell	KIT
+fine	immune	Mast cell	VWA5A
+fine	immune	Mast cell	ALDH1A1
+fine	immune	Mast cell	SDPR
+fine	immune	Mast cell	MS4A2
+fine	immune	Mast cell	C1orf186
+fine	immune	Mast cell	GATA2
+fine	immune	Mast cell	LTC4S
+fine	immune	Mast cell	RP11-354E11.2
+fine	immune	Mast cell	SLC18A2
+fine	immune	Mast cell	LAPTM4A
+fine	immune	Mast cell	ANXA1
+fine	immune	Mast cell	SAMSN1
+fine	immune	Monocyte	LYZ
+fine	immune	Monocyte	VCAN
+fine	immune	Monocyte	FCN1
+fine	immune	Monocyte	TIMP1
+fine	immune	Monocyte	S100A9
+fine	immune	Monocyte	S100A12
+fine	immune	Monocyte	S100A6
+fine	immune	Monocyte	EREG
+fine	immune	Monocyte	S100A8
+fine	immune	Monocyte	LINC01272
+fine	immune	Monocyte	TYROBP
+fine	immune	Monocyte	CFD
+fine	immune	Monocyte	SERPINA1
+fine	immune	Monocyte	NEAT1
+fine	immune	NK cell	CD7
+fine	immune	NK cell	CCL5
+fine	immune	NK cell	KLRB1
+fine	immune	NK cell	KLRC1
+fine	immune	NK cell	HOPX
+fine	immune	NK cell	GZMB
+fine	immune	NK cell	APOBEC3G
+fine	immune	NK cell	KRT86
+fine	immune	NK cell	KLRD1
+fine	immune	NK cell	MATK
+fine	immune	NK cell	IL2RB
+fine	immune	NK cell	HCST
+fine	immune	NK cell	XCL2
+fine	immune	NK cell	XCL1
+fine	immune	NK cell	EVL
+fine	immune	NK cell	GNLY
+fine	immune	NK cell	TRDC
+fine	immune	NK cell	CD247
+fine	immune	NK cell	CD2
+fine	immune	NK cell	LCK
+fine	immune	NK cell	PRF1
+fine	immune	NK cell	CST7
+fine	immune	NK cell	CTSW
+fine	immune	NK cell	STMN1
+fine	immune	NK cell	GZMA
+fine	immune	NK cell	NKG7
+fine	immune	T cell	IL32
+fine	immune	T cell	SIT1
+fine	immune	T cell	CD3D
+fine	immune	T cell	GIMAP7
+fine	immune	T cell	SPOCK2
+fine	immune	T cell	IL7R
+fine	immune	T cell	TRBC1
+fine	immune	T cell	TRBC2
+fine	immune	T cell	LCK
+fine	immune	T cell	CCL5
+fine	immune	T cell	CD3G
+fine	immune	T cell	CD3E
+fine	immune	T cell	CD2
+fine	immune	T cell	TRAC
+fine	immune	T cell	CD27
+fine	immune	T cell	LTB
+fine	immune	Macrophage	FTL
+fine	immune	Macrophage	C1QC
+fine	immune	Macrophage	APOE
+fine	immune	Macrophage	C1QB
+fine	immune	Macrophage	C1QA
+fine	immune	Macrophage	APOC1
+fine	immune	Macrophage	TREM2
+fine	immune	Macrophage	VSIG4
+fine	immune	Macrophage	FCGBP
+fine	immune	Macrophage	PLTP
+fine	immune	Macrophage	A2M
+fine	immune	Macrophage	AIF1
+fine	immune	Macrophage	GPNMB
+fine	immune	Macrophage	NPC2
+fine	immune	Macrophage	MT2A
+fine	immune	Macrophage	MT1E
+fine	immune	Macrophage	CD9
+fine	immune	Macrophage	SAT1
+fine	immune	Macrophage	RP11-552D4.1
+fine	immune	Macrophage	SPP1
+fine	immune	Macrophage	ITGA4
+fine	immune	Macrophage	TGFBI
+fine	immune	Macrophage	LGALS3BP
+fine	immune	Macrophage	IFITM2
+fine	immune	Macrophage	IFITM3
+fine	immune	Macrophage	TAGLN2
+fine	immune	Macrophage	FPR3
+fine	immune	Macrophage	KYNU
+fine	immune	Macrophage	S100A11
+fine	immune	Macrophage	S100A6
+fine	immune	Macrophage	TGM2
+fine	immune	Macrophage	EMILIN2
+fine	immune	Macrophage	GDA
+fine	immune	Macrophage	HP
+fine	immune	Macrophage	SELL
+fine	immune	Macrophage	CD163
+fine	immune	Macrophage	MRC1
+fine	immune	Macrophage	LYVE1
+fine	immune	Macrophage	SIGLEC1
+fine	immune	Microglia	TMEM119
+fine	immune	Microglia	TREM2
+fine	immune	Microglia	CX3CR1
+fine	immune	Microglia	P2RY12
+fine	immune	Microglia	ALOX5AP
+fine	immune	Microglia	ADORA3
+fine	immune	Microglia	IGSF6
+fine	immune	Microglia	ACY3
+fine	immune	Microglia	RASAL3
+fine	immune	Microglia	TBXAS1
+fine	immune	Microglia	SASH3
+fine	immune	Microglia	SUSD3
+fine	immune	Microglia	P2RY13
+fine	immune	Microglia	TMIGD3
+fine	immune	Microglia	GPR34
+fine	immune	Microglia	OLFML3
+fine	immune	Microglia	SELPLG
+fine	immune	Microglia	SPARC
+fine	immune	Microglia	FOS
+fine	immune	Microglia	SIGLEC10
+fine	immune	Microglia	C3
+fine	immune	Microglia	SLC2A5
+fine	immune	Microglia	SLC1A3
+fine	immune	Microglia	PF4
+fine	immune	Microglia	BIN1
+fine	immune	Microglia	RNASET2
+fine	immune	Microglia	RGS10
+fine	immune	Microglia	SGK1
+fine	immune	Microglia	F13A1
+fine	immune	Microglia	IFIT3
+fine	immune	Microglia	MCM5
+fine	immune	Microglia	DAB2
+fine	immune	Microglia	IFNGR1
+fine	immune	Microglia	APBB1IP
+fine	immune	Microglia	LILRB4
+fine	immune	Microglia	CYFIP1
+fine	immune	Microglia	CXCR2
+fine	immune	Microglia	SCD2
+fine	immune	Microglia	PSAT1
+fine	immune	Microglia	CSF2RA
+fine	immune	Microglia	CSF1
+fine	immune	Microglia	CSF1R
+fine	immune	Microglia	CRYBB1
+fine	immune	Microglia	FCRLS
+fine	immune	Microglia	MAFB
+fine	immune	Microglia	PMEPA1
+fine	immune	Microglia	CD14
+fine	immune	Microglia	LPL
+fine	immune	Microglia	CST7
+fine	normal	Astrocyte	SLC1A2
+fine	normal	Astrocyte	SPARCL1
+fine	normal	Astrocyte	CPE
+fine	normal	Astrocyte	ALDOC
+fine	normal	Astrocyte	CLU
+fine	normal	Astrocyte	SLC1A3
+fine	normal	Astrocyte	AQP4
+fine	normal	Astrocyte	ATP1A2
+fine	normal	Astrocyte	GLUL
+fine	normal	Astrocyte	ETNPPL
+fine	normal	Astrocyte	NTRK2
+fine	normal	Astrocyte	SERPINA3
+fine	normal	Astrocyte	AGT
+fine	normal	Astrocyte	SERPINE2
+fine	normal	Astrocyte	ADGRV1
+fine	normal	Astrocyte	PLPP3
+fine	normal	Astrocyte	MGST1
+fine	normal	Astrocyte	GPM6A
+fine	normal	Astrocyte	DKK3
+fine	normal	Astrocyte	FAM107A
+fine	normal	Astrocyte	TSPAN7
+fine	normal	Astrocyte	GPRC5B
+fine	normal	Astrocyte	ITM2C
+fine	normal	Astrocyte	WIF1
+fine	normal	Astrocyte	GJA1
+fine	normal	Astrocyte	NDRG2
+fine	normal	Astrocyte	CXCL8
+fine	normal	Astrocyte	IGFBP7
+fine	normal	Astrocyte	F3
+fine	normal	Astrocyte	CLDN10
+fine	normal	Astrocyte	ATP1B2
+fine	normal	Astrocyte	CST3
+fine	normal	Astrocyte	AHCYL1
+fine	normal	Astrocyte	CSRP1
+fine	normal	Astrocyte	TTYH1
+fine	normal	Astrocyte	TPD52L1
+fine	normal	Astrocyte	DTNA
+fine	normal	Astrocyte	GJB6
+fine	normal	Astrocyte	PTGDS
+fine	normal	Astrocyte	GRAMD2B
+fine	normal	Astrocyte	GPR37L1
+fine	normal	Astrocyte	HTRA1
+fine	normal	Astrocyte	SCG3
+fine	normal	Astrocyte	CNN3
+fine	normal	Astrocyte	S100B
+fine	normal	Astrocyte	SLC25A18
+fine	normal	Astrocyte	MGLL
+fine	normal	Astrocyte	TSC22D1
+fine	normal	Astrocyte	TUBB2B
+fine	normal	Astrocyte	GPM6B
+fine	normal	Oligodendrocyte	PLP1
+fine	normal	Oligodendrocyte	PTGDS
+fine	normal	Oligodendrocyte	PPP1R14A
+fine	normal	Oligodendrocyte	MBP
+fine	normal	Oligodendrocyte	TF
+fine	normal	Oligodendrocyte	CNP
+fine	normal	Oligodendrocyte	QDPR
+fine	normal	Oligodendrocyte	CLDND1
+fine	normal	Oligodendrocyte	MAG
+fine	normal	Oligodendrocyte	APLP1
+fine	normal	Oligodendrocyte	SELENOP
+fine	normal	Oligodendrocyte	CLDN11
+fine	normal	Oligodendrocyte	CRYAB
+fine	normal	Oligodendrocyte	APOD
+fine	normal	Oligodendrocyte	ERMN
+fine	normal	Oligodendrocyte	CNDP1
+fine	normal	Oligodendrocyte	TMEM144
+fine	normal	Oligodendrocyte	S100B
+fine	normal	Oligodendrocyte	S100A1
+fine	normal	Oligodendrocyte	GSN
+fine	normal	Oligodendrocyte	SCD
+fine	normal	Oligodendrocyte	TUBB4A
+fine	normal	Oligodendrocyte	GPM6B
+fine	normal	Oligodendrocyte	KLK6
+fine	normal	Oligodendrocyte	SLC44A1
+fine	normal	Oligodendrocyte	RNASE1
+fine	normal	Oligodendrocyte	FEZ1
+fine	normal	Oligodendrocyte	SEPTIN4
+fine	normal	Oligodendrocyte	MOG
+fine	normal	Oligodendrocyte	ENPP2
+fine	normal	Oligodendrocyte	MOBP
+fine	normal	Oligodendrocyte	EDIL3
+fine	normal	Oligodendrocyte	CAMK2N1
+fine	normal	Oligodendrocyte	ATP1B1
+fine	normal	Oligodendrocyte	SLAIN1
+fine	normal	Oligodendrocyte	PLAAT3
+fine	normal	Oligodendrocyte	LARP6
+fine	normal	Oligodendrocyte	CA2
+fine	normal	Oligodendrocyte	ABCA2
+fine	normal	Oligodendrocyte	LHPP
+fine	normal	Oligodendrocyte	NKX6-2
+fine	normal	Oligodendrocyte	ANLN
+fine	normal	Oligodendrocyte	PIP4K2A
+fine	normal	Oligodendrocyte	PLEKHB1
+fine	normal	Oligodendrocyte	PLLP
+fine	normal	Oligodendrocyte	AMER2
+fine	normal	Oligodendrocyte	EFHD1
+fine	normal	Oligodendrocyte	MAL
+fine	normal	Oligodendrocyte	TTLL7
+fine	normal	Oligodendrocyte	CNTN2
+fine	normal	OPC normal	APOD
+fine	normal	OPC normal	VCAN
+fine	normal	OPC normal	ALDOC
+fine	normal	OPC normal	HTRA1
+fine	normal	OPC normal	BCAN
+fine	normal	OPC normal	TSPAN7
+fine	normal	OPC normal	PLLP
+fine	normal	OPC normal	SCD5
+fine	normal	OPC normal	MEG3
+fine	normal	OPC normal	CDR1
+fine	normal	OPC normal	PTPRZ1
+fine	normal	OPC normal	SPOCK1
+fine	normal	OPC normal	TNR
+fine	normal	OPC normal	DNER
+fine	normal	OPC normal	PDZD2
+fine	normal	OPC normal	MEGF11
+fine	normal	OPC normal	NRCAM
+fine	normal	OPC normal	TSC22D1
+fine	normal	OPC normal	GPR17
+fine	normal	OPC normal	SLC22A17
+fine	normal	OPC normal	SULF2
+fine	normal	OPC normal	EPN2
+fine	normal	OPC normal	OLIG1
+fine	normal	OPC normal	PDGFRA
+fine	normal	OPC normal	GPRC5B
+fine	normal	OPC normal	SLC1A2
+fine	normal	OPC normal	SEMA5A
+fine	normal	OPC normal	ATCAY
+fine	normal	OPC normal	ZNF462
+fine	normal	OPC normal	SERPINE2
+fine	normal	OPC normal	CSPG4
+fine	normal	OPC normal	NCAM1
+fine	normal	OPC normal	CD82
+fine	normal	OPC normal	SNX22
+fine	normal	OPC normal	OMG
+fine	normal	OPC normal	FXYD6
+fine	normal	OPC normal	HIP1R
+fine	normal	OPC normal	SDC3
+fine	normal	OPC normal	GPR37L1
+fine	normal	OPC normal	GPM6A
+fine	normal	OPC normal	CHL1
+fine	normal	OPC normal	LHFPL3
+fine	normal	OPC normal	SMOC1
+fine	normal	OPC normal	GRIA2
+fine	normal	OPC normal	SLC6A1
+fine	normal	OPC normal	MTSS1
+fine	normal	OPC normal	CA10
+fine	normal	OPC normal	MSMO1
+fine	normal	OPC normal	SLC35F1
+fine	normal	OPC normal	THY1
+fine	normal	Neuron	CXCL14
+fine	normal	Neuron	MEG3
+fine	normal	Neuron	CCK
+fine	normal	Neuron	SNAP25
+fine	normal	Neuron	RTN1
+fine	normal	Neuron	CDR1
+fine	normal	Neuron	TMEM130
+fine	normal	Neuron	GAD1
+fine	normal	Neuron	SCG2
+fine	normal	Neuron	ALDOC
+fine	normal	Neuron	TSPAN7
+fine	normal	Neuron	CALB2
+fine	normal	Neuron	SLC6A1
+fine	normal	Neuron	SYNPR
+fine	normal	Neuron	CNTNAP2
+fine	normal	Neuron	NDRG4
+fine	normal	Neuron	SYT1
+fine	normal	Neuron	ENO2
+fine	normal	Neuron	FXYD6
+fine	normal	Neuron	DKK3
+fine	normal	Neuron	NAP1L3
+fine	normal	Neuron	FAIM2
+fine	normal	Neuron	TUBB2A
+fine	normal	Neuron	SPOCK1
+fine	normal	Neuron	SLC22A17
+fine	normal	Neuron	TUBB4A
+fine	normal	Neuron	DNER
+fine	normal	Neuron	UCHL1
+fine	normal	Neuron	SCG5
+fine	normal	Neuron	SYNGR3
+fine	normal	Neuron	RCAN2
+fine	normal	Neuron	RELN
+fine	normal	Neuron	CAMK2B
+fine	normal	Neuron	TAGLN3
+fine	normal	Neuron	THY1
+fine	normal	Neuron	MAP1B
+fine	normal	Neuron	TSC22D1
+fine	normal	Neuron	OLFM1
+fine	normal	Neuron	STMN1
+fine	normal	Neuron	TSPYL2
+fine	normal	Neuron	ATP1B1
+fine	normal	Neuron	CYFIP2
+fine	normal	Neuron	RPH3A
+fine	normal	Neuron	GAD2
+fine	normal	Neuron	MAP1A
+fine	normal	Neuron	PHYHIPL
+fine	normal	Neuron	KIF1A
+fine	normal	Neuron	DPP6
+fine	normal	Neuron	SCN2A
+fine	normal	Neuron	PCLO
+fine	normal	Radial glial	SOX4
+fine	normal	Radial glial	HES1
+fine	normal	Radial glial	H2AZ1
+fine	normal	Radial glial	EMX2
+fine	normal	Radial glial	MIR9-1HG
+fine	normal	Radial glial	H4C3
+fine	normal	Radial glial	HMGB2
+fine	normal	Radial glial	STMN1
+fine	normal	Radial glial	CENPW
+fine	normal	Radial glial	TUBB
+fine	normal	Radial glial	TUBA1A
+fine	normal	Radial glial	LINC01551
+fine	normal	Radial glial	PTTG1
+fine	normal	Radial glial	PCLAF
+fine	normal	Radial glial	CENPF
+fine	normal	Radial glial	HMGB3
+fine	normal	Radial glial	TMSB15A
+fine	normal	Radial glial	KPNA2
+fine	normal	Radial glial	TMEM161B-AS1
+fine	normal	Radial glial	FABP7
+fine	normal	Radial glial	SOX11
+fine	normal	Radial glial	TOP2A
+fine	normal	Radial glial	TUBA1B
+fine	normal	Radial glial	CKS1B
+fine	normal	Radial glial	NUSAP1
+fine	normal	Radial glial	UBE2T
+fine	normal	Radial glial	TAGLN3
+fine	normal	Radial glial	KNOP1
+fine	normal	Radial glial	RBM4
+fine	normal	Radial glial	HSP90AA1
+fine	normal	Radial glial	LIX1
+fine	normal	Radial glial	STMN4
+fine	normal	Radial glial	PEG10
+fine	normal	Radial glial	CSRP2
+fine	normal	Radial glial	CCNB2
+fine	normal	Radial glial	NNAT
+fine	normal	Radial glial	PHGDH
+fine	normal	Radial glial	HMGN2
+fine	normal	Radial glial	CDK1
+fine	normal	Radial glial	BIRC5
+fine	normal	Radial glial	CKS2
+fine	normal	Radial glial	GINS2
+fine	normal	Radial glial	MAP1B
+fine	normal	Radial glial	MSMO1
+fine	normal	Radial glial	TLE4
+fine	normal	Radial glial	ACAT2
+fine	normal	Radial glial	MCM7
+fine	normal	Radial glial	MLLT11
+fine	normal	Radial glial	PCNA
+fine	normal	Radial glial	C3orf14
+fine	immune	Plasma B	IGKC
+fine	immune	Plasma B	IGLC2
+fine	immune	Plasma B	JCHAIN
+fine	immune	Plasma B	IGHM
+fine	immune	Plasma B	MZB1
+fine	immune	Plasma B	XBP1
+fine	immune	Plasma B	PTGDS
+fine	immune	Plasma B	MBP
+fine	immune	Plasma B	DERL3
+fine	immune	Plasma B	PLP1
+fine	immune	Plasma B	CRYAB
+fine	immune	Plasma B	CD79A
+fine	immune	Plasma B	RNASE1
+fine	immune	Plasma B	PIM2
+fine	immune	Plasma B	PLAAT3
+fine	immune	Plasma B	CNP
+fine	immune	Plasma B	LHPP
+fine	immune	Plasma B	CLDND1
+fine	immune	Plasma B	GPM6B
+fine	immune	Plasma B	HERPUD1
+fine	immune	Plasma B	CD38
+fine	immune	Plasma B	CFL2
+fine	immune	Plasma B	TENT5C
+fine	immune	Plasma B	ISG20
+fine	immune	Plasma B	EVI2A
+fine	immune	Plasma B	FCRL5
+fine	immune	Plasma B	CD27
+fine	immune	Plasma B	PMP22
+fine	immune	Plasma B	POU2AF1
+fine	immune	Plasma B	SVIP
+fine	immune	Plasma B	QDPR
+fine	immune	Plasma B	SLAMF7
+fine	immune	Plasma B	SELENOM
+fine	immune	Plasma B	COMMD3
+fine	vasculature	Mural cell	IGFBP7
+fine	vasculature	Mural cell	FN1
+fine	vasculature	Mural cell	SPARC
+fine	vasculature	Mural cell	RGS5
+fine	vasculature	Mural cell	COL4A1
+fine	vasculature	Mural cell	COL1A2
+fine	vasculature	Mural cell	MMP9
+fine	vasculature	Mural cell	NDUFA4L2
+fine	vasculature	Mural cell	TAGLN
+fine	vasculature	Mural cell	CALD1
+fine	vasculature	Mural cell	COL3A1
+fine	vasculature	Mural cell	COL1A1
+fine	vasculature	Mural cell	BGN
+fine	vasculature	Mural cell	COL4A2
+fine	vasculature	Mural cell	ACTA2
+fine	vasculature	Mural cell	DCN
+fine	vasculature	Mural cell	THY1
+fine	vasculature	Mural cell	MIR4435-2HG
+fine	vasculature	Mural cell	ITGB1
+fine	vasculature	Mural cell	CYTOR
+fine	vasculature	Mural cell	TIMP1
+fine	vasculature	Mural cell	MGP
+fine	vasculature	Mural cell	TPM2
+fine	vasculature	Mural cell	MYL9
+fine	vasculature	Mural cell	HIGD1B
+fine	vasculature	Mural cell	UACA
+fine	vasculature	Mural cell	IFITM3
+fine	vasculature	Mural cell	SERPINH1
+fine	vasculature	Mural cell	COL6A1
+fine	vasculature	Mural cell	FSTL1
+fine	vasculature	Mural cell	COL6A2
+fine	vasculature	Mural cell	PDGFRB
+fine	vasculature	Mural cell	LUM
+fine	vasculature	Mural cell	FRZB
+fine	vasculature	Mural cell	NOTCH3
+fine	vasculature	Mural cell	PLXDC1
+fine	vasculature	Mural cell	COL5A2
+fine	vasculature	Mural cell	TPM4
+fine	vasculature	Mural cell	COL18A1
+fine	vasculature	Mural cell	PCOLCE
+fine	vasculature	Mural cell	MCAM
+fine	vasculature	Mural cell	TPM1
+fine	vasculature	Mural cell	NID1
+fine	vasculature	Mural cell	CCN2
+fine	vasculature	Mural cell	IGFBP4
+fine	vasculature	Mural cell	SPARCL1
+fine	vasculature	Mural cell	ITGA1
+fine	vasculature	Mural cell	EPAS1
+fine	vasculature	Mural cell	C11orf96
+fine	vasculature	Mural cell	LAMA4
+fine	vasculature	Endothelial	IGFBP7
+fine	vasculature	Endothelial	CLDN5
+fine	vasculature	Endothelial	SPARC
+fine	vasculature	Endothelial	ITM2A
+fine	vasculature	Endothelial	CCN2
+fine	vasculature	Endothelial	A2M
+fine	vasculature	Endothelial	COL4A1
+fine	vasculature	Endothelial	ANGPT2
+fine	vasculature	Endothelial	CA2
+fine	vasculature	Endothelial	IFI27
+fine	vasculature	Endothelial	GNG11
+fine	vasculature	Endothelial	VWF
+fine	vasculature	Endothelial	COL4A2
+fine	vasculature	Endothelial	RGCC
+fine	vasculature	Endothelial	ESAM
+fine	vasculature	Endothelial	APOLD1
+fine	vasculature	Endothelial	HSPG2
+fine	vasculature	Endothelial	SLC38A5
+fine	vasculature	Endothelial	INSR
+fine	vasculature	Endothelial	SPARCL1
+fine	vasculature	Endothelial	ABCG2
+fine	vasculature	Endothelial	ADGRL4
+fine	vasculature	Endothelial	MFSD2A
+fine	vasculature	Endothelial	TM4SF1
+fine	vasculature	Endothelial	FLT1
+fine	vasculature	Endothelial	EPAS1
+fine	vasculature	Endothelial	EDN1
+fine	vasculature	Endothelial	IFITM3
+fine	vasculature	Endothelial	PECAM1
+fine	vasculature	Endothelial	IGFBP3
+fine	vasculature	Endothelial	TSC22D1
+fine	vasculature	Endothelial	EGFL7
+fine	vasculature	Endothelial	PODXL
+fine	vasculature	Endothelial	CAVIN2
+fine	vasculature	Endothelial	SLC9A3R2
+fine	vasculature	Endothelial	FN1
+fine	vasculature	Endothelial	SPINK8
+fine	vasculature	Endothelial	SLC7A5
+fine	vasculature	Endothelial	RAMP2
+fine	vasculature	Endothelial	SLC2A1
+fine	vasculature	Endothelial	MCAM
+fine	vasculature	Endothelial	ENG
+fine	vasculature	Endothelial	ITGB1
+fine	vasculature	Endothelial	ADGRF5
+fine	vasculature	Endothelial	PCAT19
+fine	vasculature	Endothelial	APLN
+fine	vasculature	Endothelial	C1orf54
+fine	vasculature	Endothelial	STC1
+fine	vasculature	Endothelial	TIMP3
+fine	vasculature	Endothelial	CD93
+fine	cancer	MES2	HILPDA
+fine	cancer	MES2	ADM
+fine	cancer	MES2	DDIT3
+fine	cancer	MES2	NDRG1
+fine	cancer	MES2	HERPUD1
+fine	cancer	MES2	DNAJB9
+fine	cancer	MES2	TRIB3
+fine	cancer	MES2	ENO2
+fine	cancer	MES2	AKAP12
+fine	cancer	MES2	SQSTM1
+fine	cancer	MES2	MT1X
+fine	cancer	MES2	ATF3
+fine	cancer	MES2	NAMPT
+fine	cancer	MES2	NRN1
+fine	cancer	MES2	SLC2A1
+fine	cancer	MES2	BNIP3
+fine	cancer	MES2	LGALS3
+fine	cancer	MES2	INSIG2
+fine	cancer	MES2	IGFBP3
+fine	cancer	MES2	PPP1R15A
+fine	cancer	MES2	VIM
+fine	cancer	MES2	PLOD2
+fine	cancer	MES2	GBE1
+fine	cancer	MES2	SLC2A3
+fine	cancer	MES2	FTL
+fine	cancer	MES2	WARS
+fine	cancer	MES2	ERO1L
+fine	cancer	MES2	XPOT
+fine	cancer	MES2	HSPA5
+fine	cancer	MES2	GDF15
+fine	cancer	MES2	ANXA2
+fine	cancer	MES2	EPAS1
+fine	cancer	MES2	LDHA
+fine	cancer	MES2	P4HA1
+fine	cancer	MES2	SERTAD1
+fine	cancer	MES2	PFKP
+fine	cancer	MES2	PGK1
+fine	cancer	MES2	EGLN3
+fine	cancer	MES2	SLC6A6
+fine	cancer	MES2	CA9
+fine	cancer	MES2	BNIP3L
+fine	cancer	MES2	RPL21
+fine	cancer	MES2	TRAM1
+fine	cancer	MES2	UFM1
+fine	cancer	MES2	ASNS
+fine	cancer	MES2	GOLT1B
+fine	cancer	MES2	ANGPTL4
+fine	cancer	MES2	SLC39A14
+fine	cancer	MES2	CDKN1A
+fine	cancer	MES2	HSPA9
+fine	cancer	MES2	A2M
+fine	cancer	MES2	TNC
+fine	cancer	MES2	ZFP36L1
+fine	cancer	MES2	PDLIM4
+fine	cancer	MES2	WDR13
+fine	cancer	MES2	NPNT
+fine	cancer	MES2	HSPB1
+fine	cancer	MES2	SGCE
+fine	cancer	MES2	GABARAPL1
+fine	cancer	MES2	PON2
+fine	cancer	MES2	CYR61
+fine	cancer	MES2	COL1A2
+fine	cancer	MES2	ANXA1
+fine	cancer	MES2	SAT1
+fine	cancer	MES2	ATP1A2
+fine	cancer	MES2	CHL1
+fine	cancer	MES1	CHI3L1
+fine	cancer	MES1	ANXA2
+fine	cancer	MES1	ANXA1
+fine	cancer	MES1	CD44
+fine	cancer	MES1	VIM
+fine	cancer	MES1	MT2A
+fine	cancer	MES1	C1S
+fine	cancer	MES1	NAMPT
+fine	cancer	MES1	EFEMP1
+fine	cancer	MES1	C1R
+fine	cancer	MES1	SOD2
+fine	cancer	MES1	IFITM3
+fine	cancer	MES1	TIMP1
+fine	cancer	MES1	SPP1
+fine	cancer	MES1	A2M
+fine	cancer	MES1	S100A11
+fine	cancer	MES1	MT1X
+fine	cancer	MES1	S100A10
+fine	cancer	MES1	FN1
+fine	cancer	MES1	LGALS1
+fine	cancer	MES1	S100A16
+fine	cancer	MES1	CLIC1
+fine	cancer	MES1	MGST1
+fine	cancer	MES1	RCAN1
+fine	cancer	MES1	TAGLN2
+fine	cancer	MES1	NPC2
+fine	cancer	MES1	SERPING1
+fine	cancer	MES1	C8orf4
+fine	cancer	MES1	EMP1
+fine	cancer	MES1	APOE
+fine	cancer	MES1	CTSB
+fine	cancer	MES1	C3
+fine	cancer	MES1	LGALS3
+fine	cancer	MES1	MT1E
+fine	cancer	MES1	EMP3
+fine	cancer	MES1	SERPINA3
+fine	cancer	MES1	ACTN1
+fine	cancer	MES1	PRDX6
+fine	cancer	MES1	IGFBP7
+fine	cancer	MES1	SERPINE1
+fine	cancer	MES1	PLP2
+fine	cancer	MES1	MGP
+fine	cancer	MES1	CLIC4
+fine	cancer	MES1	GFPT2
+fine	cancer	MES1	GSN
+fine	cancer	MES1	NNMT
+fine	cancer	MES1	TUBA1C
+fine	cancer	MES1	GJA1
+fine	cancer	MES1	TNFRSF1A
+fine	cancer	MES1	WWTR1
+fine	cancer	MES1	CPNE1
+fine	cancer	MES1	CSPG4
+fine	cancer	MES1	PCMTD2
+fine	cancer	MES1	PDZD2
+fine	cancer	MES1	METL7B
+fine	cancer	MES1	EGFR-AS1
+fine	cancer	MES1	HEPN1
+fine	cancer	MES1	ANXA5
+fine	cancer	MES1	SOCS2
+fine	cancer	MES1	NEAT1
+fine	cancer	MES1	ATP13A4
+fine	cancer	MES1	SLC1A3
+fine	cancer	MES1	DBI
+fine	cancer	MES1	MEOX2
+fine	cancer	MES1	GPR37L1
+fine	cancer	MES1	CD82
+fine	cancer	MES1	CST3
+fine	cancer	MES1	MT3
+fine	cancer	MES1	SEC61G
+fine	cancer	MES1	EGFR
+fine	cancer	AC	CST3
+fine	cancer	AC	S100B
+fine	cancer	AC	SLC1A3
+fine	cancer	AC	HEPN1
+fine	cancer	AC	HOPX
+fine	cancer	AC	MT3
+fine	cancer	AC	SPARCL1
+fine	cancer	AC	MLC1
+fine	cancer	AC	GFAP
+fine	cancer	AC	FABP7
+fine	cancer	AC	BCAN
+fine	cancer	AC	PON2
+fine	cancer	AC	METTL7B
+fine	cancer	AC	SPARC
+fine	cancer	AC	GATM
+fine	cancer	AC	RAMP1
+fine	cancer	AC	PMP2
+fine	cancer	AC	AQP4
+fine	cancer	AC	DBI
+fine	cancer	AC	EDNRB
+fine	cancer	AC	PTPRZ1
+fine	cancer	AC	CLU
+fine	cancer	AC	PMP22
+fine	cancer	AC	ATP1A2
+fine	cancer	AC	S100A16
+fine	cancer	AC	HEY1
+fine	cancer	AC	PCDHGC3
+fine	cancer	AC	TTYH1
+fine	cancer	AC	NDRG2
+fine	cancer	AC	PRCP
+fine	cancer	AC	ATP1B2
+fine	cancer	AC	AGT
+fine	cancer	AC	PLTP
+fine	cancer	AC	GPM6B
+fine	cancer	AC	F3
+fine	cancer	AC	RAB31
+fine	cancer	AC	PPAP2B
+fine	cancer	AC	ANXA5
+fine	cancer	AC	TSPAN7
+fine	cancer	AC	PDGFRA
+fine	cancer	AC	RPL32
+fine	cancer	AC	LSM3
+fine	cancer	AC	CUTA
+fine	cancer	AC	UBE2E2
+fine	cancer	AC	RPL34
+fine	cancer	AC	UGDH
+fine	cancer	AC	TXN
+fine	cancer	AC	RPL45A
+fine	cancer	AC	MPZL1
+fine	cancer	AC	CUEDC2
+fine	cancer	AC	PIP4K2A
+fine	cancer	AC	CTHRC1
+fine	cancer	AC	H19
+fine	cancer	AC	H2AFZ
+fine	cancer	AC	PLAT
+fine	cancer	AC	COX7A2
+fine	cancer	AC	VDAC2
+fine	cancer	AC	SOX10
+fine	cancer	AC	LPPR1
+fine	cancer	AC	MIF
+fine	cancer	AC	CDR1
+fine	cancer	AC	STMN2
+fine	cancer	AC	RP1
+fine	cancer	AC	RPL35
+fine	cancer	AC	RPS24
+fine	cancer	AC	COL9A1
+fine	cancer	AC	CNTN1
+fine	cancer	AC	PGAM1
+fine	cancer	AC	RPL21
+fine	cancer	AC	SNHG5
+fine	cancer	AC	BEX4
+fine	cancer	AC	GAS5
+fine	cancer	AC	PPA1
+fine	cancer	AC	GAD1
+fine	cancer	AC	LINC00643
+fine	cancer	AC	TCEAL2
+fine	cancer	AC	NME1
+fine	cancer	AC	BEX1
+fine	cancer	AC	ITM2A
+fine	cancer	OPC	BCAN
+fine	cancer	OPC	PLP1
+fine	cancer	OPC	GPR17
+fine	cancer	OPC	FIBIN
+fine	cancer	OPC	LHFPL3
+fine	cancer	OPC	OLIG1
+fine	cancer	OPC	PSAT1
+fine	cancer	OPC	SCRG1
+fine	cancer	OPC	OMG
+fine	cancer	OPC	APOD
+fine	cancer	OPC	SIRT2
+fine	cancer	OPC	TNR
+fine	cancer	OPC	THY1
+fine	cancer	OPC	PHYHIPL
+fine	cancer	OPC	SOX2-OT
+fine	cancer	OPC	NKAIN4
+fine	cancer	OPC	LPPR1
+fine	cancer	OPC	PTPRZ1
+fine	cancer	OPC	VCAN
+fine	cancer	OPC	DBI
+fine	cancer	OPC	PMP2
+fine	cancer	OPC	CNP
+fine	cancer	OPC	TNS3
+fine	cancer	OPC	LIMA1
+fine	cancer	OPC	CA10
+fine	cancer	OPC	PCDHGC3
+fine	cancer	OPC	CNTN1
+fine	cancer	OPC	SCD5
+fine	cancer	OPC	P2RX7
+fine	cancer	OPC	CADM2
+fine	cancer	OPC	TTYH1
+fine	cancer	OPC	FGF12
+fine	cancer	OPC	TMEM206
+fine	cancer	OPC	NEU4
+fine	cancer	OPC	FXYD6
+fine	cancer	OPC	RNF13
+fine	cancer	OPC	RTKN
+fine	cancer	OPC	GPM6B
+fine	cancer	OPC	LMF1
+fine	cancer	OPC	ALCAM
+fine	cancer	OPC	PGRMC1
+fine	cancer	OPC	HRASLS
+fine	cancer	OPC	BCAS1
+fine	cancer	OPC	RAB31
+fine	cancer	OPC	PLLP
+fine	cancer	OPC	FABP5
+fine	cancer	OPC	NLGN3
+fine	cancer	OPC	SERINC5
+fine	cancer	OPC	EPB41L2
+fine	cancer	OPC	GPR37L1
+fine	cancer	OPC	VIPR2
+fine	cancer	OPC	PSPH
+fine	cancer	OPC	NTRK2
+fine	cancer	OPC	GSTM1
+fine	cancer	OPC	CDKN2A
+fine	cancer	OPC	CDK4
+fine	cancer	OPC	DCTN2
+fine	cancer	OPC	B4GALNT1
+fine	cancer	OPC	CD24
+fine	cancer	OPC	DDIT3
+fine	cancer	OPC	PFN2
+fine	cancer	OPC	DGKB
+fine	cancer	OPC	LINC00689
+fine	cancer	OPC	RARRES2
+fine	cancer	NPC1	DLL3
+fine	cancer	NPC1	DLL1
+fine	cancer	NPC1	SOX4
+fine	cancer	NPC1	TUBB3
+fine	cancer	NPC1	HES6
+fine	cancer	NPC1	TAGLN3
+fine	cancer	NPC1	NEU4
+fine	cancer	NPC1	MARCKSL1
+fine	cancer	NPC1	CD24
+fine	cancer	NPC1	STMN1
+fine	cancer	NPC1	TCF12
+fine	cancer	NPC1	BEX1
+fine	cancer	NPC1	OLIG1
+fine	cancer	NPC1	MAP2
+fine	cancer	NPC1	FXYD6
+fine	cancer	NPC1	PTPRS
+fine	cancer	NPC1	MLLT11
+fine	cancer	NPC1	NPPA
+fine	cancer	NPC1	BCAN
+fine	cancer	NPC1	MEST
+fine	cancer	NPC1	ASCL1
+fine	cancer	NPC1	BTG2
+fine	cancer	NPC1	DCX
+fine	cancer	NPC1	NXPH1
+fine	cancer	NPC1	HN1
+fine	cancer	NPC1	PFN2
+fine	cancer	NPC1	SCG3
+fine	cancer	NPC1	MYT1
+fine	cancer	NPC1	CHD7
+fine	cancer	NPC1	GPR56
+fine	cancer	NPC1	TUBA1A
+fine	cancer	NPC1	PCBP4
+fine	cancer	NPC1	ETV1
+fine	cancer	NPC1	SHD
+fine	cancer	NPC1	TNR
+fine	cancer	NPC1	AMOTL2
+fine	cancer	NPC1	DBN1
+fine	cancer	NPC1	HIP1
+fine	cancer	NPC1	ABAT
+fine	cancer	NPC1	ELAVL4
+fine	cancer	NPC1	LMF1
+fine	cancer	NPC1	GRIK2
+fine	cancer	NPC1	SERINC5
+fine	cancer	NPC1	TSPAN13
+fine	cancer	NPC1	ELMO1
+fine	cancer	NPC1	GLCCI1
+fine	cancer	NPC1	SEZ6L
+fine	cancer	NPC1	LRRN1
+fine	cancer	NPC1	SEZ6
+fine	cancer	NPC1	SOX11
+fine	cancer	NPC1	A2M
+fine	cancer	NPC1	TNC
+fine	cancer	NPC1	ZFP36L1
+fine	cancer	NPC1	PDLIM4
+fine	cancer	NPC1	WDR13
+fine	cancer	NPC1	NPNT
+fine	cancer	NPC1	HSPB1
+fine	cancer	NPC1	SGCE
+fine	cancer	NPC1	GABARAPL1
+fine	cancer	NPC1	PON2
+fine	cancer	NPC1	CYR61
+fine	cancer	NPC1	COL1A2
+fine	cancer	NPC1	ANXA1
+fine	cancer	NPC1	SAT1
+fine	cancer	NPC1	ATP1A2
+fine	cancer	NPC1	CHL1
+fine	cancer	NPC2	STMN2
+fine	cancer	NPC2	CD24
+fine	cancer	NPC2	RND3
+fine	cancer	NPC2	HMP19
+fine	cancer	NPC2	TUBB3
+fine	cancer	NPC2	MIAT
+fine	cancer	NPC2	DCX
+fine	cancer	NPC2	NSG1
+fine	cancer	NPC2	ELAVL4
+fine	cancer	NPC2	MLLT11
+fine	cancer	NPC2	DLX6-AS1
+fine	cancer	NPC2	SOX11
+fine	cancer	NPC2	NREP
+fine	cancer	NPC2	FNBP1L
+fine	cancer	NPC2	TAGLN3
+fine	cancer	NPC2	STMN4
+fine	cancer	NPC2	DLX5
+fine	cancer	NPC2	SOX4
+fine	cancer	NPC2	MAP1B
+fine	cancer	NPC2	RBFOX2
+fine	cancer	NPC2	IGFBPL1
+fine	cancer	NPC2	STMN1
+fine	cancer	NPC2	HN1
+fine	cancer	NPC2	TMEM161B-AS1
+fine	cancer	NPC2	DPYSL3
+fine	cancer	NPC2	Sep-03
+fine	cancer	NPC2	PKIA
+fine	cancer	NPC2	ATP1B1
+fine	cancer	NPC2	DYNC1I1
+fine	cancer	NPC2	CD200
+fine	cancer	NPC2	SNAP25
+fine	cancer	NPC2	PAK3
+fine	cancer	NPC2	NDRG4
+fine	cancer	NPC2	KIF5A
+fine	cancer	NPC2	UCHL1
+fine	cancer	NPC2	ENO2
+fine	cancer	NPC2	KIF5C
+fine	cancer	NPC2	DDAH2
+fine	cancer	NPC2	TUBB2A
+fine	cancer	NPC2	LBH
+fine	cancer	NPC2	LOC150568
+fine	cancer	NPC2	TCF4
+fine	cancer	NPC2	GNG3
+fine	cancer	NPC2	NFIB
+fine	cancer	NPC2	DPYSL5
+fine	cancer	NPC2	CRABP1
+fine	cancer	NPC2	DBN1
+fine	cancer	NPC2	NFIX
+fine	cancer	NPC2	CEP170
+fine	cancer	NPC2	BLCAP
+fine	cancer	NPC2	CPNE1
+fine	cancer	NPC2	CSPG4
+fine	cancer	NPC2	PCMTD2
+fine	cancer	NPC2	PDZD2
+fine	cancer	NPC2	METL7B
+fine	cancer	NPC2	EGFR-AS1
+fine	cancer	NPC2	HEPN1
+fine	cancer	NPC2	ANXA5
+fine	cancer	NPC2	MT2A
+fine	cancer	NPC2	SOCS2
+fine	cancer	NPC2	NEAT1
+fine	cancer	NPC2	ATP13A4
+fine	cancer	NPC2	SLC1A3
+fine	cancer	NPC2	DBI
+fine	cancer	NPC2	MEOX2
+fine	cancer	NPC2	GPR37L1
+fine	cancer	NPC2	CD82
+fine	cancer	NPC2	CST3
+fine	cancer	NPC2	S100A16
+fine	cancer	NPC2	MT3
+fine	cancer	NPC2	SEC61G
+fine	cancer	NPC2	EGFR

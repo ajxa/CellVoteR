@@ -8,34 +8,88 @@ build_broad_marker_config(
   marker_list,
   priority_order,
   default_threshold = 0.1,
-  default_coexp = 1
+  default_coexp = 1,
+  per_category_overrides = NULL
 )
 }
 \arguments{
-\item{marker_list}{A named list where names are cell types (e.g., "T_cells", "B_cells")
-and values are character vectors of gene markers.}
+\item{marker_list}{Named list of character vectors. Names are broad category
+labels (e.g. \code{"immune"}, \code{"vasculature"}), values are marker
+gene symbols.}
 
-\item{priority_order}{A character vector defining the hierarchy of cell types.
-Categories appearing earlier in this vector are assigned a lower numeric priority score
-(1 = highest priority).}
+\item{priority_order}{Character vector defining the assignment priority.
+Categories listed first receive lower (higher-priority) rank values.
+All entries must correspond to names in \code{marker_list}. At most one
+category in \code{marker_list} may be absent from this vector (see
+Priority order section).}
 
-\item{default_threshold}{Numeric. The default expression detection threshold. Default is 0.1.}
+\item{default_threshold}{Numeric scalar (>= 0). Default expression threshold
+applied to every category. Defaults to \code{0.1}.}
 
-\item{default_coexp}{Numeric/Integer. The minimum number of markers required to be
-co-expressed. Default is 1.}
+\item{default_coexp}{Positive integer scalar. Minimum number of co-expressed
+markers required for a category call. Defaults to \code{1}.}
+
+\item{per_category_overrides}{Optional named list of named lists, keyed by
+category name. Each inner list may contain \code{expr_threshold} and/or
+\code{coexp_min} to override the defaults for that category. Categories
+not listed use the defaults. Defaults to \code{NULL} (no overrides).}
 }
 \value{
-A named list of configuration lists. Each element contains:
-\itemize{
-\item \code{markers}: Vector of genes.
-\item \code{expr_threshold}: The threshold set.
-\item \code{coexp_min}: The co-expression minimum.
-\item \code{priority}: Integer rank based on \code{priority_order}.
+A named list (one element per category, ordered by priority rank
+ascending) where each element is a list with components:
+\describe{
+\item{markers}{Character vector of marker gene symbols.}
+\item{expr_threshold}{Numeric expression threshold for the category.}
+\item{coexp_min}{Integer minimum co-expression count.}
+\item{priority}{Integer priority rank (1 = highest priority).}
 }
 }
 \description{
-specific list structure required for annotation or scoring functions.
-It assigns priorities, default expression thresholds, and co-expression requirements
-to each cell type category.
+Converts a named list of broad-category marker vectors into a structured
+configuration list suitable for priority-based cell-type assignment. Each
+category is annotated with an expression threshold, minimum co-expression
+count, and a numeric priority rank derived from \code{priority_order}.
 }
-\keyword{internal}
+\section{Priority order}{
+
+The \code{priority_order} vector determines how ties are resolved when a
+cell or cluster matches multiple broad categories. Categories listed
+earlier receive higher priority (lower rank number). At most one category
+may be omitted from \code{priority_order}, in which case it is
+automatically assigned the lowest priority. If two or more categories are
+omitted they would share the same rank, making tie-breaking ambiguous -
+this is treated as an error.
+}
+
+\examples{
+\dontrun{
+  markers <- list(
+    immune      = c("CD45", "CD3", "CD8"),
+    vasculature = c("PECAM1", "VWF"),
+    stromal     = c("COL1A1", "VIM")
+  )
+
+  # All categories ranked explicitly
+  cfg <- build_broad_marker_config(
+    marker_list    = markers,
+    priority_order = c("vasculature", "immune", "stromal")
+  )
+
+  # One category omitted - automatically gets lowest priority
+  cfg <- build_broad_marker_config(
+    marker_list    = markers,
+    priority_order = c("vasculature", "immune")
+  )
+  # vasculature=1, immune=2, stromal=3
+
+  # Per-category overrides
+  cfg <- build_broad_marker_config(
+    marker_list    = markers,
+    priority_order = c("vasculature", "immune", "stromal"),
+    per_category_overrides = list(
+      immune = list(coexp_min = 2, expr_threshold = 0.2)
+    )
+  )
+}
+
+}

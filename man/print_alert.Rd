@@ -4,51 +4,94 @@
 \alias{print_alert}
 \title{Print a styled alert message}
 \usage{
-print_alert(text, type = "i", face = "n", color = "grey80")
+print_alert(
+  text,
+  type = "n",
+  face = "n",
+  color = "grey80",
+  highlight_color = "grey98",
+  .envir = parent.frame()
+)
 }
 \arguments{
-\item{text}{Character string. The message to display.}
+\item{text}{Character string. The message to display. Supports \code{cli}
+glue-style interpolation and inline markup (e.g. \code{{.val x}},
+\code{{.emph x}}, \code{{?singular/plural}}).}
 
-\item{type}{Character string. The type of alert icon to display. Options:
-\itemize{
-\item \code{"s"}: Success (Green Tick)
-\item \code{"d"}: Danger (Red Cross)
-\item \code{"w"}: Warning (Orange Exclamation)
-\item \code{"i"}: Info (Blue/Cyan 'i') - \emph{Default}
-\item Any other value defaults to a generic alert (Arrow).
+\item{type}{Character string. Alert type controlling the leading icon:
+\describe{
+\item{\code{"s"}}{Success (green tick)}
+\item{\code{"d"}}{Danger (red cross)}
+\item{\code{"w"}}{Warning (orange exclamation)}
+\item{\code{"i"}}{Info (blue/cyan 'i')}
+\item{\code{"n"}}{Plain text, no icon (default)}
+}
+Any other value falls back to a generic alert (arrow).}
+
+\item{face}{Character string. Font face applied to the base text:
+\describe{
+\item{\code{"n"}}{Normal / plain (default)}
+\item{\code{"b"}}{Bold}
+\item{\code{"i"}}{Italic}
+\item{\code{"bi"}}{Bold italic}
 }}
 
-\item{face}{Character string. The font face styling code. Options:
-\itemize{
-\item \code{"n"}: Normal (Plain) - \emph{Default}
-\item \code{"b"}: Bold
-\item \code{"i"}: Italic
-\item \code{"bi"}: Bold Italic
-}}
+\item{color}{Character string. Base text color applied to the message body.
+Accepts standard color names (e.g. \code{"red"}) or hex codes (e.g.
+\code{"#FF5733"}). Defaults to \code{"grey80"}.}
 
-\item{color}{Character string. The color of the text. Supports standard names
-(e.g., "red") or hex codes. Defaults to \code{"grey80"}.}
+\item{highlight_color}{Character string. Color applied to \code{{.val ...}};
+\code{{.arg ...}}; \code{{.field ...}} and \code{{.path ...}} spans.
+Each of the aforementioned spans are rendered using their default themes:
+only the colour is changed according to this argument which accepts the same
+values as \code{color} and defaults to \code{"grey98"}.}
+
+\item{.envir}{Environment used for glue interpolation. Defaults to the
+caller's environment so that variables referenced in \code{text} are
+resolved from the calling scope.}
 }
 \value{
-No return value; prints a formatted message to the console.
+Invisible \code{NULL}; called for its side effect of printing a
+formatted message to the console.
 }
 \description{
-A flexible wrapper for \code{cli} alert functions. It allows you to dispatch
-different alert types (success, danger, warning, info) using shorthand codes,
-while simultaneously controlling text color and font face (bold/italic).
+A flexible wrapper for \code{cli} alert functions that uses \code{cli}'s
+theming system for consistent styling. Supports glue-style interpolation
+including \code{cli} in-line text formatting for the following:
+\code{{.val ...}}; \code{{.arg ...}}; \code{{.field ...}} and \code{{.path ...}}.
+Moreover, each of these in-line values is rendered in a
+distinct highlight color (defaulting to \code{"grey98"}),
+making it easy to draw attention to specific variables or values within the message.
+The alert type controls the leading icon, while the base text color and font face
+can be customized for further emphasis.
+}
+\details{
+Styling is applied via \code{\link[cli]{start_app}} themes rather than
+pre-wrapping the text in ANSI codes. This ensures that \code{cli}'s own
+inline markup (\code{{.val}}, \code{{.emph}}, etc.) composes correctly
+with the user-specified base color and face.
+
+The \code{"n"} (plain) alert type uses \code{\link[cli]{cli_text}} under
+the \code{body} theme class, producing output with no icon and no leading
+whitespace — visually identical to the other alert types minus the bullet
+character.
 }
 \examples{
 \dontrun{
-  # Standard Info (Grey)
+  # Plain message — no icon, default grey
   print_alert("Starting process...")
 
-  # Success with Bold Green Text
-  print_alert("Compilation Complete", type = "s", color = "green", face = "b")
+  # Highlight interpolated values
+  n <- 5
+  print_alert("Loaded {.val {n}} sample{?s}", type = "s", color = "green")
 
-  # Warning with Italic Orange Text
-  print_alert("Disk space low", type = "w", color = "orange", face = "i")
+  # Warning with italic text and custom highlight
+  print_alert("Column {.val {col}} has missing values",
+              type = "w", color = "orange", face = "i",
+              highlight_color = "yellow")
 
-  # Critical Error (Bold Italic Red)
-  print_alert("Fatal Exception", type = "d", color = "red", face = "bi")
+  # Bold italic danger alert
+  print_alert("Fatal: {.val {msg}}", type = "d", color = "red", face = "bi")
 }
+
 }
