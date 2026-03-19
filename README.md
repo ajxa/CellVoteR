@@ -1,187 +1,232 @@
 # CellVoteR <img src="man/figures/logo.png" align="right" height="130" alt="" />
 
-An ensemble-based pipeline for robust cell type classification in single-cell RNAseq data. 
+An ensemble-based pipeline for robust cell type annotation in single-cell RNA-seq data.
 
-It moves beyond simple "best-match" scoring by integrating multiple classification 
-strategies: 
-lineage triage, targeted sub-clustering, and global consensus, to generate a 
-high-confidence label for every cell.
+CellVoteR moves beyond simple "best-match" scoring by integrating four complementary
+annotation strategies across two feature spaces, resolved through a principled
+consensus voting step to generate a high-confidence label for every cell.
 
 ## How It Works
 
-CellVoteR determines cell identity through a three-stage voting process:
+CellVoteR determines cell identity through a three-stage process:
 
-### 1. Broad Triage (divide & conquer)
-The dataset is first split into broad biological categories (e.g., *Immune* vs. *Vascular* vs. *Tumour*) 
-using defined marker thresholds or coarse clustering. 
-This "Triage" step isolates distinct lineages, 
-preventing dominant signals from obscuring rare cell types.
+### 1. Broad Triage
+Each cell is first assigned a broad lineage label (e.g. *Immune*, *Vasculature*,
+*Other*) using one of two strategies:
 
-### 2. Targeted Sub-clustering
-Each broad category is processed independently. Cells are sub-clustered to 
-identify fine-grained states, and their identity is determined by 
-performing Fisher's Exact Tests against a reference marker panel. 
-This ensures that an immune cell is only compared against immune markers, 
-reducing false positives.
+- **Cluster-based:** Unsupervised clusters are labelled by testing whether
+  curated broad marker genes are significantly and consistently top-ranked
+  within each cluster.
+- **Enrichment-based:** Individual cells are labelled directly by aggregating
+  expression across small, distinct broad marker sets and applying
+  category-specific thresholds.
 
-### 3. Global Consensus (tie-breaker)
-Simultaneously, the full dataset is clustered globally (without triage). 
-These global labels serve as a "baseline vote." 
-In the final ensemble step, if the triage methods disagree, 
-the global result and raw marker intensities are used to break the tie and 
-resolve the final identity.
+### 2. Targeted Sub-clustering & Fine Annotation
+Each broad lineage is sub-clustered independently. Sub-cluster identity is then
+determined by scoring the top ranked marker genes against a curated fine-resolution
+marker panel using Fisher's Exact Test and overlap similarity. This ensures, for
+example, that immune sub-clusters are only compared against immune markers —
+reducing false positives and improving resolution of rare populations.
+
+Both strategies are applied to two feature spaces:
+
+- **Full gene set** — the complete normalised expression matrix
+- **Reduced gene set** — a targeted panel of user-supplied marker genes
+
+This gives four primary annotation methods in total.
+
+### 3. Global Consensus & Tie-breaking
+Two global tie-breakers are computed in parallel without broad triage, by
+clustering the full and reduced gene sets directly and scoring against the
+fine marker panel. These serve as independent reference votes.
+
+All six method outputs are then passed to a configurable ensemble voting step
+which applies a decision hierarchy to resolve disagreements and assign a final
+label to each cell.
 
 ## Workflow Diagram
-
 ```mermaid
 graph TD
-    %% --- Styles ---
     classDef default fill:#ffffff,stroke:#333,stroke-width:1px,color:#000
     classDef start fill:#e1f5fe,stroke:#01579b,stroke-width:2px,color:#000
-    
-    %% Track Box: Dashed border, no fill
     classDef track fill:none,stroke:#999,stroke-width:2px,stroke-dasharray: 5 5
-    
-    %% Titles: Visible Header Boxes
     classDef title fill:#eceff1,stroke:#455a64,stroke-width:2px,font-weight:bold,color:#000
-    
     classDef decision fill:#fff9c4,stroke:#fbc02d,stroke-width:2px,color:#000
-    classDef group fill:#e0f2f1,stroke:#00695c,stroke-width:1px,color:#000
+    classDef method fill:#e0f2f1,stroke:#00695c,stroke-width:1px,color:#000
+    classDef tiebreak fill:#fce4ec,stroke:#880e4f,stroke-width:1px,color:#000
     classDef logic fill:#fff3e0,stroke:#e65100,stroke-width:1px,color:#000
     classDef endnode fill:#dcedc8,stroke:#33691e,stroke-width:2px,color:#000
 
-    %% --- Input Phase ---
-    Input([Input Data]):::start --> QC[Quality Control]
+    Input([Raw Counts + Markers]):::start
+    Input --> QC[assess_cell_quality]
+    QC --> Norm[normalize_counts]
+    Norm --> Prep[prepare_sce\nBuilds full + reduced feature spaces\nand attaches marker config]
 
-    %% --- TRACK 1: Broad Triage ---
-    subgraph T1 [ ]
+    Prep --> M1
+    Prep --> M2
+    Prep --> M3
+    Prep --> M4
+    Prep --> G1
+    Prep --> G2
+
+    subgraph PrimaryMethods [ ]
         direction TB
-        %% Title Node
-        Title1[Broad Triage]:::title
-        
-        Split{Split?}:::decision
-        
-        %% Invisible link to force vertical stacking
-        Title1 ~~~ Split
-        
-        %% Groups
-        GrpImm[Immune]:::group
-        GrpEndo[Endothelial]:::group
-        GrpOth[Other]:::group
-        
-        Split --> GrpImm
-        Split --> GrpEndo
-        Split --> GrpOth
-        
-        %% Processing Steps
-        SubA[Sub-Cluster &<br/>Fisher Score]
-        SubB[Sub-Cluster &<br/>Fisher Score]
-        SubC[Sub-Cluster &<br/>Fisher Score]
-        
-        GrpImm --> SubA
-        GrpEndo --> SubB
-        GrpOth --> SubC
+        TitleP[Primary Annotation Methods]:::title
+
+        subgraph Full[Full Gene Set]
+            M1[Method 1\nCluster-based\nBroad triage → subcluster\n→ Fisher score]:::method
+            M3[Method 3\nEnrichment-based\nBroad triage → subcluster\n→ Fisher score]:::method
+        end
+
+        subgraph Reduced[Reduced Gene Set]
+            M2[Method 2\nCluster-based\nBroad triage → subcluster\n→ Fisher score]:::method
+            M4[Method 4\nEnrichment-based\nBroad triage → subcluster\n→ Fisher score]:::method
+        end
+
+        TitleP ~~~ Full
+        TitleP ~~~ Reduced
     end
 
-    %% --- TRACK 2: Global Consensus ---
-    subgraph T2 [ ]
+    subgraph TieBreakerTrack [ ]
         direction TB
-        %% Title Node
-        Title2[Global Consensus]:::title
-        
-        Global[Global Clustering]
-        ScoreG[Global Fisher Score]
-        
-        Title2 ~~~ Global
-        Global --> ScoreG
+        TitleT[Global Tie-breakers]:::title
+
+        G1[Tie-breaker 1\nHVG clusters\nFull gene set\n→ Fisher score]:::tiebreak
+        G2[Tie-breaker 2\nPanel clusters\nReduced gene set\n→ Fisher score]:::tiebreak
+
+        TitleT ~~~ G1
+        TitleT ~~~ G2
     end
 
-    %% --- Main Connections ---
-    %% Connect QC to the TITLES
-    QC --> Title1
-    QC --> Title2
+    M1 & M2 & M3 & M4 --> Vote
+    G1 & G2 --> Vote
 
-    %% --- Ensemble & Resolution ---
-    SubA & SubB & SubC --> Vote[Ensemble Voting]
-    ScoreG --> Vote
+    Vote[resolve_consensus_labels\nEnsemble voting]
 
-    Vote --> Resolve{Clash?}:::decision
-    
-    %% Outcomes
-    Yes[Yes]:::logic
-    No[No]:::logic
-    
-    Resolve --> Yes
-    Resolve --> No
-    
-    Yes --> TieBreak[Apply Breaker]
-    No --> Final([Final Label]):::endnode
-    TieBreak --> Final
+    Vote --> Majority{Majority\nvote?}:::decision
+    Majority -->|Yes| Final
+    Majority -->|No, but\nleading candidate| TB{Tie-breakers\nagree?}:::decision
+    TB -->|Both agree| Final
+    TB -->|Priority order| Final
+    TB -->|Neither resolves| Unresolved[Unassigned]:::logic
+    Majority -->|All methods\ndisagree| Unresolved
 
-    %% Apply Track Styles
-    class T1,T2 track
+    Final([Final Cell Label]):::endnode
+
+    class PrimaryMethods,TieBreakerTrack track
 ```
 
 ## Installation
 
 You can install the development version of CellVoteR with:
-
-``` r
+```r
 # install.packages("devtools")
 devtools::install_github("ajxa/CellVoteR")
 ```
 
 ## Quick Start
 
-### 1. Quality Control
+### 1. Prepare inputs
 
-Before labelling, ensure your data is clean using the built-in QC functions.
-
-``` r
+CellVoteR requires two inputs: a raw counts matrix and a marker configuration.
+```r
 library(CellVoteR)
-library(Seurat)
 
-# Load your data (Seurat, SingleCellExperiment, or Matrix)
-counts <- Read10X(data.dir = "path/to/data")
+# Load and configure markers
+markers <- load_markers(file_path = "path/to/input_markers.xlsx")
 
-# Assess quality (calculates mito/ribo % automatically)
-qc_metrics <- assess_cell_quality(counts, 
-                                  min_features = 200, 
-                                  max_mito_pct = 20)
-
-# Filter the object
-clean_obj <- filter_cells(counts, qc_metrics)
-```
-
-### 2. Run the Ensemble
-
-Run the full pipeline on your filtered object. You can use the default global methods or enable the full ensemble.
-
-``` r
-# Basic Run (General Purpose)
-# Uses global clustering and marker matching
-labelled_obj <- run_ensemble(clean_obj)
-
-# Advanced Run (Full Ensemble)
-# Runs triage methods (1-4) + global breakers (5-6) and resolves clashes
-labelled_obj <- run_ensemble(clean_obj, use_ensemble = TRUE)
-
-# View Results
-table(labelled_obj$Ensemble_Resolved)
-```
-
-### 3. Custom Markers
-
-CellVoteR works with any tissue. Simply provide a dataframe of markers.
-
-``` r
-# Define your own markers
-my_markers <- data.frame(
-  gene = c("EPCAM", "COL1A1", "CD3D"),
-  cell_type = c("Epithelial", "Stromal", "T_Cell"),
-  category = c("Epithelial", "Stromal", "Immune") 
+markers$broad <- build_broad_marker_config(
+  marker_list    = markers$broad,
+  priority_order = c("vasculature", "immune"),
+  default_threshold = 0.25
 )
 
-# Run with custom panel
-results <- run_ensemble(clean_obj, markers = my_markers)
+# Create SCE from a sparse matrix or file path
+sce <- create_sce(
+  counts        = "path/to/counts.rds",
+  cell_metadata = "path/to/metadata.rds"  # optional, also accepts .csv / .tsv
+)
 ```
+
+### 2. QC and preprocessing
+```r
+sce <- assess_cell_quality(sce, remove_failed_cells = TRUE)
+sce <- normalize_counts(sce)
+
+# Builds both feature spaces (full + reduced), clusters them, and
+# attaches the marker configuration to the SCE
+sce <- prepare_sce(sce, markers)
+```
+
+### 3. Run the ensemble
+```r
+# Default run — uses all four methods and both tie-breakers
+results <- run_cellvoter(sce)
+
+# With custom annotation parameters
+results <- run_cellvoter(
+  sce,
+  return_full_output = TRUE,
+  annotation_args = list(
+    broad_args   = list(test_type = "t", min_prop = 0.1),
+    rank_args    = list(test_type = "t", min_prop = 0.25),
+    extract_args = list(fdr_threshold = 0.01, target_n = 50L)
+  )
+)
+```
+### 4. Resolve consensus
+
+The consensus step is intentionally separate so voting parameters can be
+tweaked and re-run without repeating the annotation pipeline.
+```r
+consensus <- resolve_consensus_labels(
+  label_list        = results$labels,
+  method_names      = results$method_names,
+  tie_breaker_names = results$tie_breaker_names,
+  unassigned_label  = "unknown",
+  allow_even_split  = FALSE,
+  ordered_tiebreak  = TRUE
+)
+
+# Attach final labels to the SCE
+sce$cellVoteR_label  <- consensus$label
+sce$cellVoteR_method <- consensus$method
+
+# Inspect results
+table(sce$cellVoteR_label)
+table(sce$cellVoteR_method)
+
+# Inspect per-method labels before consensus
+table(results$labels$method_1)
+table(results$labels$method_2)
+table(results$labels$method_3)
+table(results$labels$method_4)
+table(results$labels$global_1)
+table(results$labels$global_2)
+
+# Inspect per-cluster scores for a method (requires return_full_output = TRUE)
+results$full_output$method_1$scores
+```
+
+### 5. Custom markers
+
+CellVoteR is tissue-agnostic. Broad markers should be small (ideally ≤ 3 genes),
+mutually exclusive across categories, and biologically diagnostic of a lineage.
+Fine markers can be larger gene sets and are used for Fisher scoring.
+```r
+# Markers are loaded from an Excel workbook or nested YAML file
+markers <- load_markers(file_path = "path/to/my_tissue_markers.xlsx")
+```
+
+See `?load_markers` and `?build_broad_marker_config` for details on the
+expected input format.
+
+## Key Design Decisions
+
+| Decision | Rationale |
+|---|---|
+| Broad triage before fine annotation | Prevents dominant lineages from masking rare populations |
+| Two feature spaces (full + reduced) | Full HVG space captures global structure; marker-defined space sharpens lineage boundaries |
+| Four methods + two tie-breakers | Redundancy across strategies reduces sensitivity to any single method's failure mode |
+| Consensus step is separate | Users can re-tune voting parameters without re-running the full pipeline |
+| Fisher's Exact Test for scoring | Statistically principled enrichment test that accounts for background gene set size |
