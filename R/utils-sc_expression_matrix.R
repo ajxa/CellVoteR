@@ -182,6 +182,7 @@ create_sce <- function(counts = NULL,
   return(sce)
 }
 
+
 #' Resolve cell metadata from a data.frame or file path
 #'
 #' Accepts a \code{data.frame} directly, or a path to an \code{.rds},

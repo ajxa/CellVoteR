@@ -27,7 +27,8 @@ Priority order section).}
 applied to every category. Defaults to \code{0.1}.}
 
 \item{default_coexp}{Positive integer scalar. Minimum number of co-expressed
-markers required for a category call. Defaults to \code{1}.}
+markers required for a category call. Defaults to \code{1}. Deprecated in this version,
+but retained for backward compatibility - will be removed in a future release.}
 
 \item{per_category_overrides}{Optional named list of named lists, keyed by
 category name. Each inner list may contain \code{expr_threshold} and/or

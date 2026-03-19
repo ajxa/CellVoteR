@@ -1,6 +1,6 @@
-# 1.) Load and format the markers ----------------------------------------------
+# 1.) Load inputs --------------------------------------------------------------
 
-markers <- load_markers(file_path = "inst/input_markers.xlsx")
+markers <- load_markers(file_path = "~/Desktop/example_data/input_markers.xlsx")
 
 markers$broad <- build_broad_marker_config(
   marker_list = markers$broad,
@@ -8,7 +8,7 @@ markers$broad <- build_broad_marker_config(
   default_threshold = 0.25
   )
 
-# 2.) Load the single-cell expression data -------------------------------------
+# Loading the single-cell expression data --------------------------------------
 # data_path <- "~/Desktop/OneDrive - University of Leeds/adhoc/Ensemble_Cell_Typing/data"
 
 # sc_data_path <- list(
@@ -34,10 +34,10 @@ markers$broad <- build_broad_marker_config(
 # data[1:5,1:7]
 
 # Loading a sparse matrix and cell_metadata saved as .rds objects
-sce <- create_sce(
-  counts = "~/Desktop/example_data/test_input_sc_matrix.rds",
-  cell_metadata = "~/Desktop/example_data/cell_metadata.rds"
-)
+# sce <- create_sce(
+#   counts = "~/Desktop/example_data/test_input_sc_matrix.rds",
+#   cell_metadata = "~/Desktop/example_data/cell_metadata.rds"
+# )
 
 # Loading a sparse matrix saved as a .mtx file, with separate files for genes and cells
 # mtx_data <- create_sce(
@@ -47,18 +47,21 @@ sce <- create_sce(
 #   cell_metadata = cell_meta
 #   )
 
-# 3.) QC & Pre-process ----------------------------------------------------------
+sce <- create_sce(
+  counts = "~/Desktop/example_data/test_input_sc_matrix.rds",
+  cell_metadata = "~/Desktop/example_data/cell_metadata.rds"
+)
+
+# QC & Pre-process -------------------------------------------------------------
 sce <- assess_cell_quality(sce, remove_failed_cells = TRUE)
 
 sce <- normalize_counts(sce)
 
 sce <- prepare_sce(sce, markers)
-rm(markers)
-
-reduced <- SingleCellExperiment::altExp(sce)
 
 # The reduced feature set is stored in the `altExperiment` slot of the SingleCellExperiment class
 # reduced <- SingleCellExperiment::altExp(sce)
+reduced <- SingleCellExperiment::altExp(sce)
 
 
 clusters <- list(all = list(), reduced = list())

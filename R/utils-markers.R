@@ -243,7 +243,8 @@ load_markers <- function(file_path,
 #' @param default_threshold Numeric scalar (>= 0). Default expression threshold
 #'   applied to every category. Defaults to \code{0.1}.
 #' @param default_coexp Positive integer scalar. Minimum number of co-expressed
-#'   markers required for a category call. Defaults to \code{1}.
+#'   markers required for a category call. Defaults to \code{1}. Deprecated in this version,
+#'   but retained for backward compatibility - will be removed in a future release.
 #' @param per_category_overrides Optional named list of named lists, keyed by
 #'   category name. Each inner list may contain \code{expr_threshold} and/or
 #'   \code{coexp_min} to override the defaults for that category. Categories
@@ -365,7 +366,6 @@ build_broad_marker_config <- function(
       type = "w"
     )
   }
-
 
   # -- Validate per-category overrides ---
 
