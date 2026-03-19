@@ -49,28 +49,28 @@
 }
 
 
-#' Shared rank -> extract -> score -> assign fine annotation pipeline
+#' Run shared rank > extract > score > assign fine annotation pipeline
 #'
 #' @param sce A SingleCellExperiment with \code{cluster_col} in colData.
 #' @param cluster_col Character scalar. colData column of cluster identifiers.
 #' @param marker_panel Named nested list of fine marker gene sets.
 #' @param background_genes Character vector of all genes in the dataset.
 #' @param rank_args Named list of additional arguments passed to
-#'   \code{\link{rank_cluster_markers}}. Valid entries:
+#'   \code{rank_cluster_markers}. Valid entries:
 #'   \code{assay_type}, \code{test_type}, \code{direction}, \code{pval_type},
 #'   \code{min_prop}, \code{BPPARAM}.
 #' @param extract_args Named list of additional arguments passed to
-#'   \code{\link{extract_top_markers}}. Valid entries:
+#'   \code{extract_top_markers}. Valid entries:
 #'   \code{fdr_threshold}, \code{effect_threshold}, \code{target_n}.
 #' @param score_args Named list of additional arguments passed to
-#'   \code{\link{score_markers_against_panel}}. No additional arguments
+#'   \code{score_markers_against_panel}. No additional arguments
 #'   currently accepted beyond those supplied directly.
 #' @param assign_args Named list of additional arguments passed to
-#'   \code{\link{assign_fine_labels}}. No additional arguments currently
+#'   \code{assign_fine_labels}. No additional arguments currently
 #'   accepted beyond those supplied directly.
 #'
 #' @return List with \code{$labels} (factor) and \code{$scores} (data.frame)
-#'   as returned by \code{\link{assign_fine_labels}}.
+#'   as returned by \code{assign_fine_labels}.
 #'
 #' @noRd
 .run_fine_annotation <- function(sce,
@@ -160,7 +160,7 @@
 #'     broad marker sets are small and highly specific, a more lenient
 #'     \code{min_prop} is often appropriate here.}
 #'   \item{\code{rank_args}}{Controls ranking inside
-#'     \code{\link{.run_fine_annotation}} for all six methods. These ranks are
+#'     \code{.run_fine_annotation} for all six methods. These ranks are
 #'     used to extract top marker genes per subcluster, which are then scored
 #'     against the fine marker panel via Fisher's exact test. Methods 3 and 4
 #'     use \code{rank_args} only, as \code{\link{annotate_broad_cells}} does
@@ -217,7 +217,7 @@
 #'   \code{altExp}.
 #' @param return_full_output Logical scalar. When \code{FALSE} (default),
 #'   only the per-cell label factors are returned under \code{$labels}. When
-#'   \code{TRUE}, the full output from each \code{\link{.run_fine_annotation}}
+#'   \code{TRUE}, the full output from each \code{.run_fine_annotation}
 #'   call - including per-cluster score tables - is also returned under
 #'   \code{$full_output}.
 #' @param annotation_args Named list of argument sublists passed through to
@@ -305,7 +305,7 @@ run_cellvoter <- function(sce,
   }
 
   # --- 2.) Merge annotation_args with defaults ----
-  args <- modifyList(
+  args <- utils::modifyList(
     list(
       broad_args   = list(),  # controls annotate_broad_clusters ranking
       rank_args    = list(),  # controls fine annotation ranking

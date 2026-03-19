@@ -15,7 +15,7 @@ assay, \code{metadata$marker_config},
 
 \item{return_full_output}{Logical scalar. When \code{FALSE} (default),
 only the per-cell label factors are returned under \code{$labels}. When
-\code{TRUE}, the full output from each \code{\link{.run_fine_annotation}}
+\code{TRUE}, the full output from each \code{.run_fine_annotation}
 call - including per-cluster score tables - is also returned under
 \code{$full_output}.}
 
@@ -106,7 +106,7 @@ vasculature) based on the median rank of curated broad markers. Because
 broad marker sets are small and highly specific, a more lenient
 \code{min_prop} is often appropriate here.}
 \item{\code{rank_args}}{Controls ranking inside
-\code{\link{.run_fine_annotation}} for all six methods. These ranks are
+\code{.run_fine_annotation} for all six methods. These ranks are
 used to extract top marker genes per subcluster, which are then scored
 against the fine marker panel via Fisher's exact test. Methods 3 and 4
 use \code{rank_args} only, as \code{\link{annotate_broad_cells}} does
