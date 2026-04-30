@@ -15,7 +15,6 @@ sce <- create_sce(
   cell_metadata = "~/Desktop/example_data/cell_metadata.rds"  # optional, also accepts .csv/.tsv
 )
 
-rm(markers)
 # 3.) QC and removal of  low-quality cells (optional) --------------------------
 
 sce <- assess_cell_quality(sce, remove_failed_cells = TRUE)
@@ -80,5 +79,9 @@ table(results$labels$global_2)
 # Full scores per cluster per method (if return_full_output = TRUE)
 results$full_output$method_1$scores
 results$full_output$global_1$scores
+
+# Viewing the Vignette (Probably needs some updating for v2) -------------------
+
+vignette("CellVoteR", package = "CellVoteR")
 
 # END --------------------------------------------------------------------------
