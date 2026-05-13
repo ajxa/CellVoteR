@@ -43,14 +43,17 @@ modified \code{sce} is returned.}
 \code{\link[scran]{quickSubCluster}} via \code{format}. This controls how
 final subcluster labels are constructed. Defaults to \code{`\%s_sc\%s`}.}
 
-\item{hvg_prop}{Numeric scalar in \code{(0, 1]}. Proportion of genes to
-retain as highly variable within each subset when
-\code{feature_mode = "hvg"}. Defaults to \code{0.1}.}
+\item{hvg_prop}{Numeric scalar in \code{(0, 1]}. When the \code{feature_mode = "hvg"},
+this is the proportion of genes that are retained as highly variable within each broad subset.
+For example, the default of \code{0.1} means that the top 10\\% of genes
+ranked by variance modelling will be used.}
 
 \item{min_ncells}{Integer scalar. Minimum number of cells required for a
 broad group to be subclustered. Groups smaller than this threshold are not
 subclustered by \code{\link[scran]{quickSubCluster}}. Defaults to
-\code{50}.}
+\code{50}. This value is passed directly to \code{min.ncells} in
+\code{\link[scran]{quickSubCluster}} and aligns with its default,
+which is based on empirical observations of when subclustering becomes unreliable.}
 
 \item{seed}{Integer scalar. Random seed used before running subclustering.
 Defaults to \code{1234}.}

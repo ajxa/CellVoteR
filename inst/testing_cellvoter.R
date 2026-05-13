@@ -4,17 +4,18 @@ markers <- load_markers(file_path = "~/Desktop/example_data/input_markers.xlsx")
 
 markers$broad <- build_broad_marker_config(
   marker_list = markers$broad,
-  priority_order = c("vasculature", "immune"),
-  default_threshold = 0.25
+  priority_order = c("vasculature", "immune")
+  # default_threshold = 0.25
   )
 
 # Loading the single-cell expression data --------------------------------------
-# data_path <- "~/Desktop/OneDrive - University of Leeds/adhoc/Ensemble_Cell_Typing/data"
 
+# data_path <- "~/Desktop/OneDrive - University of Leeds/adhoc/Ensemble_Cell_Typing/data"
+#
 # sc_data_path <- list(
-#   cosmx = list.files(data_path, pattern = "sObj\\.rds", full.names = TRUE)
-  # wang = list.files(file.path(data_path, "Wang_patient_seurats"), full.names = TRUE),
-  # nomura =  list.files(file.path(data_path, "Nomura_patient_seurats"), full.names = TRUE)
+#   cosmx = list.files(data_path, pattern = "sObj\\.rds", full.names = TRUE),
+#   wang = list.files(file.path(data_path, "Wang_patient_seurats"), full.names = TRUE),
+#   nomura =  list.files(file.path(data_path, "Nomura_patient_seurats"), full.names = TRUE)
 # )
 
 # raw data is in the count data slot typically
@@ -24,20 +25,42 @@ markers$broad <- build_broad_marker_config(
 # saving that separately.
 
 # seu_data <- readRDS(sc_data_path$cosmx)
-# rm(data_path, sc_data_path, seu_data)
-#
 
-# cell_meta <- readRDS("~/Desktop/example_data/cell_metadata.rds")
-# data <- readRDS("~/Desktop/example_data/test_input_sc_matrix.rds")
+# Look at the Imp14P and Imp14R samples only for development:
+# seu_data <- seu_data[grep("Imp14_[PR]$", names(seu_data), value = TRUE)]
+#
+# save_seurat_components(
+#   seurat_obj = seu_data$Imp14_P,
+#   base_name = "Imp14_P",
+#   out_dir = "~/Desktop/example_data"
+# )
+# save_seurat_components(
+#   seurat_obj = seu_data$Imp14_R,
+#   base_name = "Imp14_R",
+#   out_dir = "~/Desktop/example_data"
+# )
+
+
+# rm(data_path, sc_data_path, seu_data)
+
+# cell_meta <- readRDS("~/Desktop/example_data/Imp14_P_metadata_2026-05-13T15-27-40.rds")
+# data <- readRDS("~/Desktop/example_data/Imp14_P_counts_2026-05-13T15-27-40.rds")
+#
 #
 # cell_meta[1:5,1:7]
 # data[1:5,1:7]
 
 # Loading a sparse matrix and cell_metadata saved as .rds objects
-# sce <- create_sce(
-#   counts = "~/Desktop/example_data/test_input_sc_matrix.rds",
-#   cell_metadata = "~/Desktop/example_data/cell_metadata.rds"
-# )
+sce_list <- list(
+  Imp14_P = list.files("~/Desktop/example_data", pattern = "Imp14_P", full.names = TRUE),
+  Imp14_R = list.files("~/Desktop/example_data", pattern = "Imp14_R", all.files = TRUE)
+   )
+
+sce <- create_sce(
+  counts = sce_list$Imp14_P[1], cell_metadata = sce_list$Imp14_P[2]
+  )
+
+rm(sce_list)
 
 # Loading a sparse matrix saved as a .mtx file, with separate files for genes and cells
 # mtx_data <- create_sce(
@@ -47,10 +70,10 @@ markers$broad <- build_broad_marker_config(
 #   cell_metadata = cell_meta
 #   )
 
-sce <- create_sce(
-  counts = "~/Desktop/example_data/test_input_sc_matrix.rds",
-  cell_metadata = "~/Desktop/example_data/cell_metadata.rds"
-)
+# sce <- create_sce(
+#   counts = "~/Desktop/example_data/test_input_sc_matrix.rds",
+#   cell_metadata = "~/Desktop/example_data/cell_metadata.rds"
+# )
 
 # QC & Pre-process -------------------------------------------------------------
 sce <- assess_cell_quality(sce, remove_failed_cells = TRUE)
@@ -71,6 +94,7 @@ ties     <- list(global_1 = list(), global_2 = list())
 # (All) Cluster-based Labelling ------------------------------------------------
 
 sce <- annotate_broad_clusters(sce, label_col = "broad_cluster")
+
 sce <- subcluster_labels(sce, group_col = "broad_cluster", out_col = "broad_cluster_sub")
 
 clusters$all$marker_ranks <- rank_cluster_markers(sce = sce,
@@ -86,8 +110,9 @@ clusters$all$label_scores <- score_markers_against_panel(
   background_genes = rownames(sce)
 )
 
-clusters$all$final <- assign_fine_labels(cluster_col = sce$broad_cluster_sub,
-                                         scores = clusters$all$label_scores)
+clusters$all$final <- assign_fine_labels(
+  cluster_col = sce$broad_cluster_sub, scores = clusters$all$label_scores
+  )
 
 # (Reduced) Cluster-based Labelling --------------------------------------------
 
@@ -124,6 +149,7 @@ clusters$reduced$final <- assign_fine_labels(cluster_col = reduced$broad_cluster
 # (All) Cell Enrichment-based Labelling ----------------------------------------
 
 sce <- annotate_broad_cells(sce, label_col = "broad_enrichment")
+
 sce <- subcluster_labels(sce, group_col = "broad_enrichment", out_col = "broad_enrichment_sub")
 
 cells$all$marker_ranks <- rank_cluster_markers(sce = sce,

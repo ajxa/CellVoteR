@@ -472,3 +472,36 @@ step_fmt <- function(text, color = "grey60", face = "n") {
     ))
   }
 }
+
+
+#' Create a new filename with a timestamp
+#'
+#' @param filename The filename.
+#' @param filepath The path where the file should be saved.
+#' @param timestamp_format The format for the timestamp
+#' @returns a timestamped filename including a path (if one is supplied)
+#' @export
+nf = function(filename,
+              filepath = NULL,
+              timestamp_format = "%Y-%m-%dT%H-%M-%S") {
+
+  if(missing(filename)) cli::cli_abort("please supply a name")
+  if(!is.null(filepath)) if(!dir.exists(filepath)) cli::cli_abort("path does not exist!")
+
+  time_stamp = format(Sys.time(), timestamp_format)
+
+  file_extension_found = tools::file_ext(filename)
+
+  if(nchar(file_extension_found) <= 1) cli::cli_abort("Please check the file extension supplied to filename!")
+
+  filename = tools::file_path_sans_ext(filename)
+
+  outfilename = paste0(
+    paste(filename, time_stamp, sep = "_"),
+    ".",
+    file_extension_found
+  )
+
+  if(is.null(filepath)) return(outfilename) else return(file.path(filepath, outfilename))
+
+}
