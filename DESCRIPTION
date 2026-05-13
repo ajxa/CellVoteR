@@ -47,6 +47,6 @@ Config/testthat/edition: 3
 Depends: 
     R (>= 4.0)
 LazyData: true
-URL: https://github.com/ajxa/CellVoteR
+URL: https://github.com/ajxa/CellVoteR, https://ajxa.github.io/CellVoteR/
 BugReports: https://github.com/ajxa/CellVoteR/issues
 VignetteBuilder: knitr
