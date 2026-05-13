@@ -9,7 +9,10 @@
 ^Meta$
 ^\.positai$
 ^\.claude$
+<<<<<<< HEAD
 ^_pkgdown\.yml$
 ^docs$
 ^pkgdown$
 ^\.github$
+=======
+>>>>>>> ad733f6 (Updated lockfile and added pkgdown site files)

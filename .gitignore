@@ -8,4 +8,7 @@ inst/doc
 /doc/
 /Meta/
 .positai
+<<<<<<< HEAD
 docs
+=======
+>>>>>>> ad733f6 (Updated lockfile and added pkgdown site files)
