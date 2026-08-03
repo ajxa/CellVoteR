@@ -15,6 +15,12 @@ sce <- create_sce(
   cell_metadata = "~/Desktop/example_data/cell_metadata.rds"  # optional, also accepts .csv/.tsv
 )
 
+input_dir <- "~/Desktop/OneDrive - University of Leeds/analysis/Multiomics/Data/cellvoter_inputs/"
+
+patient_samples <- list.files(input_dir, full.names = TRUE)
+
+sce <- create_sce(counts  =  patient_samples[4])
+
 # 3.) QC and removal of  low-quality cells (optional) --------------------------
 
 sce <- assess_cell_quality(sce, remove_failed_cells = TRUE)
@@ -28,7 +34,10 @@ sce <- normalize_counts(sce)
 # This clusters both gene sets, attaches marker config and filtered fine markers
 # to metadata, and stores the reduced altExp under "user_panel"
 
-sce <- prepare_sce(sce, markers)
+# Need to look into this where we have clusters with a small numbe of cells we skip
+# assignment, but in cases where we have a cluster that has just one cell, we have an
+# issue with a variance calculation
+sce <- prepare_sce(sce, markers, k = 20, resolution = 1.2, n_hvgs = 2000, n_pcs = 50)
 
 # 6.) Run ensemble annotation --------------------------------------------------
 # Default run

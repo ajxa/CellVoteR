@@ -1,7 +1,7 @@
 # Assign broad labels based on the median rank of validated markers
 
 Assigns broad cluster labels using ranked marker tables produced by
-[`rank_cluster_markers`](rank_cluster_markers.md).
+[`rank_cluster_markers`](https://ajxa.github.io/CellVoteR/reference/rank_cluster_markers.md).
 
 ## Usage
 
@@ -30,8 +30,9 @@ label_broad_clusters(
 - broad_config:
 
   Named list or `NULL`. Validated broad marker definitions as produced
-  by [`build_broad_marker_config`](build_broad_marker_config.md). If
-  `NULL`, extracted from
+  by
+  [`build_broad_marker_config`](https://ajxa.github.io/CellVoteR/reference/build_broad_marker_config.md).
+  If `NULL`, extracted from
   `metadata(sce)[[marker_config_key]][["broad"]]`.
 
 - marker_config_key:
@@ -42,7 +43,7 @@ label_broad_clusters(
 - ranked_markers:
 
   List or `NULL`. Ranked marker result from
-  [`rank_cluster_markers`](rank_cluster_markers.md)`(return_list = TRUE)`.
+  [`rank_cluster_markers`](https://ajxa.github.io/CellVoteR/reference/rank_cluster_markers.md)`(return_list = TRUE)`.
   If `NULL`, extracted from `metadata(sce)[[ranked_markers_key]]`.
 
 - ranked_markers_key:

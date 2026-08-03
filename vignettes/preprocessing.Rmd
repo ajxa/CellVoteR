@@ -1,0 +1,88 @@
+---
+title: "Preprocessing and Analysis Tracks"
+author: "Shoaib Ajaib"
+date: "`r Sys.Date()`"
+output:
+  rmdformats::downcute:
+    self_contained: true
+    default_style: "light"
+    downcute_theme: "default"
+    code_folding: show
+    toc_depth: 4
+    toc_float: true
+vignette: >
+  %\VignetteIndexEntry{Preprocessing and Analysis Tracks}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>",
+  eval = FALSE
+)
+```
+
+# Overview
+
+This article describes the preprocessing steps used before running CellVoteR annotation.
+
+The main steps are:
+
+1. Create a `SingleCellExperiment` object.
+2. Assess cell quality.
+3. Normalise counts.
+4. Build full and reduced analysis tracks with `prepare_sce()`.
+
+# Create a SingleCellExperiment
+
+```{r create-sce}
+sce <- create_sce(
+  counts        = "path/to/counts.rds",
+  cell_metadata = "path/to/metadata.rds"
+)
+```
+
+# Quality Control
+
+```{r qc}
+sce <- assess_cell_quality(sce, remove_failed_cells = TRUE)
+```
+
+# Normalisation
+
+```{r normalise}
+sce <- normalize_counts(sce)
+```
+
+# Build Analysis Tracks
+
+```{r prepare}
+sce <- prepare_sce(sce, markers)
+```
+
+# Automatic Parameter Estimation
+
+`prepare_sce()` can estimate clustering and dimensionality-reduction parameters automatically based on dataset size.
+
+```{r prepare-custom}
+sce <- prepare_sce(
+  sce,
+  markers,
+  n_hvgs     = 3000L,
+  n_pcs      = 30L,
+  k          = 20L,
+  resolution = 0.8
+)
+```
+
+# Marker Overlap Reporting
+
+```{r missing-markers}
+metadata(sce)$missing_by_label
+```
+
+# Resulting Object Structure
+
+After preprocessing, the `SingleCellExperiment` contains the assays, reduced dimensions, cluster labels, marker configuration, and reduced marker-panel experiment needed by the annotation workflow.

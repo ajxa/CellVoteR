@@ -4,8 +4,8 @@ Reads a marker definition file (csv, tab-separated txt, or xlsx) and
 organises it into a hierarchical list suitable for two-tier (broad -\>
 fine) cell-type annotation pipelines. The returned broad markers are a
 simple named list of character vectors intended to be passed to
-[`build_broad_marker_config()`](build_broad_marker_config.md) as a
-subsequent step to attach priority, threshold, and co-expression
+[`build_broad_marker_config()`](https://ajxa.github.io/CellVoteR/reference/build_broad_marker_config.md)
+as a subsequent step to attach priority, threshold, and co-expression
 settings.
 
 ## Usage
@@ -51,8 +51,8 @@ A named list with components:
 
   Named list of character vectors - one element per broad category,
   values are marker gene symbols. Pass this to
-  [`build_broad_marker_config()`](build_broad_marker_config.md) to
-  generate the full configuration.
+  [`build_broad_marker_config()`](https://ajxa.github.io/CellVoteR/reference/build_broad_marker_config.md)
+  to generate the full configuration.
 
 - fine:
 
@@ -120,8 +120,8 @@ fine rows cause an error.
 
 ## See also
 
-[`build_broad_marker_config`](build_broad_marker_config.md) for
-configuring the broad markers returned by this function.
+[`build_broad_marker_config`](https://ajxa.github.io/CellVoteR/reference/build_broad_marker_config.md)
+for configuring the broad markers returned by this function.
 
 ## Examples
 

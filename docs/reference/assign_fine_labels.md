@@ -22,8 +22,8 @@ assign_fine_labels(cluster_col, scores)
 - scores:
 
   A `data.frame` as returned by
-  [`score_markers_against_panel`](score_markers_against_panel.md), with
-  columns `cluster_name`, `marker_set_name`, `fisher_p`, and
+  [`score_markers_against_panel`](https://ajxa.github.io/CellVoteR/reference/score_markers_against_panel.md),
+  with columns `cluster_name`, `marker_set_name`, `fisher_p`, and
   `similarity`.
 
 ## Value
