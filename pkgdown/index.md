@@ -8,11 +8,11 @@ marker-reduced feature spaces, then resolves agreement and disagreement
 through a configurable consensus voting step.
 
 
-## Workflow
-
 <img src="man/figures/cellvoter-workflow.svg"
      alt="CellVoteR workflow"
      width="100%">
+
+<hr>
 
 ## Installation
 
@@ -22,6 +22,7 @@ You can install the development version from GitHub:
 # install.packages("devtools")
 devtools::install_github("ajxa/CellVoteR")
 ```
+
 
 ## Quick Start
 
@@ -58,11 +59,69 @@ sce$cellVoteR_method <- consensus$method
 table(sce$cellVoteR_label)
 
 ```
-## Learn More
 
-- [Introduction to CellVoteR](articles/intro_to_CellVoteR.html)
-- [User inputs and required formats](articles/user_inputs.html)
-- [Preprocessing and analysis tracks](articles/preprocessing.html)
-- [Annotation methods](articles/annotation_methods.html)
-- [Consensus and results](articles/consensus_and_results.html)
-- [Troubleshooting](articles/troubleshooting.html)
+<div class="row">
+<div class="col-md-6">
+
+## Getting started
+
+[Introduction to CellVoteR](articles/intro_to_CellVoteR.html)  
+A short walkthrough of the complete CellVoteR workflow.
+
+[User inputs and required formats](articles/user_inputs.html)  
+How to structure count matrices, metadata, and marker files.
+
+[Preprocessing and analysis tracks](articles/preprocessing.html)  
+QC, normalisation, marker overlap checks, and feature-space construction.
+
+</div>
+<div class="col-md-6">
+
+## Annotation workflow
+
+[Annotation methods](articles/annotation_methods.html)  
+The four primary methods and two global tie-breakers.
+
+[Consensus and results](articles/consensus_and_results.html)  
+How final labels are resolved and inspected.
+
+</div>
+</div>
+
+
+<div class="row">
+<div class="col-md-8">
+
+## Practical guidance
+
+[Troubleshooting](articles/troubleshooting.html)  
+Common issues with marker overlap, unresolved labels, and large datasets.
+
+</div>
+</div>
+
+
+<div class="row">
+<div class="col-md-4">
+
+## Source
+
+[Browse source code](https://github.com/ajxa/CellVoteR)  
+[Report a bug](https://github.com/ajxa/CellVoteR/issues)
+
+</div>
+<div class="col-md-4">
+
+## License
+
+[Full license](LICENSE.html)
+
+</div>
+<div class="col-md-4">
+
+## Citation
+
+[How to cite CellVoteR](authors.html#citation)
+
+</div>
+</div>

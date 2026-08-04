@@ -1,59 +1,60 @@
 # Troubleshooting
 
-## Overview
-
 This article collects common issues and practical checks for CellVoteR
 workflows.
 
-## Low Marker Overlap
+## Low marker overlap
 
 If
 [`prepare_sce()`](https://ajxa.github.io/CellVoteR/reference/prepare_sce.md)
-reports low marker overlap, inspect the missing marker report:
+warns about low fine marker overlap, you can inspect which labels are
+missing markers with:
 
 ``` r
 
 metadata(sce)$missing_by_label
 ```
 
-Common causes include gene symbol mismatches, platform-specific gene
-capture, or marker sets from a different species or annotation source.
+Consider whether the missing genes are platform-specific (e.g. not
+captured by your assay technology), or whether alternative gene symbols
+should be used.
 
-## High Unresolved Rate
+## High unresolved rate
 
-If many cells are assigned the unresolved label, inspect method-level
-agreement:
-
-``` r
-
-table(results$labels$method_1, results$labels$method_2)
-table(results$labels$method_3, results$labels$method_4)
-```
-
-You can also re-run consensus with less conservative settings:
+If many cells are labelled `"unknown"` after consensus, try:
 
 ``` r
 
+# 1. Allow even splits
 consensus <- resolve_consensus_labels(
-  label_list        = results$labels,
-  method_names      = results$method_names,
-  tie_breaker_names = results$tie_breaker_names,
-  unassigned_label  = "unknown",
-  allow_even_split  = TRUE,
-  ordered_tiebreak  = FALSE
+  ...,
+  allow_even_split = TRUE
 )
+
+# 2. Disable ordered tie-breaking so either tie-breaker can resolve
+consensus <- resolve_consensus_labels(
+  ...,
+  ordered_tiebreak = FALSE
+)
+
+# 3. Inspect which method combinations are causing disagreements
+table(results$labels$method_1, results$labels$method_2)
 ```
 
-## Collapsed Broad Labels
+## Collapsed broad labels
 
 If all clusters receive the same broad label, CellVoteR retains the
-original cluster structure automatically. This can be expected in highly
-homogeneous datasets.
+original cluster structure automatically. This is expected behaviour for
+highly homogeneous datasets (e.g. a sample consisting entirely of tumour
+cells). In this case, the numeric cluster prefixes (e.g. `1_sc1`,
+`2_sc1`) trigger testing against the full fine marker panel rather than
+a lineage-specific subset.
 
-## Large Datasets
+## Large datasets
 
-For datasets that exceed available memory, consider storing the object
-in HDF5-backed format after creating the initial SCE:
+For datasets exceeding available RAM, convert the SCE to HDF5-backed
+storage after
+[`create_sce()`](https://ajxa.github.io/CellVoteR/reference/create_sce.md):
 
 ``` r
 
@@ -61,9 +62,13 @@ HDF5Array::saveHDF5SummarizedExperiment(sce, dir = "my_hdf5_sce")
 sce <- HDF5Array::loadHDF5SummarizedExperiment("my_hdf5_sce")
 ```
 
-## Parallelisation
+Whilst this has been implemented and tested, it is not yet a fully
+supported workflow. Please report any issues which may arise.
 
-Some internal steps support parallel execution through `BiocParallel`:
+### Parallelisation
+
+Key functions accept a `BPPARAM` argument for parallelisation via
+[`BiocParallel`](https://bioconductor.org/packages/BiocParallel/):
 
 ``` r
 

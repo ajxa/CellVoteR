@@ -8,9 +8,9 @@ complementary annotation strategies across full and marker-reduced
 feature spaces, then resolves agreement and disagreement through a
 configurable consensus voting step.
 
-## Workflow
-
 ![CellVoteR workflow](reference/figures/cellvoter-workflow.svg)
+
+------------------------------------------------------------------------
 
 ## Installation
 
@@ -58,16 +58,47 @@ sce$cellVoteR_method <- consensus$method
 table(sce$cellVoteR_label)
 ```
 
-## Learn More
+## Getting started
 
-- [Introduction to
-  CellVoteR](https://ajxa.github.io/CellVoteR/articles/intro_to_CellVoteR.md)
-- [User inputs and required
-  formats](https://ajxa.github.io/CellVoteR/articles/user_inputs.md)
-- [Preprocessing and analysis
-  tracks](https://ajxa.github.io/CellVoteR/articles/preprocessing.md)
-- [Annotation
-  methods](https://ajxa.github.io/CellVoteR/articles/annotation_methods.md)
-- [Consensus and
-  results](https://ajxa.github.io/CellVoteR/articles/consensus_and_results.md)
-- [Troubleshooting](https://ajxa.github.io/CellVoteR/articles/troubleshooting.md)
+[Introduction to
+CellVoteR](https://ajxa.github.io/CellVoteR/articles/intro_to_CellVoteR.md)  
+A short walkthrough of the complete CellVoteR workflow.
+
+[User inputs and required
+formats](https://ajxa.github.io/CellVoteR/articles/user_inputs.md)  
+How to structure count matrices, metadata, and marker files.
+
+[Preprocessing and analysis
+tracks](https://ajxa.github.io/CellVoteR/articles/preprocessing.md)  
+QC, normalisation, marker overlap checks, and feature-space
+construction.
+
+## Annotation workflow
+
+[Annotation
+methods](https://ajxa.github.io/CellVoteR/articles/annotation_methods.md)  
+The four primary methods and two global tie-breakers.
+
+[Consensus and
+results](https://ajxa.github.io/CellVoteR/articles/consensus_and_results.md)  
+How final labels are resolved and inspected.
+
+## Practical guidance
+
+[Troubleshooting](https://ajxa.github.io/CellVoteR/articles/troubleshooting.md)  
+Common issues with marker overlap, unresolved labels, and large
+datasets.
+
+## Source
+
+[Browse source code](https://github.com/ajxa/CellVoteR)  
+[Report a bug](https://github.com/ajxa/CellVoteR/issues)
+
+## License
+
+[Full license](https://ajxa.github.io/CellVoteR/LICENSE.md)
+
+## Citation
+
+[How to cite
+CellVoteR](https://ajxa.github.io/CellVoteR/authors.html#citation)

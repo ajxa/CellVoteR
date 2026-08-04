@@ -3,11 +3,12 @@
 ## Overview
 
 CellVoteR is an ensemble-based pipeline for robust cell type annotation
-in single-cell RNA-seq data. Rather than assigning labels from a single
-marker score or clustering strategy, CellVoteR runs complementary
-annotation methods across two feature spaces and resolves the results
-through a configurable consensus step. The workflow has four main
-stages:
+in single-cell RNA-seq data.
+
+Rather than assigning labels from a single marker score or clustering
+strategy, CellVoteR runs complementary annotation methods across two
+feature spaces and resolves the results through a configurable consensus
+step. The workflow has four main stages:
 
 1.  Prepare a SingleCellExperiment object from raw counts.
 2.  Load and configure broad and fine marker sets.
@@ -81,41 +82,21 @@ disagreement.
 
 ## Where to Go Next?
 
-For details on input file formats and marker structure, see
-vignette(“user_inputs”). For preprocessing, analysis tracks, and
-prepare_sce(), see the preprocessing article. For the annotation methods
-and custom parameters, see the annotation methods article. For consensus
-voting, output inspection, and troubleshooting, see the consensus and
-results articles.
+- For details on input file formats and marker structure, see [User
+  inputs and required
+  formats](https://ajxa.github.io/CellVoteR/articles/user_inputs.md).
 
-## Session Info
+- For information on preprocessing, normalisation and preparing the
+  analysis tracks, see [Preprocessing and analysis
+  tracks](https://ajxa.github.io/CellVoteR/articles/preprocessing.md).
 
-    #> R version 4.4.1 (2024-06-14)
-    #> Platform: aarch64-apple-darwin20
-    #> Running under: macOS 26.5.2
-    #> 
-    #> Matrix products: default
-    #> BLAS:   /Library/Frameworks/R.framework/Versions/4.4-arm64/Resources/lib/libRblas.0.dylib 
-    #> LAPACK: /Library/Frameworks/R.framework/Versions/4.4-arm64/Resources/lib/libRlapack.dylib;  LAPACK version 3.12.0
-    #> 
-    #> locale:
-    #> [1] en_US.UTF-8/en_US.UTF-8/en_US.UTF-8/C/en_US.UTF-8/en_US.UTF-8
-    #> 
-    #> time zone: Europe/London
-    #> tzcode source: internal
-    #> 
-    #> attached base packages:
-    #> [1] stats     graphics  grDevices datasets  utils     methods   base     
-    #> 
-    #> loaded via a namespace (and not attached):
-    #>  [1] cli_3.6.6           knitr_1.51          rlang_1.2.0        
-    #>  [4] xfun_0.54           otel_0.2.0          renv_1.0.7         
-    #>  [7] textshaping_1.0.4   jsonlite_2.0.0      htmltools_0.5.9    
-    #> [10] ragg_1.5.0          sass_0.4.10         rmarkdown_2.31     
-    #> [13] evaluate_1.0.5      jquerylib_0.1.4     rmdformats_1.0.4   
-    #> [16] fastmap_1.2.0       yaml_2.3.11         lifecycle_1.0.5    
-    #> [19] bookdown_0.46       BiocManager_1.30.27 compiler_4.4.1     
-    #> [22] fs_1.6.6            htmlwidgets_1.6.4   rstudioapi_0.17.1  
-    #> [25] systemfonts_1.3.1   digest_0.6.39       R6_2.6.1           
-    #> [28] bslib_0.9.0         tools_4.4.1         pkgdown_2.2.0      
-    #> [31] cachem_1.1.0        desc_1.4.3
+- For information on the individual annotation methods, see [Annotation
+  methods](https://ajxa.github.io/CellVoteR/articles/annotation_methods.md)
+  .
+
+- For details on the consensus resolution step, see [Consensus and
+  results](https://ajxa.github.io/CellVoteR/articles/consensus_and_results.md).
+
+- For any additional practical guidance, including troubleshooting tips
+  and common issues, see
+  [Troubleshooting](https://ajxa.github.io/CellVoteR/articles/troubleshooting.md).

@@ -34,7 +34,6 @@
 
     <div id="navbar" class="collapse navbar-collapse ms-3">
       <ul class="navbar-nav me-auto">
-<li class="nav-item"><a class="nav-link" href="../reference/index.html">Reference</a></li>
 <li class="active nav-item dropdown">
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-articles" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Articles</button>
   <ul class="dropdown-menu" aria-labelledby="dropdown-articles">
@@ -46,6 +45,7 @@
     <li><a class="dropdown-item" href="../articles/troubleshooting.html">Troubleshooting</a></li>
   </ul>
 </li>
+<li class="nav-item"><a class="nav-link" href="../reference/index.html">Reference</a></li>
       </ul>
 <ul class="navbar-nav">
 <li class="nav-item"><form class="form-inline" role="search">
@@ -76,7 +76,7 @@
                         <h4 data-toc-skip class="author">Shoaib
 Ajaib</h4>
             
-            <h4 data-toc-skip class="date">2026-08-03</h4>
+            <h4 data-toc-skip class="date">2026-08-04</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/ajxa/CellVoteR/blob/HEAD/vignettes/annotation_methods.Rmd" class="external-link"><code>vignettes/annotation_methods.Rmd</code></a></small>
       <div class="d-none name"><code>annotation_methods.Rmd</code></div>
@@ -84,65 +84,81 @@ Ajaib</h4>
 
     
     
-<div class="section level2">
-<h2 id="overview">Overview<a class="anchor" aria-label="anchor" href="#overview"></a>
-</h2>
 <p>CellVoteR runs four primary annotation methods and two global
-tie-breakers.</p>
-</div>
-<div class="section level2">
-<h2 id="run-cellvoter">Run CellVoteR<a class="anchor" aria-label="anchor" href="#run-cellvoter"></a>
-</h2>
+tie-breakers. These methods are all run in parallel and the results are
+returned in a single list. The <code><a href="../reference/run_cellvoter.html">run_cellvoter()</a></code> function is
+the main entry point for running the annotation methods.</p>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">results</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/run_cellvoter.html">run_cellvoter</a></span><span class="op">(</span><span class="va">sce</span><span class="op">)</span></span></code></pre></div>
-</div>
 <div class="section level2">
 <h2 id="primary-methods">Primary Methods<a class="anchor" aria-label="anchor" href="#primary-methods"></a>
 </h2>
-<table class="table">
-<colgroup>
-<col width="25%">
-<col width="25%">
-<col width="25%">
-<col width="25%">
-</colgroup>
-<thead><tr class="header">
-<th>Method</th>
-<th>Feature space</th>
-<th>Broad strategy</th>
-<th>Fine annotation</th>
-</tr></thead>
-<tbody>
-<tr class="odd">
-<td>Method 1</td>
-<td>Full HVG space</td>
-<td>Cluster-based</td>
-<td>Subcluster marker scoring</td>
-</tr>
-<tr class="even">
-<td>Method 2</td>
-<td>Reduced marker space</td>
-<td>Cluster-based</td>
-<td>Subcluster marker scoring</td>
-</tr>
-<tr class="odd">
-<td>Method 3</td>
-<td>Full HVG space</td>
-<td>Enrichment-based</td>
-<td>Subcluster marker scoring</td>
-</tr>
-<tr class="even">
-<td>Method 4</td>
-<td>Reduced marker space</td>
-<td>Enrichment-based</td>
-<td>Subcluster marker scoring</td>
-</tr>
-</tbody>
-</table>
+<p>Each of the four primary workflows follow the same general
+outline:</p>
+<pre><code>broad annotation
+      ↓
+subcluster_labels()
+      ↓
+rank_cluster_markers()          ←   DE testing per sub-cluster
+      ↓
+extract_top_markers()           ←   select top N genes per cluster
+      ↓
+score_markers_against_panel()   ←   Fisher's Exact Test + overlap similarity
+      ↓
+assign_fine_labels()            ←   best label per cluster    →    mapped to cells</code></pre>
+<div class="section level3">
+<h3 id="broad-annotation-strategies">Broad annotation strategies<a class="anchor" aria-label="anchor" href="#broad-annotation-strategies"></a>
+</h3>
+<p>For the broad annotation step, CellVoteR provides two strategies for
+assigning broad labels to clusters or cells:</p>
+<p><strong>Cluster-based</strong>
+(<code><a href="../reference/annotate_broad_clusters.html">annotate_broad_clusters()</a></code>): Runs DE testing on
+pre-existing unsupervised clusters. Each cluster is assigned the broad
+category whose curated markers have the lowest median rank among
+significantly up-regulated genes (FDR ≤ 0.05, AUC ≥ 0.6 by default).</p>
+<p><strong>Enrichment-based</strong>
+(<code><a href="../reference/annotate_broad_cells.html">annotate_broad_cells()</a></code>): Assigns labels directly to
+individual cells by aggregating expression across each broad category’s
+marker genes and comparing against category-specific thresholds. Does
+not depend on clustering.</p>
+<blockquote>
+<p>In some datasets (highly homogeneous tumour sample), all clusters may
+receive the same broad label. CellVoteR detects this and retains the
+original cluster structure for subclustering rather than collapsing to a
+single group, preserving the fine-resolution information for downstream
+processes.</p>
+</blockquote>
+</div>
+<div class="section level3">
+<h3 id="fine-annotation-overview">Fine annotation overview<a class="anchor" aria-label="anchor" href="#fine-annotation-overview"></a>
+</h3>
+<p>Once broad labels are assigned, the fine annotation workflow is
+applied to each broad category independently. The steps are identical in
+all cases and are as follows:</p>
+<pre><code>`subcluster_labels()`
+          ↓
+`rank_cluster_markers()`
+          ↓
+`extract_top_markers()`
+          ↓
+`score_markers_against_panel()`
+          ↓
+`assign_fine_labels()`
+</code></pre>
+</div>
 </div>
 <div class="section level2">
 <h2 id="global-tie-breakers">Global Tie-breakers<a class="anchor" aria-label="anchor" href="#global-tie-breakers"></a>
 </h2>
+<p>In addition to the four primary workflows, CellVoteR provides two
+global tie-breakers that can be used to resolve conflicts between the
+different methods. These tie-breakers are applied after the primary
+methods have been run and represent the unsupervised case where no broad
+or fine labels are assigned and all the cells are treated as a single
+group, taking all highly variable genes (HVGs) as input or the reduced
+marker space based on the curated marker panel.</p>
+<p>A summary of the tie-breakers, detailing their feature space and
+strategy, is as follows:</p>
 <table class="table">
 <colgroup>
 <col width="33%">
@@ -169,36 +185,67 @@ tie-breakers.</p>
 </table>
 </div>
 <div class="section level2">
-<h2 id="fine-annotation-flow">Fine Annotation Flow<a class="anchor" aria-label="anchor" href="#fine-annotation-flow"></a>
+<h2 id="customising-parameters">Customising parameters<a class="anchor" aria-label="anchor" href="#customising-parameters"></a>
 </h2>
-<pre class="text"><code>broad annotation
-↓
-subcluster_labels()
-↓
-rank_cluster_markers()
-↓
-extract_top_markers()
-↓
-score_markers_against_panel()
-↓
-assign_fine_labels()</code></pre>
-</div>
-<div class="section level2">
-<h2 id="custom-parameters">Custom Parameters<a class="anchor" aria-label="anchor" href="#custom-parameters"></a>
-</h2>
-<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
+<p>The main <code><a href="../reference/run_cellvoter.html">run_cellvoter()</a></code> function accepts an
+<code>annotation_args</code> list which can be used to customise various
+parameters of the underlying internal functions, if required. There
+following parameter lists that can be specified, which each control
+specific aspects of the underlying logic:</p>
+<ul>
+<li>
+<p><strong>rank_args</strong> Controls parameters associated with
+<code><a href="../reference/rank_cluster_markers.html">rank_cluster_markers()</a></code>:</p>
+<ul>
+<li>assay_type</li>
+<li>test_type</li>
+<li>direction</li>
+<li>pval_type</li>
+<li>min_prop</li>
+<li>BPPARAM</li>
+</ul>
+</li>
+<li><p><strong>broad_args</strong> is identical to the
+<code>rank_args</code>, but only controls the ranking inside the
+<code>annotate_broad_clusters</code> function. This is useful for
+altering the parameters which control how the broad cell lineage labels
+(e.g, immune, vasculature) are defined - these broad markers are small
+and highly specific and so you may wish to use a more lenient
+<code>min_prop</code> compared to the fine labels and this allows for
+such fine control of the process.</p></li>
+<li>
+<p><strong>extract_args</strong> Controls parameters associated with
+<code><a href="../reference/extract_top_markers.html">extract_top_markers()</a></code>:</p>
+<ul>
+<li>fdr_threshold</li>
+<li>effect_threshold</li>
+<li>target_n</li>
+</ul>
+</li>
+</ul>
+<p>The following is an example of how this can be used to independently
+alter the broad and fine labelling logic:</p>
+<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">results</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/run_cellvoter.html">run_cellvoter</a></span><span class="op">(</span></span>
 <span>  <span class="va">sce</span>,</span>
 <span>  return_full_output <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>  annotation_args <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span></span>
+<span></span>
+<span>    <span class="co"># Controls ranking inside annotate_broad_clusters (methods 1 and 2)</span></span>
+<span>    <span class="co"># Lenient min_prop appropriate for small, specific broad marker sets</span></span>
 <span>    broad_args <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span></span>
 <span>      test_type <span class="op">=</span> <span class="st">"wilcox"</span>,</span>
 <span>      min_prop  <span class="op">=</span> <span class="fl">0.1</span></span>
 <span>    <span class="op">)</span>,</span>
+<span></span>
+<span>    <span class="co"># Controls ranking inside .run_fine_annotation (all six methods)</span></span>
+<span>    <span class="co"># Stricter settings for fine sub-cluster marker extraction</span></span>
 <span>    rank_args <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span></span>
 <span>      test_type <span class="op">=</span> <span class="st">"wilcox"</span>,</span>
 <span>      min_prop  <span class="op">=</span> <span class="fl">0.25</span></span>
 <span>    <span class="op">)</span>,</span>
+<span></span>
+<span>    <span class="co"># Controls top marker extraction</span></span>
 <span>    extract_args <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span></span>
 <span>      fdr_threshold    <span class="op">=</span> <span class="fl">0.05</span>,</span>
 <span>      effect_threshold <span class="op">=</span> <span class="fl">0.6</span>,</span>
@@ -206,13 +253,41 @@ assign_fine_labels()</code></pre>
 <span>    <span class="op">)</span></span>
 <span>  <span class="op">)</span></span>
 <span><span class="op">)</span></span></code></pre></div>
+<blockquote>
+<p><strong>broad_args</strong> vs <strong>rank_args</strong>: these both
+control <code><a href="../reference/rank_cluster_markers.html">rank_cluster_markers()</a></code> but at different workflow
+stages. <em>broad_args</em> affects how broad lineage labels are
+assigned (methods 1 and 2 only); <em>rank_args</em> affects how
+sub-cluster marker genes are extracted for Fisher scoring (all six
+methods). Methods 3 and 4 use <em>rank_args</em> only, as the
+enrichment-based broad step does not call
+<em>rank_cluster_markers()</em>.</p>
+</blockquote>
 </div>
 <div class="section level2">
-<h2 id="full-outputs">Full Outputs<a class="anchor" aria-label="anchor" href="#full-outputs"></a>
+<h2 id="outputs">Outputs<a class="anchor" aria-label="anchor" href="#outputs"></a>
 </h2>
-<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">results</span><span class="op">$</span><span class="va">full_output</span><span class="op">$</span><span class="va">method_1</span><span class="op">$</span><span class="va">scores</span></span>
+<blockquote>
+<p>By Setting the <code>return_full_output</code> =
+<strong>TRUE</strong> in <code><a href="../reference/run_cellvoter.html">run_cellvoter()</a></code>, the function
+returns all of the per-cluster Fisher scores and similarity values are
+for every method (by default this is set to <em>FALSE</em>). These
+scores can be used to inspect the per-cluster scoring and to understand
+how the final consensus label was derived. The following code shows how
+to access these scores:</p>
+</blockquote>
+<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="co"># Per-cluster score table for method 1</span></span>
+<span><span class="va">results</span><span class="op">$</span><span class="va">full_output</span><span class="op">$</span><span class="va">method_1</span><span class="op">$</span><span class="va">scores</span></span>
+<span></span>
+<span><span class="co"># Per-cluster score table for tie-breaker 2</span></span>
 <span><span class="va">results</span><span class="op">$</span><span class="va">full_output</span><span class="op">$</span><span class="va">global_2</span><span class="op">$</span><span class="va">scores</span></span></code></pre></div>
+</div>
+<div class="section level2">
+<h2 id="next-steps">Next Steps<a class="anchor" aria-label="anchor" href="#next-steps"></a>
+</h2>
+<p>Following annotation, the next step is to resolve the consensus
+labels and attach them to the SCE object. This is covered in the <a href="consensus_and_results.html">Consensus and results</a> article.</p>
 </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
     </nav></aside>

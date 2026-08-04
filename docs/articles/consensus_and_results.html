@@ -34,7 +34,6 @@
 
     <div id="navbar" class="collapse navbar-collapse ms-3">
       <ul class="navbar-nav me-auto">
-<li class="nav-item"><a class="nav-link" href="../reference/index.html">Reference</a></li>
 <li class="active nav-item dropdown">
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-articles" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Articles</button>
   <ul class="dropdown-menu" aria-labelledby="dropdown-articles">
@@ -46,6 +45,7 @@
     <li><a class="dropdown-item" href="../articles/troubleshooting.html">Troubleshooting</a></li>
   </ul>
 </li>
+<li class="nav-item"><a class="nav-link" href="../reference/index.html">Reference</a></li>
       </ul>
 <ul class="navbar-nav">
 <li class="nav-item"><form class="form-inline" role="search">
@@ -76,7 +76,7 @@
                         <h4 data-toc-skip class="author">Shoaib
 Ajaib</h4>
             
-            <h4 data-toc-skip class="date">2026-08-03</h4>
+            <h4 data-toc-skip class="date">2026-08-04</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/ajxa/CellVoteR/blob/HEAD/vignettes/consensus_and_results.Rmd" class="external-link"><code>vignettes/consensus_and_results.Rmd</code></a></small>
       <div class="d-none name"><code>consensus_and_results.Rmd</code></div>
@@ -84,15 +84,12 @@ Ajaib</h4>
 
     
     
-<div class="section level2">
-<h2 id="overview">Overview<a class="anchor" aria-label="anchor" href="#overview"></a>
-</h2>
-<p>This article describes how CellVoteR resolves method-level
-annotations into final cell labels.</p>
-</div>
-<div class="section level2">
-<h2 id="resolve-consensus-labels">Resolve Consensus Labels<a class="anchor" aria-label="anchor" href="#resolve-consensus-labels"></a>
-</h2>
+<p>After running the ensemble annotation methods, the next step is to
+resolve the results into a final set of cell labels. This is done
+through a configurable consensus resolution step. This step is
+intentionally separate from the annotation methods, allowing you to
+adjust voting parameters and run <code><a href="../reference/resolve_consensus_labels.html">resolve_consensus_labels()</a></code>
+without needing to re-running the entire annotation pipeline.</p>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">consensus</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/resolve_consensus_labels.html">resolve_consensus_labels</a></span><span class="op">(</span></span>
 <span>  label_list        <span class="op">=</span> <span class="va">results</span><span class="op">$</span><span class="va">labels</span>,</span>
@@ -102,16 +99,36 @@ annotations into final cell labels.</p>
 <span>  allow_even_split  <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>  ordered_tiebreak  <span class="op">=</span> <span class="cn">TRUE</span></span>
 <span><span class="op">)</span></span></code></pre></div>
-</div>
 <div class="section level2">
-<h2 id="attach-labels">Attach Labels<a class="anchor" aria-label="anchor" href="#attach-labels"></a>
+<h2 id="decision-hierarchy">Decision hierarchy<a class="anchor" aria-label="anchor" href="#decision-hierarchy"></a>
 </h2>
-<div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">sce</span><span class="op">$</span><span class="va">cellVoteR_label</span>  <span class="op">&lt;-</span> <span class="va">consensus</span><span class="op">$</span><span class="va">label</span></span>
-<span><span class="va">sce</span><span class="op">$</span><span class="va">cellVoteR_method</span> <span class="op">&lt;-</span> <span class="va">consensus</span><span class="op">$</span><span class="va">method</span></span></code></pre></div>
+<p>The process of resolving a final label for each cell is based on a
+simple voting scheme. Each of the four primary annotation workflows
+casts a “vote” for a label, and the two global tie-breakers are then
+used to resolve any ties.</p>
+<p>For each cell, the following logic is applied in order:</p>
+<ol style="list-style-type: decimal">
+<li><p><strong>Strong majority</strong> — if one label receives strictly
+more than 50% of method votes (3 of 4 by default) it is assigned
+immediately.</p></li>
+<li><p><strong>Tie-breaker agreement</strong> — if the two tie-breakers
+agree with each other <em>and</em> their shared label matches the
+leading candidate, that label is assigned.</p></li>
+<li><p><strong>Ordered tie-breaking</strong>
+(<code>ordered_tiebreak = TRUE</code>, default) — tie-breaker 1 is tried
+first; if it matches the leading candidate the label is assigned.
+Otherwise tie-breaker 2 is tried.</p></li>
+<li><p><strong>Either tie-breaking</strong>
+(<code>ordered_tiebreak = FALSE</code>) — either tie-breaker agreeing
+with the leading candidate is sufficient, with no priority between
+them.</p></li>
+<li><p><strong>Unresolved</strong> — if every method disagrees (no
+leading candidate exists) or no tie-breaker resolves the split,
+<code>unassigned_label</code> is assigned.</p></li>
+</ol>
 </div>
 <div class="section level2">
-<h2 id="voting-parameters">Voting Parameters<a class="anchor" aria-label="anchor" href="#voting-parameters"></a>
+<h2 id="voting-parameters">Voting parameters<a class="anchor" aria-label="anchor" href="#voting-parameters"></a>
 </h2>
 <table class="table">
 <colgroup>
@@ -126,65 +143,95 @@ annotations into final cell labels.</p>
 </tr></thead>
 <tbody>
 <tr class="odd">
-<td><code>allow_even_split</code></td>
-<td><code>FALSE</code></td>
-<td>When <code>TRUE</code>, a 2-of-4 plurality can be accepted</td>
+<td><strong>allow_even_split</strong></td>
+<td><strong>FALSE</strong></td>
+<td>When <strong>TRUE</strong>, a 2-of-4 plurality is accepted as
+majority</td>
 </tr>
 <tr class="even">
-<td><code>ordered_tiebreak</code></td>
-<td><code>TRUE</code></td>
-<td>When <code>TRUE</code>, tie-breakers are checked in priority
-order</td>
+<td><strong>ordered_tiebreak</strong></td>
+<td><strong>TRUE</strong></td>
+<td>When <strong>FALSE</strong>, either tie-breaker can resolve a
+split</td>
 </tr>
 <tr class="odd">
-<td><code>unassigned_label</code></td>
-<td><code>"Unknown"</code></td>
-<td>Label assigned when consensus cannot be resolved</td>
+<td><strong>unassigned_label</strong></td>
+<td><strong>“Unknown”</strong></td>
+<td>Label for unresolved cells</td>
 </tr>
 </tbody>
 </table>
 </div>
 <div class="section level2">
-<h2 id="inspect-results">Inspect Results<a class="anchor" aria-label="anchor" href="#inspect-results"></a>
+<h2 id="saving-labels-back-to-the-sce">Saving labels back to the SCE<a class="anchor" aria-label="anchor" href="#saving-labels-back-to-the-sce"></a>
 </h2>
+<div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">sce</span><span class="op">$</span><span class="va">cellVoteR_label</span>  <span class="op">&lt;-</span> <span class="va">consensus</span><span class="op">$</span><span class="va">label</span></span>
+<span><span class="va">sce</span><span class="op">$</span><span class="va">cellVoteR_method</span> <span class="op">&lt;-</span> <span class="va">consensus</span><span class="op">$</span><span class="va">method</span></span></code></pre></div>
+</div>
+<div class="section level2">
+<h2 id="inspecting-results">Inspecting Results<a class="anchor" aria-label="anchor" href="#inspecting-results"></a>
+</h2>
+<div class="section level3">
+<h3 id="summary-tables">Summary tables<a class="anchor" aria-label="anchor" href="#summary-tables"></a>
+</h3>
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/table.html" class="external-link">table</a></span><span class="op">(</span><span class="va">sce</span><span class="op">$</span><span class="va">cellVoteR_label</span><span class="op">)</span></span>
+<code class="sourceCode R"><span><span class="co"># Final label distribution</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/table.html" class="external-link">table</a></span><span class="op">(</span><span class="va">sce</span><span class="op">$</span><span class="va">cellVoteR_label</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># Decision method breakdown</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/table.html" class="external-link">table</a></span><span class="op">(</span><span class="va">sce</span><span class="op">$</span><span class="va">cellVoteR_method</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># Cross-tabulate label vs decision method</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/table.html" class="external-link">table</a></span><span class="op">(</span><span class="va">sce</span><span class="op">$</span><span class="va">cellVoteR_label</span>, <span class="va">sce</span><span class="op">$</span><span class="va">cellVoteR_method</span><span class="op">)</span></span></code></pre></div>
 </div>
-<div class="section level2">
-<h2 id="compare-method-outputs">Compare Method Outputs<a class="anchor" aria-label="anchor" href="#compare-method-outputs"></a>
-</h2>
+<div class="section level3">
+<h3 id="per-method-label-distributions">Per-method label distributions<a class="anchor" aria-label="anchor" href="#per-method-label-distributions"></a>
+</h3>
+<p>Comparing individual method outputs before consensus is useful for
+understanding where methods agree and disagree:</p>
 <div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/table.html" class="external-link">table</a></span><span class="op">(</span><span class="va">results</span><span class="op">$</span><span class="va">labels</span><span class="op">$</span><span class="va">method_1</span><span class="op">)</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/table.html" class="external-link">table</a></span><span class="op">(</span><span class="va">results</span><span class="op">$</span><span class="va">labels</span><span class="op">$</span><span class="va">method_2</span><span class="op">)</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/table.html" class="external-link">table</a></span><span class="op">(</span><span class="va">results</span><span class="op">$</span><span class="va">labels</span><span class="op">$</span><span class="va">method_3</span><span class="op">)</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/table.html" class="external-link">table</a></span><span class="op">(</span><span class="va">results</span><span class="op">$</span><span class="va">labels</span><span class="op">$</span><span class="va">method_4</span><span class="op">)</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/table.html" class="external-link">table</a></span><span class="op">(</span><span class="va">results</span><span class="op">$</span><span class="va">labels</span><span class="op">$</span><span class="va">global_1</span><span class="op">)</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/table.html" class="external-link">table</a></span><span class="op">(</span><span class="va">results</span><span class="op">$</span><span class="va">labels</span><span class="op">$</span><span class="va">global_2</span><span class="op">)</span></span></code></pre></div>
-</div>
-<div class="section level2">
-<h2 id="method-agreement">Method Agreement<a class="anchor" aria-label="anchor" href="#method-agreement"></a>
-</h2>
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/table.html" class="external-link">table</a></span><span class="op">(</span><span class="va">results</span><span class="op">$</span><span class="va">labels</span><span class="op">$</span><span class="va">method_1</span><span class="op">)</span>   <span class="co"># cluster-based, full</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/table.html" class="external-link">table</a></span><span class="op">(</span><span class="va">results</span><span class="op">$</span><span class="va">labels</span><span class="op">$</span><span class="va">method_2</span><span class="op">)</span>   <span class="co"># cluster-based, reduced</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/table.html" class="external-link">table</a></span><span class="op">(</span><span class="va">results</span><span class="op">$</span><span class="va">labels</span><span class="op">$</span><span class="va">method_3</span><span class="op">)</span>   <span class="co"># enrichment-based, full</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/table.html" class="external-link">table</a></span><span class="op">(</span><span class="va">results</span><span class="op">$</span><span class="va">labels</span><span class="op">$</span><span class="va">method_4</span><span class="op">)</span>   <span class="co"># enrichment-based, reduced</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/table.html" class="external-link">table</a></span><span class="op">(</span><span class="va">results</span><span class="op">$</span><span class="va">labels</span><span class="op">$</span><span class="va">global_1</span><span class="op">)</span>   <span class="co"># tie-breaker 1</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/table.html" class="external-link">table</a></span><span class="op">(</span><span class="va">results</span><span class="op">$</span><span class="va">labels</span><span class="op">$</span><span class="va">global_2</span><span class="op">)</span>   <span class="co"># tie-breaker 2</span></span></code></pre></div>
+<div class="section level4">
+<h4 id="method-agreement">Method agreement<a class="anchor" aria-label="anchor" href="#method-agreement"></a>
+</h4>
+<p>A useful diagnostic is to look at how often all four primary methods
+agree:</p>
 <div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">label_df</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/as.data.frame.html" class="external-link">as.data.frame</a></span><span class="op">(</span><span class="va">results</span><span class="op">$</span><span class="va">labels</span><span class="op">[</span><span class="fl">1</span><span class="op">:</span><span class="fl">4</span><span class="op">]</span><span class="op">)</span></span>
 <span></span>
+<span><span class="co"># Proportion of cells where all four methods agree</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/mean.html" class="external-link">mean</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/apply.html" class="external-link">apply</a></span><span class="op">(</span><span class="va">label_df</span>, <span class="fl">1</span>, <span class="kw">function</span><span class="op">(</span><span class="va">x</span><span class="op">)</span> <span class="fu"><a href="https://rdrr.io/r/base/length.html" class="external-link">length</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/unique.html" class="external-link">unique</a></span><span class="op">(</span><span class="va">x</span><span class="op">)</span><span class="op">)</span> <span class="op">==</span> <span class="fl">1L</span><span class="op">)</span><span class="op">)</span></span>
 <span></span>
+<span><span class="co"># Per-cell method agreement count</span></span>
 <span><span class="va">label_df</span><span class="op">$</span><span class="va">n_agree</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/apply.html" class="external-link">apply</a></span><span class="op">(</span><span class="va">label_df</span>, <span class="fl">1</span>, <span class="kw">function</span><span class="op">(</span><span class="va">x</span><span class="op">)</span> <span class="fu"><a href="https://rdrr.io/r/base/Extremes.html" class="external-link">max</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/table.html" class="external-link">table</a></span><span class="op">(</span><span class="va">x</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/table.html" class="external-link">table</a></span><span class="op">(</span><span class="va">label_df</span><span class="op">$</span><span class="va">n_agree</span><span class="op">)</span></span></code></pre></div>
 </div>
-<div class="section level2">
-<h2 id="re-run-consensus">Re-run Consensus<a class="anchor" aria-label="anchor" href="#re-run-consensus"></a>
-</h2>
+</div>
+<div class="section level3">
+<h3 id="re-running-consensus-with-different-parameters">Re-running consensus with different parameters<a class="anchor" aria-label="anchor" href="#re-running-consensus-with-different-parameters"></a>
+</h3>
 <div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">consensus_liberal</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/resolve_consensus_labels.html">resolve_consensus_labels</a></span><span class="op">(</span></span>
+<code class="sourceCode R"><span><span class="co"># allowing even splits</span></span>
+<span><span class="va">consensus_liberal</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/resolve_consensus_labels.html">resolve_consensus_labels</a></span><span class="op">(</span></span>
 <span>  label_list        <span class="op">=</span> <span class="va">results</span><span class="op">$</span><span class="va">labels</span>,</span>
 <span>  method_names      <span class="op">=</span> <span class="va">results</span><span class="op">$</span><span class="va">method_names</span>,</span>
 <span>  tie_breaker_names <span class="op">=</span> <span class="va">results</span><span class="op">$</span><span class="va">tie_breaker_names</span>,</span>
 <span>  unassigned_label  <span class="op">=</span> <span class="st">"unknown"</span>,</span>
 <span>  allow_even_split  <span class="op">=</span> <span class="cn">TRUE</span></span>
-<span><span class="op">)</span></span></code></pre></div>
+<span><span class="op">)</span></span>
+<span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/table.html" class="external-link">table</a></span><span class="op">(</span><span class="va">consensus_liberal</span><span class="op">$</span><span class="va">label</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># Compare unresolved rate between settings</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/mean.html" class="external-link">mean</a></span><span class="op">(</span><span class="va">consensus</span><span class="op">$</span><span class="va">label</span> <span class="op">==</span> <span class="st">"unknown"</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/mean.html" class="external-link">mean</a></span><span class="op">(</span><span class="va">consensus_liberal</span><span class="op">$</span><span class="va">label</span> <span class="op">==</span> <span class="st">"unknown"</span><span class="op">)</span></span></code></pre></div>
+</div>
 </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
     </nav></aside>

@@ -4,9 +4,12 @@ template:
   bootstrap: 5
   light-switch: true
 
+home:
+  sidebar: false
+
 navbar:
   structure:
-    left:  [reference, articles]
+    left:  [articles, reference]
     right: [search, github, lightswitch]
 
 articles:
