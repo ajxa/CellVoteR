@@ -1,7 +1,7 @@
 #' Load and structure CellVoteR marker definitions
 #'
-#' Reads a marker definition file (csv, tab-separated txt, or xlsx) and
-#' organises it into a hierarchical list suitable for two-tier (broad -> fine)
+#' Reads a marker definition file (csv, tab-separated txt, xlsx, rds) or receives an R
+#' \code{\link[base]{data.frame}} directly and organises it into a hierarchical list suitable for two-tier (broad -> fine)
 #' cell-type annotation pipelines. The returned broad markers are a simple
 #' named list of character vectors intended to be passed to
 #' \code{\link{build_broad_marker_config}()} as a subsequent step to attach
@@ -19,14 +19,15 @@
 #'   \item{marker}{Gene symbol.}
 #' }
 #'
-#' @section Supported file formats:
+#' @section Supported input types:
 #' \describe{
-#'   \item{\code{.csv}}{Comma-separated values, read via
-#'     \code{\link[utils]{read.csv}}.}
-#'   \item{\code{.txt}}{Tab-separated values, read via
-#'     \code{\link[utils]{read.delim}}.}
-#'   \item{\code{.xlsx}}{Excel workbook, read via
-#'     \code{\link[openxlsx]{read.xlsx}}.}
+#'   \item{\code{.csv}}{Comma-separated values, read via \code{\link[utils]{read.csv}}.}
+#'   \item{\code{.txt}}{Tab-separated values, read via \code{\link[utils]{read.delim}}.}
+#'   \item{\code{.xlsx}}{Excel workbook, read via \code{\link[openxlsx]{read.xlsx}}.}
+#'   \item{\code{.rds}}{A saved R object, read via \code{\link[base]{readRDS}}. This
+#'     must contain a \code{data.frame} matching the expected layout.}
+#'   \item{\code{data.frame}}{A \code{data.frame} passed directly via either the
+#'     \code{file_path} or \code{markers} argument.}
 #' }
 #'
 #' @section Category reconciliation:
@@ -35,21 +36,35 @@
 #' an informational message. Broad categories that have \strong{no}
 #' corresponding fine rows cause an error.
 #'
-#' @section Typical workflow:
+#' @section Typical workflow when loading external marker files:
 #' \preformatted{
 #' markers <- load_markers("markers.csv")
 #'
 #' markers$broad <- build_broad_marker_config(
-#'   marker_list    = markers$broad,
-#'   priority_order = c("vasculature", "immune"),
+#'   marker_list            = markers$broad,
+#'   priority_order         = c("vasculature", "immune"),
 #'   per_category_overrides = list(
 #'     immune = list(coexp_min = 2)
 #'   )
 #' )
 #' }
 #'
+#' @section Using internal marker panels:
+#' CellVoteR includes a set of curated marker panels for IDHwt glioblastoma (GBM) under the
+#' \code{marker_panels$GBM} list entry. These panels can be passed directly as a
+#' \code{data.frame} to \code{load_markers()}:
+#' \preformatted{
+#' markers <- load_markers(marker_panels$GBM$gbmap_neftel_full)
+#'
+#' # Or using the explicit markers parameter:
+#' markers <- load_markers(markers = marker_panels$GBM$gbmap_neftel_full)
+#'
+#' }
+#'
 #' @param file_path Character scalar. Path to a \code{.csv}, \code{.txt}
 #'   (tab-separated), or \code{.xlsx} file containing marker definitions.
+#' @param markers Alternative argument for directly passing a \code{data.frame} containing
+#'   marker definitions. If supplied, this overrides \code{file_path}.
 #' @param unnamed_broad_cat_label Character scalar. Label assigned to fine-type
 #'   categories that do not map to any broad category. Defaults to
 #'   \code{"other"}.
@@ -71,7 +86,14 @@
 #'
 #' @examples
 #' \dontrun{
+#' # Load from file
 #' markers <- load_markers("markers.csv")
+
+#' # Load from .rds file
+#' markers <- load_markers("markers.rds")
+
+#' # Load directly from data frame / internal package dataset
+#' markers <- load_markers(marker_panels$GBM$gbmap_neftel_full)
 #'
 #' # Inspect raw broad markers before configuring
 #' names(markers$broad)
@@ -89,7 +111,8 @@
 #'
 #' @export
 #' @export
-load_markers <- function(file_path,
+load_markers <- function(file_path = NULL,
+                         markers = NULL,
                          unnamed_broad_cat_label = "other",
                          type_col = "type",
                          unique_types = c("broad", "fine"),
@@ -97,24 +120,47 @@ load_markers <- function(file_path,
                          label_col = "label",
                          marker_col = "marker") {
 
-  checkmate::assert_string(file_path)
-  checkmate::assert_file_exists(file_path, access = "r")
   checkmate::assert_string(unnamed_broad_cat_label)
   checkmate::assert_character(unique_types, min.len = 1L, any.missing = FALSE)
 
-  # 1.) Read file ----
+  # 1.) Resolve the input ----
 
-  ext <- tolower(tools::file_ext(file_path))
+  if (is.null(file_path) && is.null(markers)) {
+    cli::cli_abort("Please supply either a file path or a data.frame to 'file_path' or 'markers'.")
+  }
 
-  marker_list <- switch(
-    EXPR = ext,
-    csv  = utils::read.csv(file_path, stringsAsFactors = FALSE),
-    txt  = utils::read.delim(file_path, stringsAsFactors = FALSE),
-    xlsx = openxlsx::read.xlsx(file_path),
-    stop("Unsupported file extension '", ext, "'. Expected csv, txt, or xlsx.", call. = FALSE)
-  )
+  if (!is.null(markers)) {
 
-  if (nrow(marker_list) == 0L) stop("Marker file is empty: ", file_path, call. = FALSE)
+    checkmate::assert_data_frame(markers, min.rows = 1L)
+    marker_list <- markers
+
+  } else if (is.data.frame(file_path)) {
+
+    checkmate::assert_data_frame(file_path, min.rows = 1L)
+    marker_list <- file_path
+
+  } else if (is.character(file_path)) {
+
+    checkmate::assert_string(file_path)
+    checkmate::assert_file_exists(file_path, access = "r")
+
+    ext <- tolower(tools::file_ext(file_path))
+
+    marker_list <- switch(
+      EXPR = ext,
+      csv  = utils::read.csv(file_path, stringsAsFactors = FALSE),
+      txt  = utils::read.delim(file_path, stringsAsFactors = FALSE),
+      xlsx = openxlsx::read.xlsx(file_path),
+      rds  = readRDS(file_path),
+      cli::cli_abort("Unsupported file extension '{ext}'. Expected csv, txt, xlsx, or rds.")
+    )
+
+    if (!is.data.frame(marker_list)) {
+      cli::cli_abort("The object loaded from '{file_path}', is not a data.frame.")
+    }
+  } else cli::cli_abort("'file_path' must be a character string path or a data.frame object.")
+
+  if (nrow(marker_list) == 0L) cli::cli_abort("Marker data is empty.")
 
   # 2.) Column validation ----
 
@@ -161,7 +207,17 @@ load_markers <- function(file_path,
 
   if (any(dup_rows)) {
     n_dup <- sum(dup_rows)
-    print_alert("Removed {n_dup} duplicate row{?s} from marker file.", type = "w")
+
+    dup_breakdown <- sort(table(marker_list[dup_rows, "label"]), decreasing = TRUE)
+
+    dup_items <- stats::setNames(
+      paste0(names(dup_breakdown), ": ", as.vector(dup_breakdown)),
+      rep("*", length(dup_breakdown))
+    )
+
+    print_alert("Removed {n_dup} duplicate row{?s} from input:", type = "w")
+    cli::cli_bullets(dup_items)
+
     marker_list <- marker_list[!dup_rows, ]
   }
 

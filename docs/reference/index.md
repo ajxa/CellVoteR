@@ -26,6 +26,8 @@
   : Assign broad labels based on the median rank of validated markers
 - [`load_markers()`](https://ajxa.github.io/CellVoteR/reference/load_markers.md)
   : Load and structure CellVoteR marker definitions
+- [`marker_panels`](https://ajxa.github.io/CellVoteR/reference/marker_panels.md)
+  : Cell Type Marker Panels for Single-Cell Analysis
 - [`nf()`](https://ajxa.github.io/CellVoteR/reference/nf.md) : Create a
   new filename with a timestamp
 - [`normalize_counts()`](https://ajxa.github.io/CellVoteR/reference/normalize_counts.md)

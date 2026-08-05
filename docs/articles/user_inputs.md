@@ -11,10 +11,10 @@
 > 2.  Marker configuration — a structured list of broad and fine cell
 >     type marker genes.
 
-## Preparing input marker
+## Preparing input markers
 
-Markers are the backbone of CellVoteR’s annotation strategy. These are
-organised into two tiers:
+Marker panels are the backbone of CellVoteR’s annotation strategy. These
+are organised into two tiers:
 
 ### Broad markers (lineage-specific)
 
@@ -47,9 +47,10 @@ vs. B cells and Mural cells vs Endothelial cells.
 
 ### Loading markers
 
-User-supplied markers can be loaded from either `Excel`, `CSV`, or `TXT`
-files. Irrespective of format, the file must be structured to contain
-both broad and fine markers, with the following four columns:
+User-supplied markers can be loaded from either `Excel`, `CSV`, `TXT`,
+`RDS` files or supplied directly in the form of an R `data.frame`.
+Irrespective of format, the file must be structured to contain both
+broad and fine markers, with the following four columns:
 
 > - **type** — indicates whether the marker is a *broad* or *fine*
 >
@@ -95,6 +96,37 @@ markers <- load_markers(file_path = "path/to/input_markers.xlsx")
 # Inspect the structure
 str(markers$broad)   # named list of character vectors
 str(markers$fine)    # nested named list: broad category > fine cell type > genes
+```
+
+### Internal marker panels
+
+CellVoteR also ships with a set of internal marker panels, which can be
+used as-is or modified to suit your dataset. These are stored in the
+`marker_panels` dataset and can be accessed as follows:
+
+``` r
+
+names(marker_panels)
+names(marker_panels$GBM)
+```
+
+Currently, the only internal marker panels provided relate to
+glioblastoma (GBM) datasets, but additional panels may be added in
+future updates. However, these panels can serve as a starting point for
+users to create their own custom marker panels for other tissue types
+and disease contexts.
+
+The internal marker panels are structured in the same way as
+user-supplied markers, with broad and fine markers organised into a
+nested list and can be directly supplied to the
+[`load_markers()`](https://ajxa.github.io/CellVoteR/reference/load_markers.md)
+function or explicitly by setting the `markers` parameter to the
+required internal marker list:
+
+``` r
+
+markers <- load_markers(marker_panels$GBM$gbmap_neftel_full)
+markers <- load_markers(markers = marker_panels$GBM$gbmap_neftel_full)
 ```
 
 ### Configuring broad markers

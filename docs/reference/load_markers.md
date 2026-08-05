@@ -1,9 +1,11 @@
 # Load and structure CellVoteR marker definitions
 
-Reads a marker definition file (csv, tab-separated txt, or xlsx) and
-organises it into a hierarchical list suitable for two-tier (broad -\>
-fine) cell-type annotation pipelines. The returned broad markers are a
-simple named list of character vectors intended to be passed to
+Reads a marker definition file (csv, tab-separated txt, xlsx, rds) or
+receives an R [`data.frame`](https://rdrr.io/r/base/data.frame.html)
+directly and organises it into a hierarchical list suitable for two-tier
+(broad -\> fine) cell-type annotation pipelines. The returned broad
+markers are a simple named list of character vectors intended to be
+passed to
 [`build_broad_marker_config()`](https://ajxa.github.io/CellVoteR/reference/build_broad_marker_config.md)
 as a subsequent step to attach priority, threshold, and co-expression
 settings.
@@ -12,7 +14,8 @@ settings.
 
 ``` r
 load_markers(
-  file_path,
+  file_path = NULL,
+  markers = NULL,
   unnamed_broad_cat_label = "other",
   type_col = "type",
   unique_types = c("broad", "fine"),
@@ -28,6 +31,11 @@ load_markers(
 
   Character scalar. Path to a `.csv`, `.txt` (tab-separated), or `.xlsx`
   file containing marker definitions.
+
+- markers:
+
+  Alternative argument for directly passing a `data.frame` containing
+  marker definitions. If supplied, this overrides `file_path`.
 
 - unnamed_broad_cat_label:
 
@@ -81,7 +89,7 @@ The input file must contain at least four columns (names configurable):
 
   Gene symbol.
 
-## Supported file formats
+## Supported input types
 
 - `.csv`:
 
@@ -98,6 +106,17 @@ The input file must contain at least four columns (names configurable):
   Excel workbook, read via
   [`read.xlsx`](https://rdrr.io/pkg/openxlsx/man/read.xlsx.html).
 
+- `.rds`:
+
+  A saved R object, read via
+  [`readRDS`](https://rdrr.io/r/base/readRDS.html). This must contain a
+  `data.frame` matching the expected layout.
+
+- `data.frame`:
+
+  A `data.frame` passed directly via either the `file_path` or `markers`
+  argument.
+
 ## Category reconciliation
 
 Fine-type rows whose `category` does not match any broad category are
@@ -105,18 +124,30 @@ reassigned to `unnamed_broad_cat_label` (default `"other"`) with an
 informational message. Broad categories that have **no** corresponding
 fine rows cause an error.
 
-## Typical workflow
+## Typical workflow when loading external marker files
 
 
     markers <- load_markers("markers.csv")
 
     markers$broad <- build_broad_marker_config(
-      marker_list    = markers$broad,
-      priority_order = c("vasculature", "immune"),
+      marker_list            = markers$broad,
+      priority_order         = c("vasculature", "immune"),
       per_category_overrides = list(
         immune = list(coexp_min = 2)
       )
     )
+
+## Using internal marker panels
+
+CellVoteR includes a set of curated marker panels for IDHwt glioblastoma
+(GBM) under the `marker_panels$GBM` list entry. These panels can be
+passed directly as a `data.frame` to `load_markers()`:
+
+
+    markers <- load_markers(marker_panels$GBM$gbmap_neftel_full)
+
+    # Or using the explicit markers parameter:
+    markers <- load_markers(markers = marker_panels$GBM$gbmap_neftel_full)
 
 ## See also
 
@@ -127,7 +158,12 @@ for configuring the broad markers returned by this function.
 
 ``` r
 if (FALSE) { # \dontrun{
+# Load from file
 markers <- load_markers("markers.csv")
+# Load from .rds file
+markers <- load_markers("markers.rds")
+# Load directly from data frame / internal package dataset
+markers <- load_markers(marker_panels$GBM$gbmap_neftel_full)
 
 # Inspect raw broad markers before configuring
 names(markers$broad)

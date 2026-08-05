@@ -2,6 +2,10 @@
 
 markers <- load_markers(file_path = "~/Desktop/example_data/input_markers.xlsx")
 
+markers <- load_markers(marker_panels$GBM$gbmap_neftel_full)
+markers <- load_markers(markers = marker_panels$GBM$gbmap_neftel_full)
+
+
 markers$broad <- build_broad_marker_config(
   marker_list = markers$broad,
   priority_order = c("vasculature", "immune")

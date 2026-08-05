@@ -76,7 +76,7 @@
                         <h4 data-toc-skip class="author">Shoaib
 Ajaib</h4>
             
-            <h4 data-toc-skip class="date">2026-08-04</h4>
+            <h4 data-toc-skip class="date">2026-08-05</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/ajxa/CellVoteR/blob/HEAD/vignettes/user_inputs.Rmd" class="external-link"><code>vignettes/user_inputs.Rmd</code></a></small>
       <div class="d-none name"><code>user_inputs.Rmd</code></div>
@@ -96,10 +96,10 @@ type marker genes.</p></li>
 </ol>
 </blockquote>
 <div class="section level2">
-<h2 id="preparing-input-marker">Preparing input marker<a class="anchor" aria-label="anchor" href="#preparing-input-marker"></a>
+<h2 id="preparing-input-markers">Preparing input markers<a class="anchor" aria-label="anchor" href="#preparing-input-markers"></a>
 </h2>
-<p>Markers are the backbone of CellVoteR’s annotation strategy. These
-are organised into two tiers:</p>
+<p>Marker panels are the backbone of CellVoteR’s annotation strategy.
+These are organised into two tiers:</p>
 <div class="section level3">
 <h3 id="broad-markers-lineage-specific">Broad markers (lineage-specific)<a class="anchor" aria-label="anchor" href="#broad-markers-lineage-specific"></a>
 </h3>
@@ -136,9 +136,10 @@ cells.</p>
 <h3 id="loading-markers">Loading markers<a class="anchor" aria-label="anchor" href="#loading-markers"></a>
 </h3>
 <p>User-supplied markers can be loaded from either <code>Excel</code>,
-<code>CSV</code>, or <code>TXT</code> files. Irrespective of format, the
-file must be structured to contain both broad and fine markers, with the
-following four columns:</p>
+<code>CSV</code>, <code>TXT</code>, <code>RDS</code> files or supplied
+directly in the form of an R <code>data.frame</code>. Irrespective of
+format, the file must be structured to contain both broad and fine
+markers, with the following four columns:</p>
 <blockquote>
 <ul>
 <li><p><strong>type</strong> — indicates whether the marker is a
@@ -252,12 +253,35 @@ to clusters and cells.</p>
 <span><span class="fu"><a href="https://rdrr.io/r/utils/str.html" class="external-link">str</a></span><span class="op">(</span><span class="va">markers</span><span class="op">$</span><span class="va">fine</span><span class="op">)</span>    <span class="co"># nested named list: broad category &gt; fine cell type &gt; genes</span></span></code></pre></div>
 </div>
 <div class="section level3">
+<h3 id="internal-marker-panels">Internal marker panels<a class="anchor" aria-label="anchor" href="#internal-marker-panels"></a>
+</h3>
+<p>CellVoteR also ships with a set of internal marker panels, which can
+be used as-is or modified to suit your dataset. These are stored in the
+<code>marker_panels</code> dataset and can be accessed as follows:</p>
+<div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/names.html" class="external-link">names</a></span><span class="op">(</span><span class="va">marker_panels</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/names.html" class="external-link">names</a></span><span class="op">(</span><span class="va">marker_panels</span><span class="op">$</span><span class="va">GBM</span><span class="op">)</span></span></code></pre></div>
+<p>Currently, the only internal marker panels provided relate to
+glioblastoma (GBM) datasets, but additional panels may be added in
+future updates. However, these panels can serve as a starting point for
+users to create their own custom marker panels for other tissue types
+and disease contexts.</p>
+<p>The internal marker panels are structured in the same way as
+user-supplied markers, with broad and fine markers organised into a
+nested list and can be directly supplied to the
+<code><a href="../reference/load_markers.html">load_markers()</a></code> function or explicitly by setting the
+<code>markers</code> parameter to the required internal marker list:</p>
+<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">markers</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/load_markers.html">load_markers</a></span><span class="op">(</span><span class="va">marker_panels</span><span class="op">$</span><span class="va">GBM</span><span class="op">$</span><span class="va">gbmap_neftel_full</span><span class="op">)</span></span>
+<span><span class="va">markers</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/load_markers.html">load_markers</a></span><span class="op">(</span>markers <span class="op">=</span> <span class="va">marker_panels</span><span class="op">$</span><span class="va">GBM</span><span class="op">$</span><span class="va">gbmap_neftel_full</span><span class="op">)</span></span></code></pre></div>
+</div>
+<div class="section level3">
 <h3 id="configuring-broad-markers">Configuring broad markers<a class="anchor" aria-label="anchor" href="#configuring-broad-markers"></a>
 </h3>
 <p>The <code><a href="../reference/build_broad_marker_config.html">build_broad_marker_config()</a></code> function processes the
 raw broad marker list, attaching expression thresholds and priority
 ranks used during the enrichment-based annotation step.</p>
-<div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span></span>
 <span><span class="va">markers</span><span class="op">$</span><span class="va">broad</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/build_broad_marker_config.html">build_broad_marker_config</a></span><span class="op">(</span></span>
 <span>  marker_list       <span class="op">=</span> <span class="va">markers</span><span class="op">$</span><span class="va">broad</span>,</span>
@@ -288,7 +312,7 @@ processed and annotated by the downstream functions.</p>
 <p>The most direct way to create an SCE is from an in-memory sparse
 matrix of class <code>dgCMatrix</code> (genes x cells), with optional
 cell metadata as a <code>data.frame</code>:</p>
-<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">sce</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/create_sce.html">create_sce</a></span><span class="op">(</span></span>
 <span>  counts        <span class="op">=</span> <span class="va">my_sparse_matrix</span>,  <span class="co"># dgCMatrix, genes x cells</span></span>
 <span>  cell_metadata <span class="op">=</span> <span class="va">my_metadata_df</span>     <span class="co"># data.frame, one row per cell (optional)</span></span>
@@ -301,7 +325,7 @@ cell metadata as a <code>data.frame</code>:</p>
 datasets where the matrix is stored on disk: currently, disk-backed
 matrices are not supported but this is a planned feature for a future
 release:</p>
-<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span></span>
 <span><span class="va">sce</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/create_sce.html">create_sce</a></span><span class="op">(</span></span>
 <span>  counts        <span class="op">=</span> <span class="st">"path/to/counts.rds"</span>,</span>
@@ -316,7 +340,7 @@ release:</p>
 the standard 10X Genomics output directory, which contains the
 <code>matrix.mtx.gz</code>, <code>barcodes.tsv</code>, and
 <code>features.tsv</code> files:</p>
-<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span></span>
 <span><span class="va">sce</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/create_sce.html">create_sce</a></span><span class="op">(</span></span>
 <span>  mtx_file   <span class="op">=</span> <span class="st">"path/to/matrix.mtx.gz"</span>,</span>
