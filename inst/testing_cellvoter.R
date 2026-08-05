@@ -1,14 +1,12 @@
 # 1.) Load inputs --------------------------------------------------------------
-
 markers <- load_markers(file_path = "~/Desktop/example_data/input_markers.xlsx")
 
-markers <- load_markers(marker_panels$GBM$gbmap_neftel_full)
-markers <- load_markers(markers = marker_panels$GBM$gbmap_neftel_full)
+markers <- load_markers(marker_panels$GBM$nomura)
 
 
 markers$broad <- build_broad_marker_config(
   marker_list = markers$broad,
-  priority_order = c("vasculature", "immune")
+  priority_order = c("vasculature", "immune"),
   # default_threshold = 0.25
   )
 
