@@ -11,9 +11,9 @@
 <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">
 <link rel="icon" sizes="any" href="favicon.ico">
 <link rel="manifest" href="site.webmanifest">
-<script src="deps/jquery-3.6.0/jquery-3.6.0.min.js"></script><meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-<link href="deps/bootstrap-5.3.1/bootstrap.min.css" rel="stylesheet">
-<script src="deps/bootstrap-5.3.1/bootstrap.bundle.min.js"></script><link href="deps/font-awesome-6.5.2/css/all.min.css" rel="stylesheet">
+<script src="lightswitch.js"></script><script src="deps/jquery-3.6.0/jquery-3.6.0.min.js"></script><meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<link href="deps/bootstrap-5.3.8/bootstrap.min.css" rel="stylesheet">
+<script src="deps/bootstrap-5.3.8/bootstrap.bundle.min.js"></script><link href="deps/font-awesome-6.5.2/css/all.min.css" rel="stylesheet">
 <link href="deps/font-awesome-6.5.2/css/v4-shims.min.css" rel="stylesheet">
 <script src="deps/headroom-0.11.0/headroom.min.js"></script><script src="deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="deps/search-1.0.0/fuse.min.js"></script><script src="deps/search-1.0.0/mark.min.js"></script><!-- pkgdown --><script src="pkgdown.js"></script><meta property="og:title" content="Ensemble single-cell annotation pipeline">
 <meta name="description" content="This package contains function for an ensemble-based cell typing pipeline. The method integrates multiple clustering and classification approaches to improve cell type annotation accuracy in single-cell RNA-seq data. Additionally, The package also comprises functions to enable quality control and evaluation of single-cells before and after cell-typing.">
@@ -24,7 +24,7 @@
     <a href="#main" class="visually-hidden-focusable">Skip to contents</a>
 
 
-    <nav class="navbar navbar-expand-lg fixed-top bg-light" data-bs-theme="light" aria-label="Site navigation"><div class="container">
+    <nav class="navbar navbar-expand-lg fixed-top " aria-label="Site navigation"><div class="container">
 
     <a class="navbar-brand me-2" href="index.html">CellVoteR</a>
 
@@ -37,7 +37,17 @@
 
     <div id="navbar" class="collapse navbar-collapse ms-3">
       <ul class="navbar-nav me-auto">
-<li class="nav-item"><a class="nav-link" href="articles/CellVoteR.html">Get started</a></li>
+<li class="nav-item dropdown">
+  <button class="nav-link dropdown-toggle" type="button" id="dropdown-articles" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Articles</button>
+  <ul class="dropdown-menu" aria-labelledby="dropdown-articles">
+<li><a class="dropdown-item" href="articles/intro_to_CellVoteR.html">Introduction to CellVoteR</a></li>
+    <li><a class="dropdown-item" href="articles/user_inputs.html">User Inputs and Required Formats</a></li>
+    <li><a class="dropdown-item" href="articles/preprocessing.html">Preprocessing and Analysis Tracks</a></li>
+    <li><a class="dropdown-item" href="articles/annotation_methods.html">Annotation Methods</a></li>
+    <li><a class="dropdown-item" href="articles/consensus_and_results.html">Consensus and Results</a></li>
+    <li><a class="dropdown-item" href="articles/troubleshooting.html">Troubleshooting</a></li>
+  </ul>
+</li>
 <li class="nav-item"><a class="nav-link" href="reference/index.html">Reference</a></li>
       </ul>
 <ul class="navbar-nav">
@@ -45,6 +55,14 @@
  <input class="form-control" type="search" name="search-input" id="search-input" autocomplete="off" aria-label="Search site" placeholder="Search for" data-search-index="search.json">
 </form></li>
 <li class="nav-item"><a class="external-link nav-link" href="https://github.com/ajxa/CellVoteR/" aria-label="GitHub"><span class="fa fab fa-github fa-lg"></span></a></li>
+<li class="nav-item dropdown">
+  <button class="nav-link dropdown-toggle" type="button" id="dropdown-lightswitch" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true" aria-label="Light switch"><span class="fa fa-sun"></span></button>
+  <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="dropdown-lightswitch">
+<li><button class="dropdown-item" data-bs-theme-value="light"><span class="fa fa-sun"></span> Light</button></li>
+    <li><button class="dropdown-item" data-bs-theme-value="dark"><span class="fa fa-moon"></span> Dark</button></li>
+    <li><button class="dropdown-item" data-bs-theme-value="auto"><span class="fa fa-adjust"></span> Auto</button></li>
+  </ul>
+</li>
       </ul>
 </div>
 
@@ -57,292 +75,100 @@
 <img src="logo.png" class="logo" alt=""><h1 id="cellvoter-">CellVoteR <a class="anchor" aria-label="anchor" href="#cellvoter-"></a>
 </h1>
 </div>
-<p>An ensemble-based pipeline for robust cell type annotation in single-cell RNA-seq data.</p>
-<p>CellVoteR moves beyond simple “best-match” scoring by integrating four complementary annotation strategies across two feature spaces, resolved through a principled consensus voting step to generate a high-confidence label for every cell.</p>
-<div class="section level2">
-<h2 id="how-it-works">How It Works<a class="anchor" aria-label="anchor" href="#how-it-works"></a>
-</h2>
-<p>CellVoteR determines cell identity through a three-stage process:</p>
-<div class="section level3">
-<h3 id="id_1-broad-triage">1. Broad Triage<a class="anchor" aria-label="anchor" href="#id_1-broad-triage"></a>
-</h3>
-<p>Each cell is first assigned a broad lineage label (e.g. <em>Immune</em>, <em>Vasculature</em>, <em>Other</em>) using one of two strategies:</p>
-<ul>
-<li>
-<strong>Cluster-based:</strong> Unsupervised clusters are labelled by testing whether curated broad marker genes are significantly and consistently top-ranked within each cluster.</li>
-<li>
-<strong>Enrichment-based:</strong> Individual cells are labelled directly by aggregating expression across small, distinct broad marker sets and applying category-specific thresholds.</li>
-</ul>
-</div>
-<div class="section level3">
-<h3 id="id_2-targeted-sub-clustering--fine-annotation">2. Targeted Sub-clustering &amp; Fine Annotation<a class="anchor" aria-label="anchor" href="#id_2-targeted-sub-clustering--fine-annotation"></a>
-</h3>
-<p>Each broad lineage is sub-clustered independently. Sub-cluster identity is then determined by scoring the top ranked marker genes against a curated fine-resolution marker panel using Fisher’s Exact Test and overlap similarity. This ensures, for example, that immune sub-clusters are only compared against immune markers — reducing false positives and improving resolution of rare populations.</p>
-<p>Both strategies are applied to two feature spaces:</p>
-<ul>
-<li>
-<strong>Full gene set</strong> — the complete normalised expression matrix</li>
-<li>
-<strong>Reduced gene set</strong> — a targeted panel of user-supplied marker genes</li>
-</ul>
-<p>This gives four primary annotation methods in total.</p>
-</div>
-<div class="section level3">
-<h3 id="id_3-global-consensus--tie-breaking">3. Global Consensus &amp; Tie-breaking<a class="anchor" aria-label="anchor" href="#id_3-global-consensus--tie-breaking"></a>
-</h3>
-<p>Two global tie-breakers are computed in parallel without broad triage, by clustering the full and reduced gene sets directly and scoring against the fine marker panel. These serve as independent reference votes.</p>
-<p>All six method outputs are then passed to a configurable ensemble voting step which applies a decision hierarchy to resolve disagreements and assign a final label to each cell.</p>
-</div>
-</div>
-<div class="section level2">
-<h2 id="workflow-diagram">Workflow Diagram<a class="anchor" aria-label="anchor" href="#workflow-diagram"></a>
-</h2>
-<pre class="mermaid"><code>graph TD
-    classDef default fill:#ffffff,stroke:#333,stroke-width:1px,color:#000
-    classDef start fill:#e1f5fe,stroke:#01579b,stroke-width:2px,color:#000
-    classDef track fill:none,stroke:#999,stroke-width:2px,stroke-dasharray: 5 5
-    classDef title fill:#eceff1,stroke:#455a64,stroke-width:2px,font-weight:bold,color:#000
-    classDef decision fill:#fff9c4,stroke:#fbc02d,stroke-width:2px,color:#000
-    classDef method fill:#e0f2f1,stroke:#00695c,stroke-width:1px,color:#000
-    classDef tiebreak fill:#fce4ec,stroke:#880e4f,stroke-width:1px,color:#000
-    classDef logic fill:#fff3e0,stroke:#e65100,stroke-width:1px,color:#000
-    classDef endnode fill:#dcedc8,stroke:#33691e,stroke-width:2px,color:#000
-
-    Input([Raw Counts + Markers]):::start
-    Input --&gt; QC[assess_cell_quality]
-    QC --&gt; Norm[normalize_counts]
-    Norm --&gt; Prep[prepare_sce\nBuilds full + reduced feature spaces\nand attaches marker config]
-
-    Prep --&gt; M1
-    Prep --&gt; M2
-    Prep --&gt; M3
-    Prep --&gt; M4
-    Prep --&gt; G1
-    Prep --&gt; G2
-
-    subgraph PrimaryMethods [ ]
-        direction TB
-        TitleP[Primary Annotation Methods]:::title
-
-        subgraph Full[Full Gene Set]
-            M1[Method 1\nCluster-based\nBroad triage → subcluster\n→ Fisher score]:::method
-            M3[Method 3\nEnrichment-based\nBroad triage → subcluster\n→ Fisher score]:::method
-        end
-
-        subgraph Reduced[Reduced Gene Set]
-            M2[Method 2\nCluster-based\nBroad triage → subcluster\n→ Fisher score]:::method
-            M4[Method 4\nEnrichment-based\nBroad triage → subcluster\n→ Fisher score]:::method
-        end
-
-        TitleP ~~~ Full
-        TitleP ~~~ Reduced
-    end
-
-    subgraph TieBreakerTrack [ ]
-        direction TB
-        TitleT[Global Tie-breakers]:::title
-
-        G1[Tie-breaker 1\nHVG clusters\nFull gene set\n→ Fisher score]:::tiebreak
-        G2[Tie-breaker 2\nPanel clusters\nReduced gene set\n→ Fisher score]:::tiebreak
-
-        TitleT ~~~ G1
-        TitleT ~~~ G2
-    end
-
-    M1 &amp; M2 &amp; M3 &amp; M4 --&gt; Vote
-    G1 &amp; G2 --&gt; Vote
-
-    Vote[resolve_consensus_labels\nEnsemble voting]
-
-    Vote --&gt; Majority{Majority\nvote?}:::decision
-    Majority --&gt;|Yes| Final
-    Majority --&gt;|No, but\nleading candidate| TB{Tie-breakers\nagree?}:::decision
-    TB --&gt;|Both agree| Final
-    TB --&gt;|Priority order| Final
-    TB --&gt;|Neither resolves| Unresolved[Unassigned]:::logic
-    Majority --&gt;|All methods\ndisagree| Unresolved
-
-    Final([Final Cell Label]):::endnode
-
-    class PrimaryMethods,TieBreakerTrack track</code></pre>
-</div>
+<p>CellVoteR is an ensemble-based pipeline for robust cell type annotation in single-cell RNA-seq data.</p>
+<p>Rather than relying on a single best-match score, CellVoteR combines complementary annotation strategies across full and marker-reduced feature spaces, then resolves agreement and disagreement through a configurable consensus voting step.</p>
+<p><img src="reference/figures/cellvoter-workflow.svg" alt="CellVoteR workflow" width="100%"></p>
+<hr>
 <div class="section level2">
 <h2 id="installation">Installation<a class="anchor" aria-label="anchor" href="#installation"></a>
 </h2>
-<p>You can install the development version of CellVoteR with:</p>
-<div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
+<p>You can install the development version from GitHub:</p>
+<div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># install.packages("devtools")</span></span>
 <span><span class="fu">devtools</span><span class="fu">::</span><span class="fu">install_github</span><span class="op">(</span><span class="st">"ajxa/CellVoteR"</span><span class="op">)</span></span></code></pre></div>
 </div>
 <div class="section level2">
 <h2 id="quick-start">Quick Start<a class="anchor" aria-label="anchor" href="#quick-start"></a>
 </h2>
-<div class="section level3">
-<h3 id="id_1-prepare-inputs">1. Prepare inputs<a class="anchor" aria-label="anchor" href="#id_1-prepare-inputs"></a>
-</h3>
-<p>CellVoteR requires two inputs: a raw counts matrix and a marker configuration.</p>
-<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/ajxa/CellVoteR" class="external-link">CellVoteR</a></span><span class="op">)</span></span>
-<span></span>
-<span><span class="co"># Load and configure markers</span></span>
-<span><span class="va">markers</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/load_markers.html">load_markers</a></span><span class="op">(</span>file_path <span class="op">=</span> <span class="st">"path/to/input_markers.xlsx"</span><span class="op">)</span></span>
+<div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">markers</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/load_markers.html">load_markers</a></span><span class="op">(</span>file_path <span class="op">=</span> <span class="st">"path/to/input_markers.xlsx"</span><span class="op">)</span></span>
 <span></span>
 <span><span class="va">markers</span><span class="op">$</span><span class="va">broad</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/build_broad_marker_config.html">build_broad_marker_config</a></span><span class="op">(</span></span>
-<span>  marker_list    <span class="op">=</span> <span class="va">markers</span><span class="op">$</span><span class="va">broad</span>,</span>
-<span>  priority_order <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"vasculature"</span>, <span class="st">"immune"</span><span class="op">)</span>,</span>
+<span>  marker_list       <span class="op">=</span> <span class="va">markers</span><span class="op">$</span><span class="va">broad</span>,</span>
+<span>  priority_order    <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"vasculature"</span>, <span class="st">"immune"</span><span class="op">)</span>,</span>
 <span>  default_threshold <span class="op">=</span> <span class="fl">0.25</span></span>
 <span><span class="op">)</span></span>
 <span></span>
-<span><span class="co"># Create SCE from a sparse matrix or file path</span></span>
 <span><span class="va">sce</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/create_sce.html">create_sce</a></span><span class="op">(</span></span>
 <span>  counts        <span class="op">=</span> <span class="st">"path/to/counts.rds"</span>,</span>
-<span>  cell_metadata <span class="op">=</span> <span class="st">"path/to/metadata.rds"</span>  <span class="co"># optional, also accepts .csv / .tsv</span></span>
-<span><span class="op">)</span></span></code></pre></div>
-</div>
-<div class="section level3">
-<h3 id="id_2-qc-and-preprocessing">2. QC and preprocessing<a class="anchor" aria-label="anchor" href="#id_2-qc-and-preprocessing"></a>
-</h3>
-<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">sce</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/assess_cell_quality.html">assess_cell_quality</a></span><span class="op">(</span><span class="va">sce</span>, remove_failed_cells <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
-<span><span class="va">sce</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/normalize_counts.html">normalize_counts</a></span><span class="op">(</span><span class="va">sce</span><span class="op">)</span></span>
+<span>  cell_metadata <span class="op">=</span> <span class="st">"path/to/metadata.rds"</span></span>
+<span><span class="op">)</span></span>
 <span></span>
-<span><span class="co"># Builds both feature spaces (full + reduced), clusters them, and</span></span>
-<span><span class="co"># attaches the marker configuration to the SCE</span></span>
-<span><span class="va">sce</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/prepare_sce.html">prepare_sce</a></span><span class="op">(</span><span class="va">sce</span>, <span class="va">markers</span><span class="op">)</span></span></code></pre></div>
-</div>
-<div class="section level3">
-<h3 id="id_3-run-the-ensemble">3. Run the ensemble<a class="anchor" aria-label="anchor" href="#id_3-run-the-ensemble"></a>
-</h3>
-<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="co"># Default run — uses all four methods and both tie-breakers</span></span>
+<span><span class="va">sce</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/assess_cell_quality.html">assess_cell_quality</a></span><span class="op">(</span><span class="va">sce</span>, remove_failed_cells <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
+<span><span class="va">sce</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/normalize_counts.html">normalize_counts</a></span><span class="op">(</span><span class="va">sce</span><span class="op">)</span></span>
+<span><span class="va">sce</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/prepare_sce.html">prepare_sce</a></span><span class="op">(</span><span class="va">sce</span>, <span class="va">markers</span><span class="op">)</span></span>
+<span></span>
 <span><span class="va">results</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/run_cellvoter.html">run_cellvoter</a></span><span class="op">(</span><span class="va">sce</span><span class="op">)</span></span>
 <span></span>
-<span><span class="co"># With custom annotation parameters</span></span>
-<span><span class="va">results</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/run_cellvoter.html">run_cellvoter</a></span><span class="op">(</span></span>
-<span>  <span class="va">sce</span>,</span>
-<span>  return_full_output <span class="op">=</span> <span class="cn">TRUE</span>,</span>
-<span>  annotation_args <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span></span>
-<span>    broad_args   <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>test_type <span class="op">=</span> <span class="st">"t"</span>, min_prop <span class="op">=</span> <span class="fl">0.1</span><span class="op">)</span>,</span>
-<span>    rank_args    <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>test_type <span class="op">=</span> <span class="st">"t"</span>, min_prop <span class="op">=</span> <span class="fl">0.25</span><span class="op">)</span>,</span>
-<span>    extract_args <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>fdr_threshold <span class="op">=</span> <span class="fl">0.01</span>, target_n <span class="op">=</span> <span class="fl">50L</span><span class="op">)</span></span>
-<span>  <span class="op">)</span></span>
-<span><span class="op">)</span></span></code></pre></div>
-</div>
-<div class="section level3">
-<h3 id="id_4-resolve-consensus">4. Resolve consensus<a class="anchor" aria-label="anchor" href="#id_4-resolve-consensus"></a>
-</h3>
-<p>The consensus step is intentionally separate so voting parameters can be tweaked and re-run without repeating the annotation pipeline.</p>
-<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">consensus</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/resolve_consensus_labels.html">resolve_consensus_labels</a></span><span class="op">(</span></span>
+<span><span class="va">consensus</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/resolve_consensus_labels.html">resolve_consensus_labels</a></span><span class="op">(</span></span>
 <span>  label_list        <span class="op">=</span> <span class="va">results</span><span class="op">$</span><span class="va">labels</span>,</span>
 <span>  method_names      <span class="op">=</span> <span class="va">results</span><span class="op">$</span><span class="va">method_names</span>,</span>
 <span>  tie_breaker_names <span class="op">=</span> <span class="va">results</span><span class="op">$</span><span class="va">tie_breaker_names</span>,</span>
-<span>  unassigned_label  <span class="op">=</span> <span class="st">"unknown"</span>,</span>
-<span>  allow_even_split  <span class="op">=</span> <span class="cn">FALSE</span>,</span>
-<span>  ordered_tiebreak  <span class="op">=</span> <span class="cn">TRUE</span></span>
+<span>  unassigned_label  <span class="op">=</span> <span class="st">"unknown"</span></span>
 <span><span class="op">)</span></span>
 <span></span>
-<span><span class="co"># Attach final labels to the SCE</span></span>
 <span><span class="va">sce</span><span class="op">$</span><span class="va">cellVoteR_label</span>  <span class="op">&lt;-</span> <span class="va">consensus</span><span class="op">$</span><span class="va">label</span></span>
 <span><span class="va">sce</span><span class="op">$</span><span class="va">cellVoteR_method</span> <span class="op">&lt;-</span> <span class="va">consensus</span><span class="op">$</span><span class="va">method</span></span>
 <span></span>
-<span><span class="co"># Inspect results</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/table.html" class="external-link">table</a></span><span class="op">(</span><span class="va">sce</span><span class="op">$</span><span class="va">cellVoteR_label</span><span class="op">)</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/table.html" class="external-link">table</a></span><span class="op">(</span><span class="va">sce</span><span class="op">$</span><span class="va">cellVoteR_method</span><span class="op">)</span></span>
-<span></span>
-<span><span class="co"># Inspect per-method labels before consensus</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/table.html" class="external-link">table</a></span><span class="op">(</span><span class="va">results</span><span class="op">$</span><span class="va">labels</span><span class="op">$</span><span class="va">method_1</span><span class="op">)</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/table.html" class="external-link">table</a></span><span class="op">(</span><span class="va">results</span><span class="op">$</span><span class="va">labels</span><span class="op">$</span><span class="va">method_2</span><span class="op">)</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/table.html" class="external-link">table</a></span><span class="op">(</span><span class="va">results</span><span class="op">$</span><span class="va">labels</span><span class="op">$</span><span class="va">method_3</span><span class="op">)</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/table.html" class="external-link">table</a></span><span class="op">(</span><span class="va">results</span><span class="op">$</span><span class="va">labels</span><span class="op">$</span><span class="va">method_4</span><span class="op">)</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/table.html" class="external-link">table</a></span><span class="op">(</span><span class="va">results</span><span class="op">$</span><span class="va">labels</span><span class="op">$</span><span class="va">global_1</span><span class="op">)</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/table.html" class="external-link">table</a></span><span class="op">(</span><span class="va">results</span><span class="op">$</span><span class="va">labels</span><span class="op">$</span><span class="va">global_2</span><span class="op">)</span></span>
-<span></span>
-<span><span class="co"># Inspect per-cluster scores for a method (requires return_full_output = TRUE)</span></span>
-<span><span class="va">results</span><span class="op">$</span><span class="va">full_output</span><span class="op">$</span><span class="va">method_1</span><span class="op">$</span><span class="va">scores</span></span></code></pre></div>
+<span><span class="fu"><a href="https://rdrr.io/r/base/table.html" class="external-link">table</a></span><span class="op">(</span><span class="va">sce</span><span class="op">$</span><span class="va">cellVoteR_label</span><span class="op">)</span></span></code></pre></div>
 </div>
-<div class="section level3">
-<h3 id="id_5-custom-markers">5. Custom markers<a class="anchor" aria-label="anchor" href="#id_5-custom-markers"></a>
-</h3>
-<p>CellVoteR is tissue-agnostic. Broad markers should be small (ideally ≤ 3 genes), mutually exclusive across categories, and biologically diagnostic of a lineage. Fine markers can be larger gene sets and are used for Fisher scoring.</p>
-<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="co"># Markers are loaded from an Excel workbook or nested YAML file</span></span>
-<span><span class="va">markers</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/load_markers.html">load_markers</a></span><span class="op">(</span>file_path <span class="op">=</span> <span class="st">"path/to/my_tissue_markers.xlsx"</span><span class="op">)</span></span></code></pre></div>
-<p>See <code><a href="reference/load_markers.html">?load_markers</a></code> and <code><a href="reference/build_broad_marker_config.html">?build_broad_marker_config</a></code> for details on the expected input format.</p>
-</div>
-</div>
-<div class="section level2">
-<h2 id="key-design-decisions">Key Design Decisions<a class="anchor" aria-label="anchor" href="#key-design-decisions"></a>
+<div class="row">
+<div class="section level2 col-md-6">
+<h2 id="getting-started">Getting started<a class="anchor" aria-label="anchor" href="#getting-started"></a>
 </h2>
-<table class="table">
-<colgroup>
-<col width="50%">
-<col width="50%">
-</colgroup>
-<thead><tr>
-<th>Decision</th>
-<th>Rationale</th>
-</tr></thead>
-<tbody>
-<tr>
-<td>Broad triage before fine annotation</td>
-<td>Prevents dominant lineages from masking rare populations</td>
-</tr>
-<tr>
-<td>Two feature spaces (full + reduced)</td>
-<td>Full HVG space captures global structure; marker-defined space sharpens lineage boundaries</td>
-</tr>
-<tr>
-<td>Four methods + two tie-breakers</td>
-<td>Redundancy across strategies reduces sensitivity to any single method’s failure mode</td>
-</tr>
-<tr>
-<td>Consensus step is separate</td>
-<td>Users can re-tune voting parameters without re-running the full pipeline</td>
-</tr>
-<tr>
-<td>Fisher’s Exact Test for scoring</td>
-<td>Statistically principled enrichment test that accounts for background gene set size</td>
-</tr>
-</tbody>
-</table>
+<p><a href="articles/intro_to_CellVoteR.html">Introduction to CellVoteR</a><br>
+A short walkthrough of the complete CellVoteR workflow.</p>
+<p><a href="articles/user_inputs.html">User inputs and required formats</a><br>
+How to structure count matrices, metadata, and marker files.</p>
+<p><a href="articles/preprocessing.html">Preprocessing and analysis tracks</a><br>
+QC, normalisation, marker overlap checks, and feature-space construction.</p>
+</div>
+<div class="section level2 col-md-6">
+<h2 id="annotation-workflow">Annotation workflow<a class="anchor" aria-label="anchor" href="#annotation-workflow"></a>
+</h2>
+<p><a href="articles/annotation_methods.html">Annotation methods</a><br>
+The four primary methods and two global tie-breakers.</p>
+<p><a href="articles/consensus_and_results.html">Consensus and results</a><br>
+How final labels are resolved and inspected.</p>
 </div>
 </div>
-  </main><aside class="col-md-3"><div class="links">
-<h2 data-toc-skip>Links</h2>
-<ul class="list-unstyled">
-<li><a href="https://github.com/ajxa/CellVoteR/" class="external-link">Browse source code</a></li>
-<li><a href="https://github.com/ajxa/CellVoteR/issues" class="external-link">Report a bug</a></li>
-</ul>
+<div class="row">
+<div class="section level2 col-md-8">
+<h2 id="practical-guidance">Practical guidance<a class="anchor" aria-label="anchor" href="#practical-guidance"></a>
+</h2>
+<p><a href="articles/troubleshooting.html">Troubleshooting</a><br>
+Common issues with marker overlap, unresolved labels, and large datasets.</p>
 </div>
-
-<div class="license">
-<h2 data-toc-skip>License</h2>
-<ul class="list-unstyled">
-<li><a href="LICENSE.html">Full license</a></li>
-<li><small><a href="https://opensource.org/licenses/mit-license.php" class="external-link">MIT</a> + file <a href="LICENSE-text.html">LICENSE</a></small></li>
-</ul>
 </div>
-
-
-<div class="citation">
-<h2 data-toc-skip>Citation</h2>
-<ul class="list-unstyled">
-<li><a href="authors.html#citation">Citing CellVoteR</a></li>
-</ul>
+<div class="row">
+<div class="section level2 col-md-4">
+<h2 id="source">Source<a class="anchor" aria-label="anchor" href="#source"></a>
+</h2>
+<p><a href="https://github.com/ajxa/CellVoteR" class="external-link">Browse source code</a><br><a href="https://github.com/ajxa/CellVoteR/issues" class="external-link">Report a bug</a></p>
 </div>
-
-<div class="developers">
-<h2 data-toc-skip>Developers</h2>
-<ul class="list-unstyled">
-<li>Josh Winter-Luke <br><small class="roles"> Maintainer </small> <a href="https://orcid.org/YOUR-ORCID-ID" target="orcid.widget" aria-label="ORCID" class="external-link"><span class="fab fa-orcid orcid" aria-hidden="true"></span></a>  </li>
-<li>Shoaib Ajaib <br><small class="roles"> Author </small> <a href="https://orcid.org/YOUR-ORCID-ID" target="orcid.widget" aria-label="ORCID" class="external-link"><span class="fab fa-orcid orcid" aria-hidden="true"></span></a>  </li>
-</ul>
+<div class="section level2 col-md-4">
+<h2 id="license">License<a class="anchor" aria-label="anchor" href="#license"></a>
+</h2>
+<p><a href="LICENSE.html">Full license</a></p>
 </div>
-
-
-
-  </aside>
+<div class="section level2 col-md-4">
+<h2 id="citation">Citation<a class="anchor" aria-label="anchor" href="#citation"></a>
+</h2>
+<p><a href="authors.html#citation">How to cite CellVoteR</a></p>
+</div>
+</div>
+</div>
+  </main><aside class="col-md-3"></aside>
 </div>
 
 
@@ -351,7 +177,7 @@
 </div>
 
 <div class="pkgdown-footer-right">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.0.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.1.</p>
 </div>
 
     </footer>

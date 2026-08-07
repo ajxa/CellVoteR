@@ -1,0 +1,223 @@
+# User Inputs and Required Formats
+
+  
+
+> In order to run the complete CellVoteR workflow, you must supply two
+> inputs:
+>
+> 1.  Raw gene-by-cell counts matrix (sparse `dgCMatrix`, `RDS`, or
+>     `MTX triplet` file).
+>
+> 2.  Marker configuration — a structured list of broad and fine cell
+>     type marker genes.
+
+## Preparing input markers
+
+Marker panels are the backbone of CellVoteR’s annotation strategy. These
+are organised into two tiers:
+
+### Broad markers (lineage-specific)
+
+Broad markers are used to define coarse cell lineages (e.g. *Immune*,
+*Vasculature*, *Other*) and therefore, must be:
+
+- **Small** — typically 2–5 genes per category.
+
+- **Mutually exclusive** — no gene should appear in more than one broad
+  category.
+
+- **Biologically diagnostic** — genes that robustly delineate lineages
+  even in heterogeneous datasets.
+
+These broad markers are loaded and then configured with
+[`build_broad_marker_config()`](https://ajxa.github.io/CellVoteR/reference/build_broad_marker_config.md),
+which assigns expression thresholds and priority rankings used for
+tie-breaking when a cell passes multiple broad categories.
+
+### Fine markers (cell-type specific)
+
+Fine markers define sub-populations that correspond directly to each
+broad lineage (e.g. *B cell*, *T cell*, *NK cell* within the *Immune*
+broad marker category). They marker sets can be larger and more
+redundant than broad markers, as they are only used for Fisher’s Exact
+Test scoring during fine annotation. Moreover, they do not need to be
+mutually exclusive, but should still sufficiently distinguish between to
+distinct cell types that come from the same broad lineage, e.g, T cells
+vs. B cells and Mural cells vs Endothelial cells.
+
+### Loading markers
+
+User-supplied markers can be loaded from either `Excel`, `CSV`, `TXT`,
+`RDS` files or supplied directly in the form of an R `data.frame`.
+Irrespective of format, the file must be structured to contain both
+broad and fine markers, with the following four columns:
+
+> - **type** — indicates whether the marker is a *broad* or *fine*
+>
+> - **category** — for broad markers, this is the coarse lineage
+>   category; for fine markers, this is the same as the broad category
+>   they belong to.
+>
+> - **label** - for broad markers, this field is left blank; for fine
+>   markers, this is the specific cell type label that the marker
+>   corresponds to.
+>
+> - **marker** — the gene symbol of the marker gene.
+
+  
+
+An example of the required format is as follows:
+
+| type  | category    | label       | marker |
+|-------|-------------|-------------|--------|
+| broad | immune      |             | PTPRC  |
+| broad | vasculature |             | CDH5   |
+| broad | vasculature |             | VWF    |
+| fine  | immune      | T cell      | CD2    |
+| fine  | immune      | T cell      | CD3D   |
+| fine  | immune      | T cell      | IL32   |
+| fine  | immune      | B cell      | CD79A  |
+| fine  | immune      | B cell      | CD79B  |
+| fine  | vasculature | Mural cell  | IGFBP7 |
+| fine  | vasculature | Mural cell  | FN1    |
+| fine  | vasculature | Endothelial | A2M    |
+| fine  | vasculature | Endothelial | IGFBP7 |
+
+> When defining broad category markers, there is no need to assign a
+> **label** as these are only used for coarse lineage assignment.
+> However, for the fine markers, the **label** field is required as
+> these are used to assign the final cell type labels to clusters and
+> cells.
+
+``` r
+
+markers <- load_markers(file_path = "path/to/input_markers.xlsx")
+
+# Inspect the structure
+str(markers$broad)   # named list of character vectors
+str(markers$fine)    # nested named list: broad category > fine cell type > genes
+```
+
+### Internal marker panels
+
+CellVoteR also ships with a set of internal marker panels, which can be
+used as-is or modified to suit your dataset. These are stored in the
+`marker_panels` dataset and can be accessed as follows:
+
+``` r
+
+names(marker_panels)
+names(marker_panels$GBM)
+```
+
+Currently, the only internal marker panels provided relate to
+glioblastoma (GBM) datasets, but additional panels may be added in
+future updates. However, these panels can serve as a starting point for
+users to create their own custom marker panels for other tissue types
+and disease contexts.
+
+The internal marker panels are structured in the same way as
+user-supplied markers, with broad and fine markers organised into a
+nested list and can be directly supplied to the
+[`load_markers()`](https://ajxa.github.io/CellVoteR/reference/load_markers.md)
+function or explicitly by setting the `markers` parameter to the
+required internal marker list:
+
+``` r
+
+markers <- load_markers(marker_panels$GBM$gbmap_neftel_full)
+markers <- load_markers(markers = marker_panels$GBM$gbmap_neftel_full)
+```
+
+### Configuring broad markers
+
+The
+[`build_broad_marker_config()`](https://ajxa.github.io/CellVoteR/reference/build_broad_marker_config.md)
+function processes the raw broad marker list, attaching expression
+thresholds and priority ranks used during the enrichment-based
+annotation step.
+
+``` r
+
+
+markers$broad <- build_broad_marker_config(
+  marker_list       = markers$broad,
+  priority_order    = c("vasculature", "immune"),   # higher priority listed first
+  default_threshold = 0.25                          # default logcounts threshold
+)
+
+str(markers$broad$immune)
+```
+
+> The **priority_order** argument is used to assign numeric priority
+> ranks to each broad category, which is used for tie-breaking when a
+> cell passes expression thresholds for more than one broad category.
+> Categories listed earlier receive a lower (higher priority) numeric
+> rank.
+
+## Preparing expression data
+
+CellVoteR is designed to work natively with
+[*SingleCellExperiment*](https://bioconductor.org/packages/SingleCellExperiment/)
+(SCE) objects. The
+[`create_sce()`](https://ajxa.github.io/CellVoteR/reference/create_sce.md)
+helper function can be used to construct a basic SCE from a variety of
+input formats, which is then processed and annotated by the downstream
+functions.
+
+### From sparse matrix (in-memory)
+
+The most direct way to create an SCE is from an in-memory sparse matrix
+of class `dgCMatrix` (genes x cells), with optional cell metadata as a
+`data.frame`:
+
+``` r
+
+sce <- create_sce(
+  counts        = my_sparse_matrix,  # dgCMatrix, genes x cells
+  cell_metadata = my_metadata_df     # data.frame, one row per cell (optional)
+)
+```
+
+### From a file path
+
+This function also accepts file paths, which is useful for large
+datasets where the matrix is stored on disk: currently, disk-backed
+matrices are not supported but this is a planned feature for a future
+release:
+
+``` r
+
+
+sce <- create_sce(
+  counts        = "path/to/counts.rds",
+  cell_metadata = "path/to/metadata.rds"   # also accepts .csv or .tsv
+)
+```
+
+## From a 10X Genomics output
+
+The
+[`create_sce()`](https://ajxa.github.io/CellVoteR/reference/create_sce.md)
+function can also directly import from the standard 10X Genomics output
+directory, which contains the `matrix.mtx.gz`, `barcodes.tsv`, and
+`features.tsv` files:
+
+``` r
+
+
+sce <- create_sce(
+  mtx_file   = "path/to/matrix.mtx.gz",
+  cells_file = "path/to/barcodes.tsv",
+  genes_file = "path/to/features.tsv"
+)
+```
+
+## Next Steps
+
+After creating the SCE, the next step is to perform quality control and
+filtering of low-quality cells, followed by normalisation of the
+expression data. These steps are described in more detail in the
+[Preprocessing and Analysis
+Tracks](https://ajxa.github.io/CellVoteR/articles/preprocessing.md)
+article.

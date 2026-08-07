@@ -2,8 +2,13 @@
 <url><loc>https://ajxa.github.io/CellVoteR/404.html</loc></url>
 <url><loc>https://ajxa.github.io/CellVoteR/LICENSE-text.html</loc></url>
 <url><loc>https://ajxa.github.io/CellVoteR/LICENSE.html</loc></url>
-<url><loc>https://ajxa.github.io/CellVoteR/articles/CellVoteR.html</loc></url>
+<url><loc>https://ajxa.github.io/CellVoteR/articles/annotation_methods.html</loc></url>
+<url><loc>https://ajxa.github.io/CellVoteR/articles/consensus_and_results.html</loc></url>
 <url><loc>https://ajxa.github.io/CellVoteR/articles/index.html</loc></url>
+<url><loc>https://ajxa.github.io/CellVoteR/articles/intro_to_CellVoteR.html</loc></url>
+<url><loc>https://ajxa.github.io/CellVoteR/articles/preprocessing.html</loc></url>
+<url><loc>https://ajxa.github.io/CellVoteR/articles/troubleshooting.html</loc></url>
+<url><loc>https://ajxa.github.io/CellVoteR/articles/user_inputs.html</loc></url>
 <url><loc>https://ajxa.github.io/CellVoteR/authors.html</loc></url>
 <url><loc>https://ajxa.github.io/CellVoteR/index.html</loc></url>
 <url><loc>https://ajxa.github.io/CellVoteR/reference/annotate_broad_cells.html</loc></url>
@@ -26,6 +31,8 @@
 <url><loc>https://ajxa.github.io/CellVoteR/reference/index.html</loc></url>
 <url><loc>https://ajxa.github.io/CellVoteR/reference/label_broad_clusters.html</loc></url>
 <url><loc>https://ajxa.github.io/CellVoteR/reference/load_markers.html</loc></url>
+<url><loc>https://ajxa.github.io/CellVoteR/reference/marker_panels.html</loc></url>
+<url><loc>https://ajxa.github.io/CellVoteR/reference/nf.html</loc></url>
 <url><loc>https://ajxa.github.io/CellVoteR/reference/normalize_counts.html</loc></url>
 <url><loc>https://ajxa.github.io/CellVoteR/reference/params_box.html</loc></url>
 <url><loc>https://ajxa.github.io/CellVoteR/reference/prepare_sce.html</loc></url>

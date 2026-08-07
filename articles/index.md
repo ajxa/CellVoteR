@@ -1,6 +1,24 @@
 # Articles
 
-### All vignettes
+### Getting started
 
-- [CellVoteR: Ensemble Cell Type Annotation for Single-Cell
-  RNA-seq](https://ajxa.github.io/CellVoteR/articles/CellVoteR.md):
+- [Introduction to
+  CellVoteR](https://ajxa.github.io/CellVoteR/articles/intro_to_CellVoteR.md):
+
+### Inputs and preparation
+
+- [User Inputs and Required
+  Formats](https://ajxa.github.io/CellVoteR/articles/user_inputs.md):
+- [Preprocessing and Analysis
+  Tracks](https://ajxa.github.io/CellVoteR/articles/preprocessing.md):
+
+### Annotation workflow
+
+- [Annotation
+  Methods](https://ajxa.github.io/CellVoteR/articles/annotation_methods.md):
+- [Consensus and
+  Results](https://ajxa.github.io/CellVoteR/articles/consensus_and_results.md):
+
+### Practical guidance
+
+- [Troubleshooting](https://ajxa.github.io/CellVoteR/articles/troubleshooting.md):

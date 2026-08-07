@@ -67,9 +67,10 @@ subcluster_labels(
 
 - hvg_prop:
 
-  Numeric scalar in `(0, 1]`. Proportion of genes to retain as highly
-  variable within each subset when `feature_mode = "hvg"`. Defaults to
-  `0.1`.
+  Numeric scalar in `(0, 1]`. When the `feature_mode = "hvg"`, this is
+  the proportion of genes that are retained as highly variable within
+  each broad subset. For example, the default of `0.1` means that the
+  top 10\\ ranked by variance modelling will be used.
 
 - min_ncells:
 
@@ -77,7 +78,10 @@ subcluster_labels(
   be subclustered. Groups smaller than this threshold are not
   subclustered by
   [`quickSubCluster`](https://rdrr.io/pkg/scran/man/quickSubCluster.html).
-  Defaults to `50`.
+  Defaults to `50`. This value is passed directly to `min.ncells` in
+  [`quickSubCluster`](https://rdrr.io/pkg/scran/man/quickSubCluster.html)
+  and aligns with its default, which is based on empirical observations
+  of when subclustering becomes unreliable.
 
 - seed:
 
