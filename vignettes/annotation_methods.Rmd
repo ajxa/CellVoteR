@@ -4,7 +4,7 @@ author: "Shoaib Ajaib"
 date: "`r Sys.Date()`"
 output:
   rmdformats::downcute:
-    self_contained: true
+    self_contained: false
     default_style: "light"
     downcute_theme: "default"
     code_folding: show
