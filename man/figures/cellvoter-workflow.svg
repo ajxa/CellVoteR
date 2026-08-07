@@ -1,0 +1,887 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg
+   viewBox="0 0 920 1280"
+   width="100%"
+   height="100%"
+   style="background-color: #ffffff; font-family: system-ui, -apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;"
+   version="1.1"
+   id="svg62"
+   sodipodi:docname="CellvoteR_workflow_v2.svg"
+   inkscape:version="1.3.2 (091e20e, 2023-11-25)"
+   inkscape:export-filename="CellvoteR_workflow_v3.svg"
+   inkscape:export-xdpi="300"
+   inkscape:export-ydpi="300"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg">
+  <sodipodi:namedview
+     id="namedview62"
+     pagecolor="#ffffff"
+     bordercolor="#000000"
+     borderopacity="0.25"
+     inkscape:showpageshadow="2"
+     inkscape:pageopacity="0.0"
+     inkscape:pagecheckerboard="0"
+     inkscape:deskcolor="#d1d1d1"
+     showgrid="false"
+     inkscape:zoom="0.39137047"
+     inkscape:cx="311.7251"
+     inkscape:cy="624.72777"
+     inkscape:window-width="1728"
+     inkscape:window-height="910"
+     inkscape:window-x="0"
+     inkscape:window-y="30"
+     inkscape:window-maximized="0"
+     inkscape:current-layer="svg62"
+     showguides="true"
+     inkscape:export-bgcolor="#ffffffff">
+    <sodipodi:guide
+       position="785.3258,1000.7073"
+       orientation="0,-1"
+       id="guide106"
+       inkscape:locked="false" />
+  </sodipodi:namedview>
+  <defs
+     id="defs1">
+    <inkscape:path-effect
+       effect="spiro"
+       id="path-effect96"
+       is_visible="true"
+       lpeversion="1" />
+    <inkscape:path-effect
+       effect="spiro"
+       id="path-effect95"
+       is_visible="true"
+       lpeversion="1" />
+    <!-- Arrow marker -->
+    <marker
+       id="arrow"
+       viewBox="0 0 10 10"
+       refX="6"
+       refY="5"
+       markerWidth="6"
+       markerHeight="6"
+       orient="auto-start-reverse">
+      <path
+         d="M 0 1 L 10 5 L 0 9 z"
+         fill="#333333"
+         id="path1" />
+    </marker>
+    <filter
+       id="shadow"
+       x="-0.0055555556"
+       y="-0.02"
+       width="1.0111111"
+       height="1.04">
+      <feDropShadow
+         dx="0"
+         dy="2"
+         stdDeviation="3"
+         flood-opacity="0.08" />
+    </filter>
+  </defs>
+  <style
+     id="style1">
+    .node-text { font-size: 13px; fill: #000000; text-anchor: middle; dominant-baseline: middle; }
+    .title-text { font-size: 14px; font-weight: bold; fill: #000000; text-anchor: middle; }
+    .label-text { font-size: 11px; fill: #444444; text-anchor: middle; font-weight: 500; }
+    .edge { stroke: #333333; stroke-width: 1.5; fill: none; marker-end: url(#arrow); }
+    .track-bg { fill: none; stroke: #999999; stroke-width: 2; stroke-dasharray: 5 5; rx: 8; }
+    .subgraph-bg { fill: #f8f9fa; stroke: #cfd8dc; stroke-width: 1; rx: 6; }
+  </style>
+  <!-- ================= TOP FLOW ================= -->
+  <!-- Input -->
+  <!-- QC -->
+  <!-- Norm -->
+  <!-- Prep -->
+  <!-- Fan-out connections from Prep -->
+  <!-- ================= SUBGRAPHS ================= -->
+  <!-- Primary Methods Track Container -->
+  <!-- Primary Methods Title -->
+  <!-- Full Gene Set Subgraph -->
+  <!-- M1 -->
+  <!-- M3 -->
+  <!-- Reduced Gene Set Subgraph -->
+  <!-- M2 -->
+  <!-- M4 -->
+  <!-- TieBreaker Track Container -->
+  <!-- TieBreaker Title -->
+  <!-- G1 -->
+  <!-- G2 -->
+  <!-- ================= CONSENSUS & DECISIONS ================= -->
+  <!-- Fan-in connections to Vote -->
+  <!-- Vote -->
+  <!-- Majority Decision Diamond -->
+  <!-- Majority -> Yes -> Final -->
+  <!-- Majority -> No, but leading candidate -> TB -->
+  <!-- Majority -> All methods disagree -> Unresolved -->
+  <!-- TB Decision Diamond -->
+  <!-- TB -> Both agree -> Final -->
+  <!-- TB -> Priority order -> Final -->
+  <!-- TB -> Neither resolves -> Unresolved -->
+  <!-- Unresolved -->
+  <!-- Final Cell Label -->
+  <g
+     id="g111"
+     transform="translate(-0.95083237,35.529506)">
+    <g
+       id="g67"
+       style="stroke-width:1;stroke-dasharray:none">
+      <rect
+         x="372.5"
+         y="28"
+         width="175"
+         height="32"
+         rx="18.0979"
+         fill="#eceff1"
+         stroke="#455a64"
+         stroke-width="2"
+         id="rect62"
+         ry="16"
+         style="fill:#aaccff;stroke:#003380;stroke-width:1;stroke-dasharray:none" />
+      <text
+         x="460"
+         y="45.17749"
+         class="node-text"
+         font-weight="bold"
+         id="text1"
+         style="stroke-width:1;stroke-dasharray:none">Raw Counts + Markers</text>
+    </g>
+    <rect
+       x="372.68408"
+       y="91.361702"
+       width="175"
+       height="32"
+       rx="8.5929184"
+       fill="#eceff1"
+       stroke="#455a64"
+       stroke-width="2"
+       id="rect65"
+       ry="8.169529"
+       style="fill:#ffffff;stroke:#4d4d4d;stroke-width:1;stroke-dasharray:none" />
+    <text
+       x="460"
+       y="107.23158"
+       class="node-text"
+       id="text2">Assess cell quality</text>
+    <rect
+       x="372.68408"
+       y="155.42996"
+       width="175"
+       height="32"
+       rx="8.5929184"
+       fill="#eceff1"
+       stroke="#455a64"
+       stroke-width="2"
+       id="rect64"
+       ry="8.169529"
+       style="fill:#ffffff;stroke:#4d4d4d;stroke-width:1;stroke-dasharray:none" />
+    <text
+       x="460"
+       y="172.56302"
+       class="node-text"
+       id="text3">Normalise counts</text>
+    <rect
+       x="350.84332"
+       y="218.88202"
+       width="218.80209"
+       height="49.689342"
+       rx="10.743707"
+       fill="#eceff1"
+       stroke="#455a64"
+       stroke-width="2.78672"
+       id="rect69"
+       ry="12.68558"
+       style="fill:#ffffff;stroke:#4d4d4d;stroke-width:1;stroke-dasharray:none" />
+    <g
+       id="g69">
+      <text
+         x="460"
+         y="235"
+         class="node-text"
+         font-weight="bold"
+         id="text4">Prepare SCE</text>
+      <text
+         x="460"
+         y="250"
+         class="node-text"
+         font-size="11"
+         fill="#555"
+         id="text5">Build full + reduced feature spaces</text>
+    </g>
+    <rect
+       x="40.063103"
+       y="300.00067"
+       width="600"
+       height="260"
+       class="track-bg"
+       id="rect11"
+       style="opacity:1;fill:#f9f9f9;stroke:#333333;stroke-width:0.5;stroke-dasharray:2, 2;stroke-dashoffset:0" />
+    <g
+       id="g92">
+      <rect
+         x="230"
+         y="312"
+         width="220"
+         height="32"
+         rx="4"
+         fill="#eceff1"
+         stroke="#455a64"
+         stroke-width="2"
+         id="rect12"
+         style="fill:#f9f9f9;stroke-width:0.944882;stroke-dasharray:none" />
+      <text
+         x="340.08887"
+         y="332.93896"
+         class="title-text"
+         id="text12">Annotation Methods</text>
+    </g>
+    <g
+       id="g86">
+      <rect
+         x="55.060013"
+         y="355"
+         width="275"
+         height="190"
+         class="subgraph-bg"
+         id="rect13"
+         style="fill:#f9f9f9;stroke:#666666;stroke-dasharray:4, 4;stroke-dashoffset:0" />
+      <text
+         x="192"
+         y="375"
+         class="node-text"
+         font-weight="600"
+         fill="#455a64"
+         id="text13">Full Gene Set</text>
+      <g
+         id="g84">
+        <rect
+           style="fill:#e0f2f0;fill-opacity:1;stroke:#acc6c2;stroke-width:0.877606;stroke-dasharray:none;stroke-opacity:1"
+           id="rect74"
+           width="123.51921"
+           height="110.08017"
+           x="63.806313"
+           y="394.9599"
+           rx="3.4485626" />
+        <g
+           id="g75"
+           transform="translate(-4.659424,-3.8812256)">
+          <text
+             x="130"
+             y="415"
+             class="node-text"
+             font-weight="bold"
+             id="text14">Method 1</text>
+          <text
+             x="130"
+             y="435"
+             class="node-text"
+             font-size="11"
+             id="text15">Cluster-based</text>
+          <text
+             x="130"
+             y="465"
+             class="node-text"
+             font-size="10"
+             fill="#444"
+             id="text16">Broad triage →</text>
+          <text
+             x="130"
+             y="480"
+             class="node-text"
+             font-size="10"
+             fill="#444"
+             id="text17">subcluster →</text>
+          <text
+             x="130"
+             y="495"
+             class="node-text"
+             font-size="10"
+             fill="#444"
+             id="text18">Fisher score</text>
+        </g>
+      </g>
+      <g
+         id="g83">
+        <rect
+           style="fill:#e0f2f0;fill-opacity:1;stroke:#acc6c2;stroke-width:0.877606;stroke-dasharray:none;stroke-opacity:1"
+           id="rect75"
+           width="123.51921"
+           height="110.08017"
+           x="197.85913"
+           y="394.9599"
+           rx="3.4485626" />
+        <g
+           id="g76"
+           transform="translate(4.4886093,-3.8812256)">
+          <text
+             x="255"
+             y="415"
+             class="node-text"
+             font-weight="bold"
+             id="text19">Method 3</text>
+          <text
+             x="255"
+             y="435"
+             class="node-text"
+             font-size="11"
+             id="text20">Enrichment-based</text>
+          <text
+             x="255"
+             y="465"
+             class="node-text"
+             font-size="10"
+             fill="#444"
+             id="text21">Broad triage →</text>
+          <text
+             x="255"
+             y="480"
+             class="node-text"
+             font-size="10"
+             fill="#444"
+             id="text22">subcluster →</text>
+          <text
+             x="255"
+             y="495"
+             class="node-text"
+             font-size="10"
+             fill="#444"
+             id="text23">Fisher score</text>
+        </g>
+      </g>
+    </g>
+    <g
+       id="g85">
+      <rect
+         x="350.20187"
+         y="355"
+         width="275"
+         height="190"
+         class="subgraph-bg"
+         id="rect23"
+         style="fill:#f9f9f9;stroke:#666666;stroke-dasharray:4, 4;stroke-dashoffset:0" />
+      <text
+         x="487"
+         y="375"
+         class="node-text"
+         font-weight="600"
+         fill="#455a64"
+         id="text24">Reduced Gene Set</text>
+      <g
+         id="g82">
+        <rect
+           style="fill:#e0f2f0;fill-opacity:1;stroke:#acc6c2;stroke-width:0.877606;stroke-dasharray:none;stroke-opacity:1"
+           id="rect78"
+           width="123.51921"
+           height="110.08017"
+           x="359.42676"
+           y="394.9599"
+           rx="3.4485626" />
+        <g
+           id="g79"
+           transform="translate(-4.0389786,-3.8812256)">
+          <text
+             x="425"
+             y="415"
+             class="node-text"
+             font-weight="bold"
+             id="text25">Method 2</text>
+          <text
+             x="425"
+             y="435"
+             class="node-text"
+             font-size="11"
+             id="text26">Cluster-based</text>
+          <text
+             x="425"
+             y="465"
+             class="node-text"
+             font-size="10"
+             fill="#444"
+             id="text27">Broad triage →</text>
+          <text
+             x="425"
+             y="480"
+             class="node-text"
+             font-size="10"
+             fill="#444"
+             id="text28">subcluster →</text>
+          <text
+             x="425"
+             y="495"
+             class="node-text"
+             font-size="10"
+             fill="#444"
+             id="text29">Fisher score</text>
+        </g>
+      </g>
+      <g
+         id="g81">
+        <rect
+           style="fill:#e0f2f0;fill-opacity:1;stroke:#acc6c2;stroke-width:0.877606;stroke-dasharray:none;stroke-opacity:1"
+           id="rect79"
+           width="123.51921"
+           height="110.08017"
+           x="492.51413"
+           y="394.9599"
+           rx="3.4485626" />
+        <g
+           id="g80"
+           transform="translate(4.1436081,-3.8812256)">
+          <text
+             x="550"
+             y="415"
+             class="node-text"
+             font-weight="bold"
+             id="text30">Method 4</text>
+          <text
+             x="550"
+             y="435"
+             class="node-text"
+             font-size="11"
+             id="text31">Enrichment-based</text>
+          <text
+             x="550"
+             y="465"
+             class="node-text"
+             font-size="10"
+             fill="#444"
+             id="text32">Broad triage →</text>
+          <text
+             x="550"
+             y="480"
+             class="node-text"
+             font-size="10"
+             fill="#444"
+             id="text33">subcluster →</text>
+          <text
+             x="550"
+             y="495"
+             class="node-text"
+             font-size="10"
+             fill="#444"
+             id="text34">Fisher score</text>
+        </g>
+      </g>
+    </g>
+    <rect
+       x="656.83856"
+       y="300.03247"
+       width="225"
+       height="260"
+       class="track-bg"
+       id="rect34"
+       style="opacity:1;fill:#f9f9f9;stroke:#1a1a1a;stroke-width:0.5;stroke-dasharray:2, 2;stroke-dashoffset:0" />
+    <g
+       id="g91"
+       transform="translate(2.3146362,1.034668)">
+      <rect
+         x="679.52393"
+         y="310.96533"
+         width="175"
+         height="32"
+         rx="4"
+         fill="#eceff1"
+         stroke="#455a64"
+         stroke-width="2"
+         id="rect35"
+         style="fill:#f9f9f9;stroke-width:0.944882;stroke-dasharray:none" />
+      <text
+         x="767"
+         y="332"
+         class="title-text"
+         id="text35">Global Tie-breakers</text>
+    </g>
+    <g
+       id="g89">
+      <rect
+         style="opacity:1;fill:#ffd5d5;fill-opacity:1;stroke:#ff8080;stroke-width:0.944882;stroke-dasharray:none;stroke-opacity:1"
+         id="rect86"
+         width="100.78761"
+         height="106.36631"
+         x="666.7124"
+         y="399.11258"
+         rx="4" />
+      <g
+         id="g88"
+         transform="translate(2.1379471,3.4430733)">
+        <text
+           x="715"
+           y="415"
+           class="node-text"
+           font-weight="bold"
+           id="text36">Tie-breaker 1</text>
+        <text
+           x="715"
+           y="440"
+           class="node-text"
+           font-size="10"
+           id="text37">HVG clusters</text>
+        <text
+           x="715"
+           y="460"
+           class="node-text"
+           font-size="10"
+           id="text38">Full gene set</text>
+        <text
+           x="715"
+           y="485"
+           class="node-text"
+           font-size="10"
+           fill="#444"
+           id="text39">→ Fisher score</text>
+      </g>
+    </g>
+    <g
+       id="g90">
+      <rect
+         style="opacity:1;fill:#ffd5d5;fill-opacity:1;stroke:#ff8080;stroke-width:0.944882;stroke-dasharray:none;stroke-opacity:1"
+         id="rect87"
+         width="100.78761"
+         height="106.36631"
+         x="773.638"
+         y="399.11258"
+         rx="4" />
+      <g
+         id="g87"
+         transform="translate(4.0635452,3.4430733)">
+        <text
+           x="820"
+           y="415"
+           class="node-text"
+           font-weight="bold"
+           id="text40">Tie-breaker 2</text>
+        <text
+           x="820"
+           y="440"
+           class="node-text"
+           font-size="10"
+           id="text41">Panel clusters</text>
+        <text
+           x="820"
+           y="460"
+           class="node-text"
+           font-size="10"
+           id="text42">Reduced set</text>
+        <text
+           x="820"
+           y="485"
+           class="node-text"
+           font-size="10"
+           fill="#444"
+           id="text43">→ Fisher score</text>
+      </g>
+    </g>
+    <g
+       id="g101"
+       transform="matrix(0.98547893,0,0,1.0000468,16.809724,18.89091)">
+      <path
+         sodipodi:type="star"
+         style="fill:#fff6d5;fill-opacity:1;stroke:#ffcc00;stroke-width:2.34552;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1"
+         id="path98"
+         inkscape:flatsided="true"
+         sodipodi:sides="4"
+         sodipodi:cx="220"
+         sodipodi:cy="713.05359"
+         sodipodi:r1="102.76505"
+         sodipodi:r2="51.385548"
+         sodipodi:arg1="0.52345484"
+         sodipodi:arg2="1.308853"
+         inkscape:rounded="0"
+         inkscape:randomized="0"
+         d="M 309.00454,764.4233 168.63028,802.05813 130.99546,661.68387 271.36972,624.04905 Z"
+         transform="matrix(-0.25310229,-0.31097626,0.43838602,-0.17954223,192.81048,960.44582)"
+         inkscape:transform-center-x="11.231748"
+         inkscape:transform-center-y="4.4968986" />
+      <g
+         id="g98"
+         transform="translate(-0.64746299,3.1345203)">
+        <text
+           x="450"
+           y="754"
+           class="node-text"
+           font-weight="bold"
+           id="text50">Majority</text>
+        <text
+           x="450"
+           y="770"
+           class="node-text"
+           font-weight="bold"
+           id="text51">vote?</text>
+      </g>
+    </g>
+    <path
+       d="M 408.73525,782.93979 160.53516,782.75591 152.85582,1135 h 205.17595"
+       class="edge"
+       id="path51"
+       sodipodi:nodetypes="cccc" />
+    <rect
+       x="220"
+       y="740"
+       width="40"
+       height="18"
+       fill="#ffffff"
+       rx="3"
+       id="rect51" />
+    <text
+       x="292.5293"
+       y="759.09302"
+       class="label-text"
+       id="text52"
+       style="font-size:16px">Yes</text>
+    <g
+       id="g102"
+       transform="translate(28,8.2492582)">
+      <text
+         x="512"
+         y="830"
+         class="label-text"
+         id="text53"
+         style="font-size:16px"><tspan
+           style="font-style:italic;font-size:16px"
+           id="tspan103">No, but leading</tspan></text>
+      <text
+         x="512"
+         y="848"
+         class="label-text"
+         id="text54"
+         style="font-size:16px"><tspan
+           style="font-style:italic;font-size:16px"
+           id="tspan102">candidate</tspan></text>
+    </g>
+    <path
+       d="m 512.26695,782.75591 h 273.52722 l 0.0952,237.30989"
+       class="edge"
+       id="path54"
+       sodipodi:nodetypes="ccc" />
+    <rect
+       x="580"
+       y="740"
+       width="120"
+       height="18"
+       fill="#ffffff"
+       rx="3"
+       id="rect54" />
+    <text
+       x="640"
+       y="758"
+       class="label-text"
+       id="text55"
+       style="font-size:16px">All methods disagree</text>
+    <g
+       id="g100"
+       transform="translate(9.8636917,-2.9181662)">
+      <g
+         id="g110">
+        <path
+           sodipodi:type="star"
+           style="fill:#fff6d5;fill-opacity:1;stroke:#ffcc00;stroke-width:2.34552;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1"
+           id="path99"
+           inkscape:flatsided="true"
+           sodipodi:sides="4"
+           sodipodi:cx="220"
+           sodipodi:cy="713.05359"
+           sodipodi:r1="92.429764"
+           sodipodi:r2="51.385548"
+           sodipodi:arg1="0.524475"
+           sodipodi:arg2="1.3098731"
+           inkscape:rounded="1.1504304"
+           inkscape:randomized="0"
+           d="m 300.006,759.33859 c -75.30359,130.1661 3.8751,109.02458 -126.291,33.721 -130.166104,-75.30359 -109.024581,3.8751 -33.721,-126.291 75.30359,-130.1661 -3.8751,-109.02458 126.291,-33.721 130.1661,75.30358 109.02458,-3.8751 33.721,126.291 z"
+           transform="matrix(-0.25453398,-0.28195856,0.4408658,-0.16278885,191.49371,1090.2762)"
+           inkscape:transform-center-x="11.295277"
+           inkscape:transform-center-y="4.0773137" />
+        <g
+           id="g99"
+           transform="translate(-2.3446654e-7,-4.672002e-5)">
+          <text
+             x="450"
+             y="904"
+             class="node-text"
+             font-weight="bold"
+             id="text56">Tie-breakers</text>
+          <text
+             x="450"
+             y="920"
+             class="node-text"
+             font-weight="bold"
+             id="text57">agree?</text>
+        </g>
+      </g>
+    </g>
+    <path
+       d="M 412.66785,909.22361 308.81892,909.47953 308.67844,1135 h 49.35333"
+       class="edge"
+       id="path57"
+       sodipodi:nodetypes="cccc" />
+    <rect
+       x="300"
+       y="890"
+       width="60"
+       height="18"
+       fill="#ffffff"
+       rx="3"
+       id="rect57" />
+    <text
+       x="239.75781"
+       y="1021.8993"
+       class="label-text"
+       id="text58"
+       style="font-size:16px">Both agree</text>
+    <path
+       d="M 459.99262,949.92688 V 1099.7673"
+       class="edge"
+       id="path58"
+       sodipodi:nodetypes="cc" />
+    <text
+       x="534.37915"
+       y="1029.4266"
+       class="label-text"
+       id="text59"
+       style="font-size:16px">Priority order</text>
+    <path
+       d="m 506.77388,909.27635 279.02029,0.009 0.19041,109.89775"
+       class="edge"
+       id="path59"
+       sodipodi:nodetypes="ccc" />
+    <rect
+       x="580"
+       y="890"
+       width="100"
+       height="18"
+       fill="#ffffff"
+       rx="3"
+       id="rect59" />
+    <text
+       x="639.62134"
+       y="939.2207"
+       class="label-text"
+       id="text60"
+       style="font-size:16px">Neither resolves</text>
+    <g
+       id="g109"
+       transform="translate(5.79417,2.9511341)">
+      <g
+         id="g108"
+         transform="matrix(0.86795278,0,0,0.86795278,103.00943,138.27564)">
+        <rect
+           style="opacity:1;fill:#ffe6d5;fill-opacity:1;stroke:#ff7f2a;stroke-width:0.698852;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1"
+           id="rect102"
+           width="128.03583"
+           height="51.449005"
+           x="716.07727"
+           y="1021.4437"
+           rx="15.544427"
+           ry="15.544427" />
+      </g>
+      <text
+         x="780"
+         y="1047"
+         class="node-text"
+         font-weight="bold"
+         id="text61">Unassigned</text>
+    </g>
+    <rect
+       x="377.53491"
+       y="1117.8225"
+       width="175"
+       height="32"
+       rx="18.0979"
+       fill="#eceff1"
+       stroke="#455a64"
+       stroke-width="2"
+       id="rect101"
+       ry="16"
+       style="fill:#c6e9af;stroke:#447821;stroke-width:1;stroke-dasharray:none" />
+    <text
+       x="465"
+       y="1135"
+       class="node-text"
+       font-weight="bold"
+       font-size="14"
+       id="text62">Final Cell Label</text>
+    <path
+       d="m 460,129.521 v 16.14966"
+       class="edge"
+       id="path66" />
+    <path
+       d="m 460,65.452744 v 16.14966"
+       class="edge"
+       id="path68" />
+    <path
+       d="m 460,193.58926 v 16.14966"
+       class="edge"
+       id="path69" />
+    <path
+       d="m 569.06619,243.94036 216.72798,0.31091 v 31.39424"
+       class="edge"
+       id="path92"
+       sodipodi:nodetypes="ccc"
+       style="stroke-width:1.5;stroke-dasharray:none" />
+    <path
+       d="m 351.67106,244.09784 -191.1359,1.45699 v 29.84889"
+       class="edge"
+       id="path93"
+       sodipodi:nodetypes="ccc"
+       style="stroke-width:1.5;stroke-dasharray:none" />
+    <g
+       id="g97"
+       transform="translate(9.9745941,23.678503)">
+      <g
+         id="g94"
+         transform="translate(0,1.1444092e-5)">
+        <text
+           x="450"
+           y="643"
+           class="node-text"
+           font-weight="bold"
+           id="text48">Resolve Consensus Labels</text>
+        <text
+           x="450"
+           y="660"
+           class="node-text"
+           font-size="11"
+           fill="#555"
+           id="text49">Ensemble voting</text>
+      </g>
+      <rect
+         style="opacity:1;fill:none;fill-opacity:1;stroke:#000000;stroke-width:1.5;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1"
+         id="rect94"
+         width="230.48737"
+         height="71.890038"
+         x="335.02609"
+         y="615.65497"
+         ry="21.270336"
+         rx="21.270336" />
+    </g>
+    <path
+       style="opacity:1;fill:none;fill-opacity:1;stroke:#000000;stroke-width:1.5;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1"
+       d="M 780.49958,602.48745 160.53516,601.89328 V 573.37316"
+       id="path95"
+       transform="matrix(1.0079514,0,0,1,-1.276479,0)"
+       inkscape:original-d="m 780.49958,602.48745 c -206.65481,-0.19806 -619.96442,-0.59417 -619.96442,-0.59417 0,0 0,-19.01341 0,-28.52012"
+       inkscape:path-effect="#path-effect95" />
+    <path
+       style="opacity:1;fill:none;fill-opacity:1;stroke:#000000;stroke-width:1.5;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1"
+       d="m 780.5003,573.37316 -7.2e-4,29.11429"
+       id="path96"
+       transform="matrix(0.99992625,0,0,1.0298234,5.3521553,-17.218227)"
+       inkscape:original-d="m 780.5003,573.37316 c -2.4e-4,9.70476 -4.8e-4,19.40953 -7.2e-4,29.11429"
+       inkscape:path-effect="#path-effect96" />
+    <path
+       d="m 460,611.57566 v 16.14966"
+       class="edge"
+       id="path97" />
+    <path
+       d="m 460,716.587 v 22.85002"
+       class="edge"
+       id="path103"
+       style="stroke-width:1.5;stroke-dasharray:none" />
+    <path
+       d="m 460,827.03248 -0.007,37.94059"
+       class="edge"
+       id="path106"
+       sodipodi:nodetypes="cc" />
+  </g>
+</svg>

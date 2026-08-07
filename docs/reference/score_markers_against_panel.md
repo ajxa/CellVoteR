@@ -14,7 +14,8 @@ score_markers_against_panel(top_markers, marker_panel, background_genes)
 
 - top_markers:
 
-  Named list. Output of [`extract_top_markers`](extract_top_markers.md);
+  Named list. Output of
+  [`extract_top_markers`](https://ajxa.github.io/CellVoteR/reference/extract_top_markers.md);
   each element must contain a `top_n` character vector.
 
 - marker_panel:

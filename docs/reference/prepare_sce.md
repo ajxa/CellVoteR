@@ -27,13 +27,14 @@ prepare_sce(
   A
   [`SingleCellExperiment`](https://rdrr.io/pkg/SingleCellExperiment/man/SingleCellExperiment.html)
   with `logcounts` assay (from
-  [`normalize_counts`](normalize_counts.md)).
+  [`normalize_counts`](https://ajxa.github.io/CellVoteR/reference/normalize_counts.md)).
 
 - marker_config:
 
   Named list with `$broad` (from
-  [`build_broad_marker_config`](build_broad_marker_config.md)) and
-  `$fine` (from [`load_markers`](load_markers.md)).
+  [`build_broad_marker_config`](https://ajxa.github.io/CellVoteR/reference/build_broad_marker_config.md))
+  and `$fine` (from
+  [`load_markers`](https://ajxa.github.io/CellVoteR/reference/load_markers.md)).
 
 - n_hvgs:
 
@@ -46,12 +47,12 @@ prepare_sce(
 - n_pcs, k, resolution:
 
   Override automatic parameter estimation. `NULL` (default) uses
-  [`estimate_cluster_params`](estimate_cluster_params.md).
+  [`estimate_cluster_params`](https://ajxa.github.io/CellVoteR/reference/estimate_cluster_params.md).
 
 - cluster_params_args:
 
   Named list passed to
-  [`estimate_cluster_params`](estimate_cluster_params.md).
+  [`estimate_cluster_params`](https://ajxa.github.io/CellVoteR/reference/estimate_cluster_params.md).
 
 - BPPARAM:
 
@@ -73,7 +74,7 @@ overlap with the user panel and broad markers. The dimensionality
 reduction and clustering for each track are performed independently
 using their respective feature spaces, and their parameters are
 estimated separately using
-[`estimate_cluster_params`](estimate_cluster_params.md).
+[`estimate_cluster_params`](https://ajxa.github.io/CellVoteR/reference/estimate_cluster_params.md).
 
 ## Storage layout
 

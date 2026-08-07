@@ -1,7 +1,8 @@
 # Extract top marker genes from ranked marker tables
 
 Generates a list of marker genes per cluster using ranked marker tables
-produced by [`rank_cluster_markers`](rank_cluster_markers.md).
+produced by
+[`rank_cluster_markers`](https://ajxa.github.io/CellVoteR/reference/rank_cluster_markers.md).
 
 ## Usage
 
@@ -32,7 +33,7 @@ extract_top_markers(
 - ranked_markers:
 
   List or `NULL`. Ranked marker result returned by
-  [`rank_cluster_markers`](rank_cluster_markers.md)`(return_list = TRUE)`.
+  [`rank_cluster_markers`](https://ajxa.github.io/CellVoteR/reference/rank_cluster_markers.md)`(return_list = TRUE)`.
   If supplied, this takes precedence over `sce` and
   `ranked_markers_key`.
 

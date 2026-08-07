@@ -1,0 +1,175 @@
+---
+title: "Annotation Methods"
+author: "Shoaib Ajaib"
+date: "`r Sys.Date()`"
+output:
+  rmdformats::downcute:
+    self_contained: false
+    default_style: "light"
+    downcute_theme: "default"
+    code_folding: show
+    toc_depth: 4
+    toc_float: true
+vignette: >
+  %\VignetteIndexEntry{Annotation Methods}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>",
+  eval = FALSE
+)
+```
+
+
+
+CellVoteR runs four primary annotation methods and two global tie-breakers. These methods are all
+run in parallel and the results are returned in a single list. The `run_cellvoter()` function is the main entry point for running the annotation methods.
+
+
+```{r run}
+results <- run_cellvoter(sce)
+```
+
+# Primary Methods
+
+Each of the four primary workflows follow the same general outline:
+
+```
+broad annotation
+      ↓
+subcluster_labels()
+      ↓
+rank_cluster_markers()          ←   DE testing per sub-cluster
+      ↓
+extract_top_markers()           ←   select top N genes per cluster
+      ↓
+score_markers_against_panel()   ←   Fisher's Exact Test + overlap similarity
+      ↓
+assign_fine_labels()            ←   best label per cluster    →    mapped to cells
+```
+
+## Broad annotation strategies
+
+For the broad annotation step, CellVoteR provides two strategies for assigning broad labels to clusters or cells:
+
+**Cluster-based** (`annotate_broad_clusters()`): Runs DE testing on pre-existing
+unsupervised clusters. Each cluster is assigned the broad category whose
+curated markers have the lowest median rank among significantly up-regulated
+genes (FDR ≤ 0.05, AUC ≥ 0.6 by default).
+
+**Enrichment-based** (`annotate_broad_cells()`): Assigns labels directly to
+individual cells by aggregating expression across each broad category's marker
+genes and comparing against category-specific thresholds. Does not depend on
+clustering.
+
+> In some datasets (highly homogeneous tumour sample), all clusters may
+receive the same broad label. CellVoteR detects this and retains the original
+cluster structure for subclustering rather than collapsing to a single group,
+preserving the fine-resolution information for downstream processes.
+
+
+## Fine annotation overview
+
+Once broad labels are assigned, the fine annotation workflow is applied to each broad category independently. The steps are identical in all cases and are as follows:
+
+```
+`subcluster_labels()`
+          ↓
+`rank_cluster_markers()`
+          ↓
+`extract_top_markers()`
+          ↓
+`score_markers_against_panel()`
+          ↓
+`assign_fine_labels()`
+
+```
+
+# Global Tie-breakers
+
+In addition to the four primary workflows, CellVoteR provides two global tie-breakers that can be used to resolve conflicts between the different methods. These tie-breakers are applied after the primary methods have been run and represent the unsupervised case where no broad or fine labels are assigned and all the cells are treated as a single group, taking all highly variable genes (HVGs) as input or the reduced marker space based on the curated marker panel. 
+
+A summary of the tie-breakers, detailing their feature space and strategy, is as follows:
+
+| Tie-breaker | Feature space | Strategy |
+|---|---|---|
+| Tie-breaker 1 | Full HVG space | Global clustering and marker scoring |
+| Tie-breaker 2 | Reduced marker space | Global clustering and marker scoring |
+
+
+# Customising parameters
+
+The main `run_cellvoter()` function accepts an `annotation_args` list which can be used to customise various parameters of the underlying internal functions, if required. There following parameter lists that can be specified, which each control specific aspects of the underlying logic:
+
+
+- **rank_args** Controls parameters associated with `rank_cluster_markers()`:
+  - assay_type
+  - test_type
+  - direction
+  - pval_type
+  - min_prop
+  - BPPARAM
+
+- **broad_args** is identical to the `rank_args`, but only controls the ranking inside the
+`annotate_broad_clusters` function. This is useful for altering the parameters which control how the broad cell lineage labels (e.g, immune, vasculature) are defined - these broad markers are small and highly specific and so you may wish to use a more lenient `min_prop` compared to the fine labels and this allows for such fine control of the process.
+
+- **extract_args** Controls parameters associated with `extract_top_markers()`:
+  - fdr_threshold
+  - effect_threshold
+  - target_n
+
+The following is an example of how this can be used to independently alter the broad and fine labelling logic:
+
+```{r run-custom}
+results <- run_cellvoter(
+  sce,
+  return_full_output = TRUE,
+  annotation_args = list(
+
+    # Controls ranking inside annotate_broad_clusters (methods 1 and 2)
+    # Lenient min_prop appropriate for small, specific broad marker sets
+    broad_args = list(
+      test_type = "wilcox",
+      min_prop  = 0.1
+    ),
+
+    # Controls ranking inside .run_fine_annotation (all six methods)
+    # Stricter settings for fine sub-cluster marker extraction
+    rank_args = list(
+      test_type = "wilcox",
+      min_prop  = 0.25
+    ),
+
+    # Controls top marker extraction
+    extract_args = list(
+      fdr_threshold    = 0.05,
+      effect_threshold = 0.6,
+      target_n         = 100L
+    )
+  )
+)
+```
+
+> **broad_args** vs **rank_args**: these both control `rank_cluster_markers()` but at different workflow stages. *broad_args* affects how broad lineage labels are assigned (methods 1 and 2 only); *rank_args* affects how sub-cluster marker genes are extracted for Fisher scoring (all six methods). Methods 3 and 4 use *rank_args* only, as the enrichment-based broad step does not call *rank_cluster_markers()*.
+
+
+# Outputs
+
+> By Setting the `return_full_output` = **TRUE** in `run_cellvoter()`, the function returns all of the per-cluster Fisher scores and similarity values are for every method (by default this is set to *FALSE*). These scores can be used to inspect the per-cluster scoring and to understand how the final consensus label was derived. The following code shows how to access these scores:
+
+```{r full-output}
+# Per-cluster score table for method 1
+results$full_output$method_1$scores
+
+# Per-cluster score table for tie-breaker 2
+results$full_output$global_2$scores
+```
+
+
+# Next Steps
+
+Following annotation, the next step is to resolve the consensus labels and attach them to the SCE object. This is covered in the [Consensus and results](consensus_and_results.html) article.

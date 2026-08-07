@@ -36,13 +36,17 @@
 #' @param subcluster_col_fmt Character scalar. Format string passed to
 #'   \code{\link[scran]{quickSubCluster}} via \code{format}. This controls how
 #'   final subcluster labels are constructed. Defaults to \code{`\%s_sc\%s`}.
-#' @param hvg_prop Numeric scalar in \code{(0, 1]}. Proportion of genes to
-#'   retain as highly variable within each subset when
-#'   \code{feature_mode = "hvg"}. Defaults to \code{0.1}.
+#' @param hvg_prop Numeric scalar in \code{(0, 1]}. When the \code{feature_mode = "hvg"},
+#' this is the proportion of genes that are retained as highly variable within each broad subset.
+#' For example, the default of \code{0.1} means that the top 10\% of genes
+#' ranked by variance modelling will be used.
+#
 #' @param min_ncells Integer scalar. Minimum number of cells required for a
 #'   broad group to be subclustered. Groups smaller than this threshold are not
 #'   subclustered by \code{\link[scran]{quickSubCluster}}. Defaults to
-#'   \code{50}.
+#'   \code{50}. This value is passed directly to \code{min.ncells} in
+#'    \code{\link[scran]{quickSubCluster}} and aligns with its default,
+#'    which is based on empirical observations of when subclustering becomes unreliable.
 #' @param seed Integer scalar. Random seed used before running subclustering.
 #'   Defaults to \code{1234}.
 #' @param BPPARAM A \code{\link[BiocParallel]{BiocParallelParam}} object used
@@ -97,7 +101,7 @@ subcluster_labels <- function(sce,
                               out_col = NULL,
                               subcluster_col_fmt = "%s_sc%s",
                               hvg_prop = 0.1,
-                              min_ncells = 50,
+                              min_ncells = 50, # Aligns with the scran::quickSubCluster default
                               seed = 1234,
                               BPPARAM = BiocParallel::SerialParam()
 ) {
@@ -122,6 +126,19 @@ subcluster_labels <- function(sce,
 
   feature_mode <- match.arg(feature_mode, several.ok = FALSE, choices = c("hvg", "all"))
 
+  # Identify which broad groups will be skipped for subclustering due to low cell counts
+  group_vec <- as.character(SummarizedExperiment::colData(sce)[[group_col]])
+  group_counts <- table(group_vec)
+
+  skipped_groups <- names(group_counts)[group_counts < min_ncells]
+
+  if (length(skipped_groups) > 0) {
+
+    cli::cli_alert_info(
+      "{cli::qty(length(skipped_groups))}The following broad categor{?y/ies} {?has/have} < {min_ncells} cells and will be skipped: {.val {skipped_groups}}"
+    )
+  }
+
   set.seed(seed)
 
   subcluster_out <- scran::quickSubCluster(
@@ -135,28 +152,22 @@ subcluster_labels <- function(sce,
 
     prepFUN = function(x) {
 
-      est_params <- estimate_cluster_params(n_cells = ncol(x))
       subset_row <- NULL
 
       if (feature_mode == "hvg") {
-
         dec <- scran::modelGeneVar(x)
         hvgs <- scran::getTopHVGs(dec, prop = hvg_prop)
         subset_row <- hvgs
-        n_features <- length(hvgs)
+      }
 
-      } else n_features <- nrow(x)
+      n_features <- if(is.null(subset_row)) nrow(x) else length(subset_row)
+
+      est_params <- suppressMessages({estimate_cluster_params(n_cells = ncol(x))})
 
       max_rank <- min(est_params$n_pcs, n_features - 1L, ncol(x) - 1L)
 
-      if (max_rank < 1L) {
-        cli::cli_abort(
-          c(
-            "Cannot run PCA for a subcluster subset.",
-            "i" = "Need at least 2 cells and 2 features."
-          )
-        )
-      }
+      # Silent fall-back : If PCA is impossible, return the object without PCA.
+      if (max_rank < 1L) return(x)
 
       cluster_input <- scran::fixedPCA(
         x = x,
@@ -171,8 +182,15 @@ subcluster_labels <- function(sce,
 
     clusterFUN = function(x) {
 
-      est_params <- estimate_cluster_params(n_cells = ncol(x))
+      # If PCA was skipped in prepFUN, return a single cluster label (1)
+
+      if (!"sub_PCA" %in% SingleCellExperiment::reducedDimNames(x)) return(rep(1L, ncol(x)))
+
+      est_params <- suppressMessages({estimate_cluster_params(n_cells = ncol(x))})
+
       k_eff <- min(est_params$k, ncol(x) - 1L)
+
+      if (k_eff < 1L) return(rep(1L, ncol(x)))
 
       g <- scran::clusterCells(
         x = x,

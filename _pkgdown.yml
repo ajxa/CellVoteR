@@ -1,4 +1,36 @@
 url: https://ajxa.github.io/CellVoteR/
+
 template:
   bootstrap: 5
+  light-switch: true
 
+home:
+  sidebar: false
+
+navbar:
+  structure:
+    left:  [articles, reference]
+    right: [search, github, lightswitch]
+
+articles:
+  - title: Getting started
+    navbar: ~
+    contents:
+      - intro_to_CellVoteR
+
+  - title: Inputs and preparation
+    navbar: ~
+    contents:
+      - user_inputs
+      - preprocessing
+
+  - title: Annotation workflow
+    navbar: ~
+    contents:
+      - annotation_methods
+      - consensus_and_results
+
+  - title: Practical guidance
+    navbar: ~
+    contents:
+      - troubleshooting

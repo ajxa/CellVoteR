@@ -116,9 +116,10 @@ disk-backed storage after creation:
 
 ## See also
 
-[`load_markers`](load_markers.md) and
-[`build_broad_marker_config`](build_broad_marker_config.md) for
-preparing the marker configuration to attach to the SCE via
+[`load_markers`](https://ajxa.github.io/CellVoteR/reference/load_markers.md)
+and
+[`build_broad_marker_config`](https://ajxa.github.io/CellVoteR/reference/build_broad_marker_config.md)
+for preparing the marker configuration to attach to the SCE via
 `metadata()`.
 
 ## Examples

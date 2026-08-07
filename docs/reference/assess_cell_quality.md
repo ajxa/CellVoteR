@@ -36,7 +36,8 @@ assess_cell_quality(
   list with `features` (character vector of gene names) and `max_pct`
   (numeric threshold for maximum percentage). If `NULL` (default),
   auto-detects mitochondrial (`^MT-`) and ribosomal (`^RP[SL]`) genes
-  via [`find_qc_features`](find_qc_features.md).
+  via
+  [`find_qc_features`](https://ajxa.github.io/CellVoteR/reference/find_qc_features.md).
 
 - min_cells_per_sample:
 

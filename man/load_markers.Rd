@@ -5,7 +5,8 @@
 \title{Load and structure CellVoteR marker definitions}
 \usage{
 load_markers(
-  file_path,
+  file_path = NULL,
+  markers = NULL,
   unnamed_broad_cat_label = "other",
   type_col = "type",
   unique_types = c("broad", "fine"),
@@ -17,6 +18,9 @@ load_markers(
 \arguments{
 \item{file_path}{Character scalar. Path to a \code{.csv}, \code{.txt}
 (tab-separated), or \code{.xlsx} file containing marker definitions.}
+
+\item{markers}{Alternative argument for directly passing a \code{data.frame} containing
+marker definitions. If supplied, this overrides \code{file_path}.}
 
 \item{unnamed_broad_cat_label}{Character scalar. Label assigned to fine-type
 categories that do not map to any broad category. Defaults to
@@ -41,8 +45,8 @@ level keyed by label, values are character vectors of markers. The
 }
 }
 \description{
-Reads a marker definition file (csv, tab-separated txt, or xlsx) and
-organises it into a hierarchical list suitable for two-tier (broad -> fine)
+Reads a marker definition file (csv, tab-separated txt, xlsx, rds) or receives an R
+\code{\link[base]{data.frame}} directly and organises it into a hierarchical list suitable for two-tier (broad -> fine)
 cell-type annotation pipelines. The returned broad markers are a simple
 named list of character vectors intended to be passed to
 \code{\link{build_broad_marker_config}()} as a subsequent step to attach
@@ -62,15 +66,16 @@ category in the fine rows.}
 }
 }
 
-\section{Supported file formats}{
+\section{Supported input types}{
 
 \describe{
-\item{\code{.csv}}{Comma-separated values, read via
-\code{\link[utils]{read.csv}}.}
-\item{\code{.txt}}{Tab-separated values, read via
-\code{\link[utils]{read.delim}}.}
-\item{\code{.xlsx}}{Excel workbook, read via
-\code{\link[openxlsx]{read.xlsx}}.}
+\item{\code{.csv}}{Comma-separated values, read via \code{\link[utils]{read.csv}}.}
+\item{\code{.txt}}{Tab-separated values, read via \code{\link[utils]{read.delim}}.}
+\item{\code{.xlsx}}{Excel workbook, read via \code{\link[openxlsx]{read.xlsx}}.}
+\item{\code{.rds}}{A saved R object, read via \code{\link[base]{readRDS}}. This
+must contain a \code{data.frame} matching the expected layout.}
+\item{\code{data.frame}}{A \code{data.frame} passed directly via either the
+\code{file_path} or \code{markers} argument.}
 }
 }
 
@@ -82,14 +87,14 @@ an informational message. Broad categories that have \strong{no}
 corresponding fine rows cause an error.
 }
 
-\section{Typical workflow}{
+\section{Typical workflow when loading external marker files}{
 
 \preformatted{
 markers <- load_markers("markers.csv")
 
 markers$broad <- build_broad_marker_config(
-  marker_list    = markers$broad,
-  priority_order = c("vasculature", "immune"),
+  marker_list            = markers$broad,
+  priority_order         = c("vasculature", "immune"),
   per_category_overrides = list(
     immune = list(coexp_min = 2)
   )
@@ -97,9 +102,28 @@ markers$broad <- build_broad_marker_config(
 }
 }
 
+\section{Using internal marker panels}{
+
+CellVoteR includes a set of curated marker panels for IDHwt glioblastoma (GBM) under the
+\code{marker_panels$GBM} list entry. These panels can be passed directly as a
+\code{data.frame} to \code{load_markers()}:
+\preformatted{
+markers <- load_markers(marker_panels$GBM$gbmap_neftel_full)
+
+# Or using the explicit markers parameter:
+markers <- load_markers(markers = marker_panels$GBM$gbmap_neftel_full)
+
+}
+}
+
 \examples{
 \dontrun{
+# Load from file
 markers <- load_markers("markers.csv")
+# Load from .rds file
+markers <- load_markers("markers.rds")
+# Load directly from data frame / internal package dataset
+markers <- load_markers(marker_panels$GBM$gbmap_neftel_full)
 
 # Inspect raw broad markers before configuring
 names(markers$broad)

@@ -1,0 +1,143 @@
+---
+title: "Consensus and Results"
+author: "Shoaib Ajaib"
+date: "`r Sys.Date()`"
+output:
+  rmdformats::downcute:
+    self_contained: false
+    default_style: "light"
+    downcute_theme: "default"
+    code_folding: show
+    toc_depth: 4
+    toc_float: true
+vignette: >
+  %\VignetteIndexEntry{Consensus and Results}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>",
+  eval = FALSE
+)
+```
+
+
+After running the ensemble annotation methods, the next step is to resolve the results into a final set of cell labels. This is done through a configurable consensus resolution step. This step is intentionally separate from the annotation methods, allowing you to adjust voting parameters and run `resolve_consensus_labels()` without needing to re-running the entire annotation pipeline.
+
+
+```{r resolve}
+consensus <- resolve_consensus_labels(
+  label_list        = results$labels,
+  method_names      = results$method_names,
+  tie_breaker_names = results$tie_breaker_names,
+  unassigned_label  = "unknown",
+  allow_even_split  = FALSE,
+  ordered_tiebreak  = TRUE
+)
+```
+
+# Decision hierarchy
+
+The process of resolving a final label for each cell is based on a simple voting scheme. Each of the four primary annotation workflows casts a "vote" for a label, and the two global tie-breakers are then used to resolve any ties.
+
+For each cell, the following logic is applied in order:
+
+1. **Strong majority** — if one label receives strictly more than 50% of
+   method votes (3 of 4 by default) it is assigned immediately.
+
+2. **Tie-breaker agreement** — if the two tie-breakers agree with each other
+   *and* their shared label matches the leading candidate, that label is
+   assigned.
+
+3. **Ordered tie-breaking** (`ordered_tiebreak = TRUE`, default) — tie-breaker
+   1 is tried first; if it matches the leading candidate the label is assigned.
+   Otherwise tie-breaker 2 is tried.
+
+4. **Either tie-breaking** (`ordered_tiebreak = FALSE`) — either tie-breaker
+   agreeing with the leading candidate is sufficient, with no priority between
+   them.
+
+5. **Unresolved** — if every method disagrees (no leading candidate exists) or
+   no tie-breaker resolves the split, `unassigned_label` is assigned.
+
+# Voting parameters
+
+| Parameter | Default | Effect |
+|---|---|---|
+| **allow_even_split** | **FALSE** | When **TRUE**, a 2-of-4 plurality is accepted as majority |
+| **ordered_tiebreak** | **TRUE** | When **FALSE**, either tie-breaker can resolve a split |
+| **unassigned_label** | **"Unknown"** | Label for unresolved cells |
+
+# Saving labels back to the SCE
+
+```{r attach}
+sce$cellVoteR_label  <- consensus$label
+sce$cellVoteR_method <- consensus$method
+```
+
+
+# Inspecting Results
+
+## Summary tables
+
+```{r inspect}
+# Final label distribution
+table(sce$cellVoteR_label)
+
+# Decision method breakdown
+table(sce$cellVoteR_method)
+
+# Cross-tabulate label vs decision method
+table(sce$cellVoteR_label, sce$cellVoteR_method)
+```
+
+## Per-method label distributions
+
+Comparing individual method outputs before consensus is useful for
+understanding where methods agree and disagree:
+
+```{r per-method}
+table(results$labels$method_1)   # cluster-based, full
+table(results$labels$method_2)   # cluster-based, reduced
+table(results$labels$method_3)   # enrichment-based, full
+table(results$labels$method_4)   # enrichment-based, reduced
+table(results$labels$global_1)   # tie-breaker 1
+table(results$labels$global_2)   # tie-breaker 2
+```
+
+### Method agreement
+
+A useful diagnostic is to look at how often all four primary methods agree:
+
+```{r agreement}
+label_df <- as.data.frame(results$labels[1:4])
+
+# Proportion of cells where all four methods agree
+mean(apply(label_df, 1, function(x) length(unique(x)) == 1L))
+
+# Per-cell method agreement count
+label_df$n_agree <- apply(label_df, 1, function(x) max(table(x)))
+table(label_df$n_agree)
+```
+
+## Re-running consensus with different parameters
+
+```{r re-resolve}
+# allowing even splits
+consensus_liberal <- resolve_consensus_labels(
+  label_list        = results$labels,
+  method_names      = results$method_names,
+  tie_breaker_names = results$tie_breaker_names,
+  unassigned_label  = "unknown",
+  allow_even_split  = TRUE
+)
+
+table(consensus_liberal$label)
+
+# Compare unresolved rate between settings
+mean(consensus$label == "unknown")
+mean(consensus_liberal$label == "unknown")
+```

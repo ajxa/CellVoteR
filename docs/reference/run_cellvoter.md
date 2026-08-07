@@ -5,7 +5,7 @@ that together form the CellVoteR ensemble. Each method runs broad
 annotation, subclustering, marker ranking, panel scoring, and fine label
 assignment. The tie-breakers skip the broad annotation step, operating
 directly on the pre-existing unsupervised clusters from
-[`prepare_sce`](prepare_sce.md).
+[`prepare_sce`](https://ajxa.github.io/CellVoteR/reference/prepare_sce.md).
 
 ## Usage
 
@@ -19,9 +19,10 @@ run_cellvoter(sce, return_full_output = FALSE, annotation_args = list())
 
   A
   [`SingleCellExperiment`](https://rdrr.io/pkg/SingleCellExperiment/man/SingleCellExperiment.html)
-  processed by [`prepare_sce`](prepare_sce.md). Must have a `logcounts`
-  assay, `metadata$marker_config`, `metadata$filtered_fine_markers`, and
-  a `"user_panel"` `altExp`.
+  processed by
+  [`prepare_sce`](https://ajxa.github.io/CellVoteR/reference/prepare_sce.md).
+  Must have a `logcounts` assay, `metadata$marker_config`,
+  `metadata$filtered_fine_markers`, and a `"user_panel"` `altExp`.
 
 - return_full_output:
 
@@ -37,25 +38,28 @@ run_cellvoter(sce, return_full_output = FALSE, annotation_args = list())
 
   `rank_args`
 
-  :   Arguments for [`rank_cluster_markers`](rank_cluster_markers.md):
+  :   Arguments for
+      [`rank_cluster_markers`](https://ajxa.github.io/CellVoteR/reference/rank_cluster_markers.md):
       `assay_type`, `test_type`, `direction`, `pval_type`, `min_prop`,
       `BPPARAM`.
 
   `extract_args`
 
-  :   Arguments for [`extract_top_markers`](extract_top_markers.md):
+  :   Arguments for
+      [`extract_top_markers`](https://ajxa.github.io/CellVoteR/reference/extract_top_markers.md):
       `fdr_threshold`, `effect_threshold`, `target_n`.
 
   `score_args`
 
   :   Arguments for
-      [`score_markers_against_panel`](score_markers_against_panel.md).
+      [`score_markers_against_panel`](https://ajxa.github.io/CellVoteR/reference/score_markers_against_panel.md).
       No additional arguments currently accepted.
 
   `assign_args`
 
-  :   Arguments for [`assign_fine_labels`](assign_fine_labels.md). No
-      additional arguments currently accepted.
+  :   Arguments for
+      [`assign_fine_labels`](https://ajxa.github.io/CellVoteR/reference/assign_fine_labels.md).
+      No additional arguments currently accepted.
 
   Only the sublists that differ from defaults need to be supplied.
 
@@ -82,9 +86,9 @@ A named list with the following elements:
 - `labels`:
 
   Named list of six per-cell label factors ready to pass to
-  [`resolve_consensus_labels`](resolve_consensus_labels.md) as
-  `label_list`. Names: `method_1`, `method_2`, `method_3`, `method_4`,
-  `global_1`, `global_2`.
+  [`resolve_consensus_labels`](https://ajxa.github.io/CellVoteR/reference/resolve_consensus_labels.md)
+  as `label_list`. Names: `method_1`, `method_2`, `method_3`,
+  `method_4`, `global_1`, `global_2`.
 
 - `method_names`:
 
@@ -98,15 +102,15 @@ A named list with the following elements:
 
   Only present when `return_full_output = TRUE`. Named list mirroring
   `$labels` but containing the complete
-  [`assign_fine_labels`](assign_fine_labels.md) output (labels +
-  per-cluster score table) for each method.
+  [`assign_fine_labels`](https://ajxa.github.io/CellVoteR/reference/assign_fine_labels.md)
+  output (labels + per-cluster score table) for each method.
 
 ## Details
 
 The returned label list is designed to be passed directly to
-[`resolve_consensus_labels`](resolve_consensus_labels.md), which the
-user calls independently so that voting parameters can be adjusted and
-re-run without repeating the annotation pipeline.
+[`resolve_consensus_labels`](https://ajxa.github.io/CellVoteR/reference/resolve_consensus_labels.md),
+which the user calls independently so that voting parameters can be
+adjusted and re-run without repeating the annotation pipeline.
 
 ## Pipeline structure
 
@@ -125,18 +129,19 @@ re-run without repeating the annotation pipeline.
 
 ## Ranking arguments — broad vs fine annotation
 
-Marker ranking via [`rank_cluster_markers`](rank_cluster_markers.md) is
-used at two distinct points in the pipeline, and `annotation_args`
+Marker ranking via
+[`rank_cluster_markers`](https://ajxa.github.io/CellVoteR/reference/rank_cluster_markers.md)
+is used at two distinct points in the pipeline, and `annotation_args`
 exposes independent control over each:
 
 - `broad_args`:
 
   Controls ranking inside
-  [`annotate_broad_clusters`](annotate_broad_clusters.md) (methods 1 and
-  2 only). These ranks are used to assign broad cell lineage labels
-  (e.g. immune, vasculature) based on the median rank of curated broad
-  markers. Because broad marker sets are small and highly specific, a
-  more lenient `min_prop` is often appropriate here.
+  [`annotate_broad_clusters`](https://ajxa.github.io/CellVoteR/reference/annotate_broad_clusters.md)
+  (methods 1 and 2 only). These ranks are used to assign broad cell
+  lineage labels (e.g. immune, vasculature) based on the median rank of
+  curated broad markers. Because broad marker sets are small and highly
+  specific, a more lenient `min_prop` is often appropriate here.
 
 - `rank_args`:
 
@@ -144,8 +149,9 @@ exposes independent control over each:
   These ranks are used to extract top marker genes per subcluster, which
   are then scored against the fine marker panel via Fisher's exact test.
   Methods 3 and 4 use `rank_args` only, as
-  [`annotate_broad_cells`](annotate_broad_cells.md) does not call
-  [`rank_cluster_markers`](rank_cluster_markers.md).
+  [`annotate_broad_cells`](https://ajxa.github.io/CellVoteR/reference/annotate_broad_cells.md)
+  does not call
+  [`rank_cluster_markers`](https://ajxa.github.io/CellVoteR/reference/rank_cluster_markers.md).
 
 If you want both steps to behave identically, supply the same values to
 both sublists. If you want to differentiate them — for example using a
@@ -191,5 +197,5 @@ annotation — supply different values:
 
 ## See also
 
-[`prepare_sce`](prepare_sce.md),
-[`resolve_consensus_labels`](resolve_consensus_labels.md)
+[`prepare_sce`](https://ajxa.github.io/CellVoteR/reference/prepare_sce.md),
+[`resolve_consensus_labels`](https://ajxa.github.io/CellVoteR/reference/resolve_consensus_labels.md)
