@@ -119,6 +119,18 @@ markers <- load_markers(marker_panels$GBM$gbmap_neftel_full)
 markers <- load_markers(markers = marker_panels$GBM$gbmap_neftel_full)
 ```
 
+`marker_panels$GBM$GBM_RNA_reference_panel_v1` is a reference panel for
+separating malignant from normal cells in GBM nuclear RNA. It is meant to be
+used with the same-category tie step described in *Consensus and Results*
+(`resolve_category_ties()`). See `?marker_panels` for how it was built.
+
+```{r ref-panel}
+markers <- load_markers(marker_panels$GBM$GBM_RNA_reference_panel_v1)
+
+# category of each fine label, kept for resolve_category_ties()
+markers$label_category
+```
+
 ## Configuring broad markers
 
 The `build_broad_marker_config()` function processes the raw broad marker list, attaching expression thresholds and priority ranks used during the enrichment-based annotation step. 

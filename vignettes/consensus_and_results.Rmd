@@ -71,11 +71,56 @@ For each cell, the following logic is applied in order:
 | **ordered_tiebreak** | **TRUE** | When **FALSE**, either tie-breaker can resolve a split |
 | **unassigned_label** | **"Unknown"** | Label for unresolved cells |
 
+# Same-category ties (optional second step)
+
+Many unresolved cells are not cases of real doubt. If the four methods vote
+`GPC, GPC, OPC, OPC`, every vote is a cancer label: the cell is malignant and
+only its state is undecided. The consensus vote still returns
+`unassigned_label` for it, because no single label wins.
+
+`resolve_category_ties()` is applied after `resolve_consensus_labels()` and
+handles these cells. When the consensus is unassigned and all method votes
+belong to the same category of the marker table, the cell gets a
+category-level label such as `cancer_unresolved` or `immune_unresolved`. When
+the votes span categories (for example `Astrocyte, Astrocyte, GPC, GPC`, normal
+against cancer) the cell stays unassigned, because its malignant or normal
+status is itself in doubt.
+
+The categories come from the `category` column of the marker table.
+`load_markers()` returns them as `$label_category`, recorded before `cancer`
+and `normal` are merged into the `other` broad category.
+
+```{r category-ties}
+final <- resolve_category_ties(
+  consensus        = consensus,
+  label_list       = results$labels,
+  method_names     = results$method_names,
+  label_category   = markers$label_category,
+  unassigned_label = "unknown"   # must match the value used above
+)
+
+table(final$method)
+```
+
+The function returns `label`, `method` (cells it changed are marked
+`"Same-category tie"`) and `label_before_tie_step`, the consensus label before
+this step. Keeping both makes the step easy to switch off downstream. Code that
+only needs malignant versus normal can read the category from a
+`*_unresolved` label; code that needs states should treat `*_unresolved` as
+missing.
+
+The step has no parameters to fit.
+
 # Saving labels back to the SCE
 
 ```{r attach}
 sce$cellVoteR_label  <- consensus$label
 sce$cellVoteR_method <- consensus$method
+
+# or, if the same-category tie step was applied
+sce$cellVoteR_label  <- final$label
+sce$cellVoteR_method <- final$method
+sce$cellVoteR_label_before_tie_step <- final$label_before_tie_step
 ```
 
 
