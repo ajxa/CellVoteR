@@ -4,7 +4,7 @@
 #' annotation across different disease contexts. Currently only includes IDHwt glioblastoma (GBM)
 #' marker sets under the \code{GBM} list entry.
 #'
-#' @format A named \code{list} of lists. The \code{GBM} sublist contains three \code{data.frame} objects:
+#' @format A named \code{list} of lists. The \code{GBM} sublist contains four \code{data.frame} objects:
 #' \describe{
 #'   \item{GBM}{
 #'     A named list of marker panels for glioblastoma analysis:
@@ -28,6 +28,20 @@
 #'       \item{nomura}{
 #'         A data frame containing cell-type marker panels derived from the multi-layered
 #'         transcriptional architecture of glioblastoma ecosystems defined by Nomura et al. (2025).
+#'       }
+#'       \item{GBM_RNA_reference_panel_v1}{
+#'         A reference panel for separating malignant from normal cells in GBM nuclear
+#'         RNA (24 fine labels). Malignant state lists are based on Nomura et al. (2025);
+#'         normal, immune and vascular lists on \code{gbmap_neftel_full}. The lists were
+#'         then edited against single-nucleus multiome data with per-nucleus DNA copy-number
+#'         calls (chr7 gain and chr10 loss) as ground truth: the NEU list is removed and
+#'         the Neuron list extended, genes detected at least as often in the matching
+#'         normal cell type as in malignant cells are removed from the AC and GPC lists,
+#'         and genes shared with malignant GPC cells are removed from the OPC normal list.
+#'         Malignant \code{OPC} and normal \code{OPC normal} are separate labels. Intended
+#'         to be used together with \code{\link{resolve_category_ties}()}. Derived on 10x
+#'         multiome nuclei; use on imaging platforms (e.g. CosMx) needs its own validation.
+#'         Gene symbols are as in the source panels and include some older symbols.
 #'       }
 #'     }
 #'   }
