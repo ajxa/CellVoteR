@@ -82,6 +82,12 @@
 #'   \item{fine}{Named list of lists: top level keyed by category, second
 #'     level keyed by label, values are character vectors of markers. The
 #'     \code{unnamed_broad_cat_label} group (if any) is placed last.}
+#'   \item{label_category}{Named character vector mapping each fine label to
+#'     its category as given in the input, before any re-assignment to
+#'     \code{unnamed_broad_cat_label} (so \code{"cancer"} and \code{"normal"}
+#'     labels stay distinguishable). A label that appears under more than one
+#'     category maps to \code{NA}, with a warning. Used by
+#'     \code{\link{resolve_category_ties}()}.}
 #' }
 #'
 #' @examples
@@ -109,7 +115,6 @@
 #' @seealso \code{\link{build_broad_marker_config}} for configuring the broad
 #'   markers returned by this function.
 #'
-#' @export
 #' @export
 load_markers <- function(file_path = NULL,
                          markers = NULL,
@@ -237,6 +242,15 @@ load_markers <- function(file_path = NULL,
     ))
   }
 
+  # Record each fine label's original category before any re-assignment to
+  # `unnamed_broad_cat_label`. Downstream steps (e.g. resolve_category_ties())
+  # need to know whether a label was "cancer" or "normal", which is lost once
+  # both are merged into the unnamed broad category.
+  label_category <- .label_category_lookup(
+    cat_split[["fine"]][[label_col]],
+    cat_split[["fine"]][[cat_col]]
+  )
+
   other_fine_cats <- setdiff(fine_cats, broad_cats)
 
   if (length(other_fine_cats) > 0L) {
@@ -264,6 +278,8 @@ load_markers <- function(file_path = NULL,
   }
 
   out$fine <- fine_split
+
+  out$label_category <- label_category
 
   return(out)
 
@@ -754,4 +770,35 @@ gene_synonyms <- function(lookup_genes) {
     lapply(\(x) unique(x[["external_synonym"]]))
 
   return(out)
+}
+
+
+#' Map fine labels to their original category
+#'
+#' @param labels,categories Character vectors of equal length (one entry per
+#'   fine marker row).
+#' @return Named character vector, one entry per unique label. Labels found
+#'   under more than one category are set to \code{NA} with a warning.
+#' @keywords internal
+.label_category_lookup <- function(labels, categories) {
+
+  pairs <- unique(data.frame(label = labels, category = categories,
+                             stringsAsFactors = FALSE))
+
+  n_cat <- table(pairs$label)
+  multi <- names(n_cat)[n_cat > 1L]
+
+  lookup <- stats::setNames(pairs$category, pairs$label)
+  lookup <- lookup[!duplicated(names(lookup))]
+
+  if (length(multi) > 0L) {
+    print_alert(
+      "{length(multi)} fine label{?s} appear{?s/} under more than one category \\
+       and will be treated as category-ambiguous: {.val {multi}}",
+      type = "w"
+    )
+    lookup[multi] <- NA_character_
+  }
+
+  lookup[order(names(lookup))]
 }

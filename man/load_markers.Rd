@@ -42,6 +42,12 @@ configuration.}
 \item{fine}{Named list of lists: top level keyed by category, second
 level keyed by label, values are character vectors of markers. The
 \code{unnamed_broad_cat_label} group (if any) is placed last.}
+\item{label_category}{Named character vector mapping each fine label to
+its category as given in the input, before any re-assignment to
+\code{unnamed_broad_cat_label} (so \code{"cancer"} and \code{"normal"}
+labels stay distinguishable). A label that appears under more than one
+category maps to \code{NA}, with a warning. Used by
+\code{\link{resolve_category_ties}()}.}
 }
 }
 \description{
